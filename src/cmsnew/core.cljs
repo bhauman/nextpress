@@ -2,6 +2,8 @@
   (:require
    [cmsnew.datastore.s3 :as store]
    [markdown.core :as md]
+   [clojure.string :as string]
+   [cljs.reader :refer [read-string push-back-reader read-map read-char]]
    [jayq.util :refer [log]]))
 
 (def system {
@@ -35,9 +37,32 @@
                                              (fn [e] (log (.getResponseHeader e
                                                                              "x-amz-version-id")))))))
 
-(store/get-bucket-list "immubucket" "_posts" (fn [x] (log (prn-str (doall x) ))))
+(defn get-front-matter [reader]
+  (try
+    (let [front-matter-map (cljs.reader/read reader true nil false)]
+      (if (map? front-matter-map) front-matter-map false))
+    (catch js/Object e
+      (.log js/console e) ; consider using an error channel
+      false)))
 
-(store/get-version (item-path system "index.html") (fn [x] (log (str "gversion" x))))
+(defn parse-front-matter [str-blob]
+  (let [r (push-back-reader str-blob)]
+    (if-let [front-matter (get-front-matter r)]
+      (loop [ch (read-char r)
+             result ""]
+        (if (nil? ch)
+          { :front-matter front-matter :body result }
+          (recur (read-char r) (str result ch))))
+      { :front-matter {} :body str-blob })))
+
+(store/get-text (post-path system "example_post.md")
+                (fn [post]
+                  (log (clj->js (parse-front-matter post)))
+                  ))
+
+#_(store/get-bucket-list "immubucket" "_posts" (fn [x] (log (prn-str (doall x) ))))
+
+#_(store/get-version (item-path system "index.html") (fn [x] (log (str "gversion" x))))
 
 #_(store/get-text
  (post-path system "sample_post.md")

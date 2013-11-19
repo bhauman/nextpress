@@ -18737,11 +18737,32 @@ cmsnew.core.render_template_to_path = function(a, b, c, d) {
     })
   })
 };
-cmsnew.datastore.s3.get_bucket_list.call(null, "immubucket", "_posts", function(a) {
-  return jayq.util.log.call(null, cljs.core.prn_str.call(null, cljs.core.doall.call(null, a)))
-});
-cmsnew.datastore.s3.get_version.call(null, cmsnew.core.item_path.call(null, cmsnew.core.system, "index.html"), function(a) {
-  return jayq.util.log.call(null, [cljs.core.str("gversion"), cljs.core.str(a)].join(""))
+cmsnew.core.get_front_matter = function(a) {
+  try {
+    var b = cljs.reader.read.call(null, a, !0, null, !1);
+    return cljs.core.map_QMARK_.call(null, b) ? b : !1
+  }catch(c) {
+    if(c instanceof Object) {
+      return console.log(c), !1
+    }
+    throw c;
+  }
+};
+cmsnew.core.parse_front_matter = function(a) {
+  var b = cljs.reader.push_back_reader.call(null, a), c = cmsnew.core.get_front_matter.call(null, b);
+  if(cljs.core.truth_(c)) {
+    for(var a = cljs.reader.read_char.call(null, b), d = "";;) {
+      if(null == a) {
+        return cljs.core.PersistentArrayMap.fromArray(["\ufdd0:front-matter", c, "\ufdd0:body", d], !0)
+      }
+      var e = cljs.reader.read_char.call(null, b), d = [cljs.core.str(d), cljs.core.str(a)].join(""), a = e
+    }
+  }else {
+    return cljs.core.PersistentArrayMap.fromArray(["\ufdd0:front-matter", cljs.core.PersistentArrayMap.EMPTY, "\ufdd0:body", a], !0)
+  }
+};
+cmsnew.datastore.s3.get_text.call(null, cmsnew.core.post_path.call(null, cmsnew.core.system, "example_post.md"), function(a) {
+  return jayq.util.log.call(null, cljs.core.clj__GT_js.call(null, cmsnew.core.parse_front_matter.call(null, a)))
 });
 cmsnew.datastore.s3.get_versions_of_file.call(null, "immubucket", "testerfile.json", function(a) {
   return jayq.util.log.call(null, cljs.core.prn_str.call(null, cljs.core.doall.call(null, a)))
