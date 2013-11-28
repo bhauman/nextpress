@@ -1,8 +1,5 @@
-{
-:layout "post"
-:title "Frameless Geodesic Dome"
-:published true
-}
+
+{ :layout "post" :title "Frameless Geodesic Dome" :published true }
 
 <p>
   <img src="http://rigsomelight.com/assets/images/dome.jpg">
