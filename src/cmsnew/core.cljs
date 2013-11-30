@@ -3,7 +3,6 @@
    [cljs.core.async :as async
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan]]
    [cmsnew.datastore.s3 :as store]
-   [markdown.core :as md]
    [clojure.string :as string]
    [cljs.reader :refer [push-back-reader read-string]]
    [jayq.util :refer [log]])
@@ -45,6 +44,15 @@
                                              "text/html"
                                              (fn [e] (log (.getResponseHeader e
                                                                              "x-amz-version-id")))))))
+;; markdown parsing
+;; this requires markdown js to work https://github.com/evilstreak/markdown-js
+
+(let [conv-class (.-converter js/Showdown)
+      converter (conv-class.)]
+  (defn markdown-to-html [markdown-txt]
+    (.makeHtml converter markdown-txt)))
+
+
 
 ;; getting front matter
 
@@ -220,7 +228,7 @@
 
 (defn render-raw-page [page-file-map data-for-page]
   (condp = (-> page-file-map :path extention-from-path)
-    "md"    (md/mdToHtml (:body page-file-map))
+    "md"    (markdown-to-html (:body page-file-map))
     "html"  (render-template (:body page-file-map)
                              data-for-page)
     (:body page-file-map)))
