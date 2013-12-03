@@ -8,11 +8,13 @@
                  [org.clojure/core.async "0.1.256.0-1bf8cf-alpha"]
                  [crate "0.2.4"]
                  [jayq "2.4.0"]
-                 [com.cemerick/piggieback "0.0.5"]]
+                 [org.clojars.franks42/cljs-uuid-utils "0.1.3"]                 
+                 [com.cemerick/austin "0.1.3"]]
   
   :plugins [[lein-cljsbuild "0.3.2"]]
-  
-  :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]} 
+
+  :profiles {:dev {:resource-paths ["dev"]
+                   :plugins [[com.cemerick/austin "0.1.3"]]}}
   :cljsbuild {
               :builds [{:id "cmsnew"
                         :source-paths ["src/cmsnew"]
@@ -25,5 +27,4 @@
                         :source-paths ["src/pigrep"]
                         :compiler {:output-to "resources/public/js/compiled/pigrep.js"
                                    :optimizations :simple
-                                   :pretty-print true}}]}
-  )
+                                   :pretty-print true}}]})

@@ -1,0 +1,40 @@
+body {
+   margin: 0;
+   font-family: Roboto, arial, sans-serif;
+/*   font-size: 13px;
+   line-height: 20px; */
+}
+
+h1, h2, h3, h4, h5, h6 {
+   font-family: inherit;
+   font-weight: 300;
+/*   line-height: 20px; */
+   color: inherit;
+   text-rendering: optimizelegibility;
+}
+
+.heading-input {
+   width: 100%;
+   border: 1px solid #eee;
+   font-family: inherit;
+   font-weight: 300;
+/*   line-height: 20px; */
+   color: inherit;
+   text-rendering: optimizelegibility;
+   outline: none;
+}
+
+.big-text-area {
+   width: 100%;
+   height: 25em;
+   border: 1px solid #eee;
+   font-family: inherit;
+/*   line-height: 20px; */
+   color: inherit;
+   text-rendering: optimizelegibility;
+   outline: none;
+}
+
+.heading-input[data-size="2"] {
+  font-size: 30px;
+}

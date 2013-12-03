@@ -1,371 +1,220 @@
 (ns cmsnew.core
   (:require
    [cljs.core.async :as async
-    :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan]]
+    :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
+   [crate.core :as crate]
    [cmsnew.datastore.s3 :as store]
+   [cmsnew.heckle :as heckle]
+   [cmsnew.templates :as templ]   
+   [cljs-uuid-utils :refer [make-random-uuid uuid-string]]   
    [clojure.string :as string]
    [cljs.reader :refer [push-back-reader read-string]]
+   [jayq.core :refer [$] :as jq]
    [jayq.util :refer [log]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]))
 
+;; logging utils
+(defn ld [arg]
+  "log data"
+  (log (clj->js arg)))
 
-(def system {
-             :bucket "immubucket"
-             :store-root "http://s3.amazonaws.com"
-             :template-path "_layouts"
-             :post-path "_posts"
-             :page-path "_site_src"             
-             :data-path "_data"             
-             })
+(defn lp [arg]
+  "print edn data"
+  (log (prn-str arg)))
 
-(defn bucket-path [{:keys [store-root bucket]}]
-  (str store-root "/" bucket))
+(defn log-chan [in] (map< #(do (ld %) %) in))
 
-(defn item-path [system path]
-  (str (bucket-path system) "/" path))
+;; DOM helpers
 
-(defn template-path [system path]
-  (item-path system (str (:template-path system) "/" path)))
+(defn enclosing-form [element]
+  (-> element $ (jq/parents "form") first $))
 
-(defn post-path [system path]
-  (item-path system (str (system :post-path) "/" path)))
+(defn serialize-form [form]
+  (let [data (js->clj (.serializeArray form) :keywordize-keys true)]
+    (reduce (fn [res {:keys [name value]}]
+              (assoc res (keyword name) value))
+            {} data)))
 
-(defn page-path [system path]
-  (item-path system (str (system :page-path) "/" path)))
+;; event channels
 
-(defn render-template [template-string data]
-  (.template js/_ template-string (clj->js data)))
-
-(defn render-template-to-path [system template-url data path]
-  (store/get-text template-url
-                  (fn [template-body]
-                    (store/save-data-to-file path
-                                             (render-template template-body data)
-                                             "text/html"
-                                             (fn [e] (log (.getResponseHeader e
-                                                                             "x-amz-version-id")))))))
-;; markdown parsing
-;; this requires markdown js to work https://github.com/evilstreak/markdown-js
-
-(let [conv-class (.-converter js/Showdown)
-      converter (conv-class.)]
-  (defn markdown-to-html [markdown-txt]
-    (.makeHtml converter markdown-txt)))
-
-
-
-;; getting front matter
-
-(defn get-front-matter [reader]
-  (try
-    (let [front-matter-map (cljs.reader/read reader true nil false)]
-      (if (map? front-matter-map) front-matter-map false))
-    (catch js/Object e
-      (.log js/console e) ; consider using an error channel
-      false)))
-
-(defn parse-front-matter [file-map]
-  (let [r (push-back-reader (:body file-map))]
-    (if-let [front-matter (get-front-matter r)]
-      (assoc file-map
-        :front-matter front-matter
-        :body (.substr (:body file-map) (inc (.-idx r))))
-      file-map)))
-
-;; date parsing
-
-(def filename-parts #(string/split % #"-"))
-
-(defn parse-date [filename]
-  (if (.test #"^\d{4}-\d{2}-\d{2}-" filename)
-    (zipmap [:year :month :day]
-            (map js/parseInt (take 3 (filename-parts filename))))
-    {}))
-
-(defn date-to-int [{:keys [year month day]}]
-  (+ (* 10000 year) (* 100 month) day))
-
-(defn has-date? [fm] (and (:date fm) (-> fm :date :month)))
-
-(def path-parts #(string/split % #"/"))
-
-(defn parse-file-date [{:keys [path]}]
-  (parse-date (last (path-parts path))))
-
-;; handle path rewriting
-
-(def filename-from-path (comp last path-parts))
-
-(defn extention-from-path [path]
-  (-> path
-      (string/split #"\.")
-      last))
-
-(defn dated-post-target-filename [path]
-  (->> path
-       filename-from-path
-       filename-parts
-       (drop 3)
-       (string/join "-" )))
-
-(defn str-join [coll sep] (string/join sep coll))
-
-(defn replace-extention [path new-ext]
-  (-> path
-      (string/split #"\.")
-      butlast
-      (str-join ".") 
-      (str new-ext)))
-
-(defn make-post-target-path [{:keys [date path] :as fm}]
-  (replace-extention
-   (if (has-date? fm)
-     (string/join "/"
-                  [(:year date) (:month date) (:day date)
-                   (dated-post-target-filename path)])
-     (filename-from-path path))
-   ".html"))
-
-(defn make-page-target-path [{:keys [path] :as fm}]
-  (replace-extention
-   (->> path
-        path-parts
-        rest
-        (string/join "/"))   
-   ".html"))
-
-(defn make-target-path [fm]
-  (condp = (fm :page-type)
-    :post (make-post-target-path fm)
-    (make-page-target-path fm)
-    ))
-
-;; parse data file
-
-(defn parse-data-file [file-map]
-  (try
-    (assoc file-map
-      :data (read-string (:body file-map))
-      :name (-> (:path file-map)
-                filename-from-path
-                (replace-extention "")))
-    (catch js/Object e
-      (.log js/console e) ; consider using an error channel
-      file-map)))
-
-;; fetching pipeline helpers
-
-(defn self-assoc [x key f]
-  (assoc x key (f x)))
-
-(defn file-list [bucket path-prefix]
-  (let [out (chan)
-        not-prefix? (fn [x] (not (or (= (str path-prefix "/") x)
-                                    (= path-prefix x))))]
-    (store/get-bucket-list bucket path-prefix
-                           (fn [filenames]
-                             (async/onto-chan out (filter not-prefix? filenames))))
-    out))
-
-(defn fetch-file [system file]
+(defn click-chan [selector] 
   (let [out (chan)]
-    (store/get-text (item-path system file)
-                    (fn [body] (put! out {:path file :body body}) (close! out)))
+    (jq/on ($ "body") "click" selector
+        {} (fn [e]
+             (put! out [:click e])))
     out))
 
-(defn fetch-files [system paths-chan]
-  (let [out (chan)
-        file-chans (map< (partial fetch-file system) paths-chan)]
-    (go (async/pipe (async/merge (<! (async/into [] file-chans))) out))
-    out))
-
-(defn store-rendered-file [system file-map]
+(defn form-submit-chan []
   (let [out (chan)]
-    (store/save-data-to-file (:target-path file-map)
-                             (:rendered-body file-map)
-                             "text/html"
-                             (fn [e] (let [version
-                                          (.getResponseHeader e "x-amz-version-id")]
-                                      (put! out (assoc file-map :rendered { :version version }))
-                                      (close! out)
-                                      )))  
+    (jq/on ($ "#cmsnew") "click" "input[type=submit]" {}
+        #(do
+           (jq/prevent %)
+           (.stopPropagation %)
+           (put! out [:form-submit (serialize-form (enclosing-form (.-currentTarget %)))])))
     out))
 
-(defn store-files [system file-maps-chan]
-  (let [out (chan)
-        store-chans (map< (partial store-rendered-file system) file-maps-chan)]
-    (go (async/pipe (async/merge (<! (async/into [] store-chans))) out))
+(defn form-cancel-chan []
+  (let [out (chan)]
+    (jq/on ($ "#cmsnew") "click" "input[type=reset]" {}
+        #(do
+           (jq/prevent %)
+           (.stopPropagation %)
+           (put! out [:form-cancel %])))
     out))
 
-(defn filename-without-ext [{:keys [path]}]
-  (-> path
-      filename-from-path
-      (replace-extention "")))
+;; getting the position of an element, this is ridiculous
+(defn click-event-to-position-event [container-selector item-selector [msg event]]
+  (let [target (.-currentTarget event)
+        indexed-children (-> target
+                             $
+                             (jq/parents container-selector)
+                             first
+                             $
+                             jq/children
+                             (.map (fn [i,x] [i,x])))
+        found-item-position (first (filter #(= target (last %)) indexed-children))]
+    [:position-event { :position (first found-item-position)}]))
 
-;; rendering pages
+(defn position-to-data-item [items [_ {:keys [position] :as data}]]
+  [:data-item (get (vec items) position)])
 
-(defn map-to-key [key x]
-  (zipmap (map key x) x))
+(defn position-event-chan [container-selector item-selector]
+  (->> (click-chan (str container-selector " " item-selector))
+       (map< (partial click-event-to-position-event container-selector item-selector))))
 
-(defn file-to-page-data [{:keys [body front-matter date] :as fm}]
-  (let [{:keys [title]} front-matter]
-    (merge { :content body
-             :url (str "/" (make-target-path fm))
-             :date date
-             :id   (str "/" (-> fm make-target-path (replace-extention "")) )}
-           front-matter)))
+(defn render-data-page [page]
+  (crate/html (templ/item-list "list-1" "list-1" (map templ/render-item (get-in page [:front-matter :items])))))
 
-(defn template-data [system-data]
-  (let [data-files (system-data :data)]
-    (merge
-       (zipmap (keys data-files) (map :data (vals data-files))) 
-       { :site { :posts (->> (:posts system-data)
-                             (map file-to-page-data)
-                             (sort-by #(date-to-int (:date %)))
-                             reverse)
-                 :pages (map file-to-page-data (:pages system-data))
-                }} )))
-
-(defn render-raw-page [page-file-map data-for-page]
-  (condp = (-> page-file-map :path extention-from-path)
-    "md"    (markdown-to-html (:body page-file-map))
-    "html"  (render-template (:body page-file-map)
-                             data-for-page)
-    (:body page-file-map)))
-
-(defn render-page-with-templates [system-data data-for-templates page-file-map]
-  (let [start-template (get-in page-file-map [:front-matter :layout])
-        data-for-page (merge {:page (file-to-page-data page-file-map)}
-                             data-for-templates)]
-    (loop [template start-template
-           content (render-raw-page page-file-map data-for-page)]
-      (let [template-file-map (get (system-data :templates) template)]
-        (if (nil? template-file-map)
-          content
-          (recur
-           (get-in template-file-map [:front-matter :layout])
-           (render-template (:body template-file-map)
-                            (assoc data-for-page :content content)))
-          )))))
-
-;; processing pipelines
-
-(defn get-templates [system]
-  (go (<! (->> (file-list (:bucket system) (:template-path system))
-               (fetch-files system)
-               (map< parse-front-matter)
-               (map< #(self-assoc % :name filename-without-ext))
-               (async/into [])))))
-
-(defn get-posts [system]
-  (go (<! (->> (file-list (:bucket system) (:post-path system))
-               (fetch-files system)
-               (map< parse-front-matter)
-               (map< #(assoc % :page-type :post))
-               (map< #(self-assoc % :date parse-file-date))
-               (map< #(self-assoc % :target-path make-post-target-path))
-               (async/into [])))))
-
-(defn get-pages [system]
-  (go (<! (->> (file-list (:bucket system) (:page-path system))
-               (fetch-files system)
-               (map< parse-front-matter)
-               (map< #(assoc % :page-type :page))               
-               (map< #(self-assoc % :target-path make-page-target-path))
-               (async/into [])))))
-
-(defn get-data [system]
-  (go (<! (->> (file-list (:bucket system) (:data-path system))
-               (fetch-files system)
-               (map< parse-data-file)
-               (async/into [])))))
-
-(defn process [system]
+(defn edit-item [start-item-data input-chan]
   (go
-   (let [system-data
-         { :templates  (map-to-key :name (<! (get-templates system)))
-           :data       (map-to-key :name (<! (get-data system)))
-           :posts      (<! (get-posts system))
-           :pages      (<! (get-pages system))
-           :system     system
-          }
-         data-for-templates (template-data system-data)]
-     (log (clj->js data-for-templates))
-     (log (clj->js (<! (->> (async/merge [(to-chan (:posts system-data)) (to-chan (:pages system-data))])
-                            (map< #(self-assoc % :rendered-body
-                                               (partial render-page-with-templates
-                                                        system-data
-                                                        data-for-templates)))
-                            (store-files system)
-                            (async/into [])
-                            ))))
-     #_(log (clj->js system-data))
-     #_(render-page-with-templates system-data data-for-templates (first (system-data :posts)))
-     )))
+   (jq/html ($ "#main-area") (crate/html (templ/item-form start-item-data {})))
+   (loop [[msg new-data] (<! input-chan)
+          item-data start-item-data]
+     (ld new-data)
+     (condp = msg
+       :form-cancel false
+       :form-submit (merge start-item-data new-data)
+       (recur (<! input-chan) item-data)))))
+
+(defn add-id? [{:keys [id] :as item}]
+  (if id item (assoc item :id (uuid-string (make-random-uuid)))))
+
+(defn merge-data-item-into-page [page data-item]
+  (assoc-in page [:front-matter :items]
+         (map (fn [x] (if (= (:id x) (:id data-item))
+                       data-item x))
+              (get-in page [:front-matter :items]))))
+;; page helpers
+
+(defn get-page-items [page]
+  (get-in page [:front-matter :items]))
+
+
+
+
+;; new flow
+;; receive edit page event [:edit-page page-id]
+;; emit [:render edit-page]
+
+;; edit page item event [:edit-page-item item-id]
+;; emit [:render-edit-page-item page-item-id]
+
+;; submit page item event [:submit-page-item new-page-item-data]
+
+(comment
+
+  (defn edit-page [[msg data env]]
+  (if (= msg :edit-page)
+    [:render {:name :edit-page :page-path data} env]
+    [msg data env]))
+
+(defn edit-page-item [[msg data env]]
+  (if (= msg :edit-page-item)
+    [:render {:name :edit-page-item :data data} env]
+    [msg data env]))
+
+(defn find-with-key-like [items key value]
+  (first (drop-while #(not= (key %) value) items)))
+
+(defn render-edit-page-item [[msg data env]]
+  "takes a [:render {:name :render-page-item :data {:position 5 :page-path some-path}}]"
+  (if (and (= msg :render)
+           (= :edit-page-item (:name data)))
+    (let [page      (find-with-key-like (:pages env) :path (:page-path (:data data)))
+          page-item (get (vec (get-page-items page)) (:position data))]
+      (jq/html ($ "#main-area") (crate/html (templ/item-form page-item {})))      
+      [msg data env]
+      )
+    [msg data env]
+    )
+  )
+
+(defn render-edit-page [[msg data env]]
+  (if (and (= msg :render)
+           (= :edit-page (:name data)))
+    (let [page (find-with-key-like (:pages env) :path (:page-path data))]
+      (-> ($ "#cmsnew")
+          (jq/html (crate/html (templ/edit-page (:front-matter page)))))
+      (-> ($ "#main-area")
+          (jq/html (render-data-page page)))
+      [msg data env])
+    [msg data env]))
+
+
+(defn dataflow [in]
+  (let [out (chan)]
+    (->> in
+         log-chan
+         (map< edit-page)
+         (map< edit-page-item)         
+         log-chan
+         (map< render-edit-page)
+         (map< render-edit-page-item)         
+         (async/into []))
+    out))
+  )
+
+#_(go
+ (let [pages (<! (heckle/get-pages heckle/system))
+       start-edn-page (first (filter heckle/edn-page? pages))
+       input-chan (chan)
+       dflow-out (dataflow input-chan)
+       env {:pages pages}]
+   (>! input-chan [:edit-page (:path start-edn-page) env])
+   (<! (async/timeout 1000))
+   (log "here we are")
+   (>! input-chan [:edit-page-item {:page-path (:path start-edn-page)
+                                    :position 0}
+                   env])))
+
 
 (go
- (log (clj->js (<! (process system))))
- 
- #_(log (clj->js (<! (get-posts system))))
- 
- #_(log (clj->js (<! (get-templates system))))
- #_(log (clj->js (<! (get-data system))))
- )
+ (let [pages (<! (heckle/get-pages heckle/system))
+       orig-edn-page (first (filter heckle/edn-page? pages))
+       page-items (map add-id? (get-in orig-edn-page [:front-matter :items]))
+       start-edn-page (assoc-in orig-edn-page [:front-matter :items] page-items) 
+       edit-chan (position-event-chan ".edit-items-list" ".item")
+       submit-chan (form-submit-chan)
+       cancel-chan (form-cancel-chan)
+       all-chans   (async/merge [edit-chan submit-chan cancel-chan])]
+   (-> ($ "#cmsnew")
+       (jq/append (crate/html (templ/edit-page (:front-matter start-edn-page)))))
+   (loop [edn-page start-edn-page]
+     (-> ($ "#main-area")
+         (jq/html (render-data-page edn-page)))
+     (let [[msg data] (<! all-chans)]
+       (if (= msg :position-event)
+         (let [[_ item-data] (position-to-data-item (get-page-items edn-page) [msg data])    
+               new-data-item (<! (edit-item item-data all-chans))]
+           (if new-data-item
+             (let [new-page (merge-data-item-into-page edn-page new-data-item)]
+               (ld new-page)
+               (heckle/store-source-file heckle/system new-page)
+               (recur new-page))
+             (recur edn-page)))
+         (recur edn-page))))))
 
+#_(go
+ (log (clj->js (<! (<! (heckle/process heckle/system))))))
 
-#_(log (clj->js (parse-date "2013-03-22-this-is-a-post")))
-#_(log (clj->js (parse-date "2013-03-2-this-is-a-post")))
-
-#_(log (clj->js (filename-from-path "_posts/2010-02-10-console-for-sinatra-on-jruby-appengine.md")))
-
-#_(log (clj->js (make-post-target-path {:date {:month 5 :day 10 :year 2010} :path "_posts/2010-02-10-console-for-sinatra-on-jruby-appengine.md" })))
-
-;; pull layouts add them to system
-;; pull data add them to system
-
-#_(log (post-path system "sample_post.md"))
-
-#_(store/get-text (post-path system "sample_post.md")
-                (fn [post]
-                  (log (clj->js (parse-front-matter post)))
-                  ))
-
-#_(store/get-bucket-list "immubucket" "_posts" (fn [x] (log (prn-str (doall x) ))))
-
-#_(store/get-version (item-path system "index.html") (fn [x] (log (str "gversion" x))))
-
-#_(store/get-text
- (post-path system "sample_post.md")
- (fn [md-body]
-   (render-template-to-path system
-                            (template-path system "default.html")
-                            {:content_for_layout (md/mdToHtml md-body)}
-                            "index.html")
-   ))
-
-#_(.log js/console
-  (md/mdToHtml "##This is a heading\n\nwith a paragraph following it\n"))
-
-#_(log (item-path system "index.html"))
-
-#_(store/get-text (item-path system "_layouts/default.html")
-                (fn [body]
-                  (store/save-data-to-file "index.html"
-                                           (render-template body {:content_for_layout "hey"})
-                                           "text/html"
-                                           (fn [e] (log (.getResponseHeader e
-                                                                           "x-amz-version-id"))))
-                  (log (str body))))
-
-#_(log (render-template "<h1><%= name %></h2>" {:name "george"}))
-
-#_(store/get-signed-put "testfile.json" "text/html" (fn [e] (log e)))
-
-#_(store/save-data-to-file "index.html"
-                         (render-template template {:content_for_layout body})
-                         "text/html"
-                         (fn [e] (log (.getResponseHeader e
-                                                         "x-amz-version-id"))))
-
-#_(store/get-versions-of-file "immubucket" "testerfile.json" (fn [x] (log (prn-str (doall x) ))))
 
