@@ -2,8 +2,12 @@
 /lib
 /classes
 /checkouts
+/out
+/.repl
 pom.xml
 pom.xml.asc
+\#*\#
+.\#*
 *.jar
 *.class
 .lein-deps-sum
