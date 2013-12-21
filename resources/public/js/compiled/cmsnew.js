@@ -1712,110 +1712,110 @@ cljs.core._invoke = function() {
       throw cljs.core.missing_protocol.call(null, "IFn.-invoke", a);
     }
     return s.call(null, a, b, c, d, e, f, h, g, m, k, n, l, p, q, r)
-  }, t = function(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s) {
+  }, u = function(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s) {
     if(a ? a.cljs$core$IFn$_invoke$arity$16 : a) {
       return a.cljs$core$IFn$_invoke$arity$16(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s)
-    }
-    var t;
-    t = cljs.core._invoke[goog.typeOf(null == a ? null : a)];
-    if(!t && (t = cljs.core._invoke._, !t)) {
-      throw cljs.core.missing_protocol.call(null, "IFn.-invoke", a);
-    }
-    return t.call(null, a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s)
-  }, u = function(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, t) {
-    if(a ? a.cljs$core$IFn$_invoke$arity$17 : a) {
-      return a.cljs$core$IFn$_invoke$arity$17(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, t)
     }
     var u;
     u = cljs.core._invoke[goog.typeOf(null == a ? null : a)];
     if(!u && (u = cljs.core._invoke._, !u)) {
       throw cljs.core.missing_protocol.call(null, "IFn.-invoke", a);
     }
-    return u.call(null, a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, t)
-  }, v = function(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, t, u) {
+    return u.call(null, a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s)
+  }, v = function(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, u) {
+    if(a ? a.cljs$core$IFn$_invoke$arity$17 : a) {
+      return a.cljs$core$IFn$_invoke$arity$17(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, u)
+    }
+    var t;
+    t = cljs.core._invoke[goog.typeOf(null == a ? null : a)];
+    if(!t && (t = cljs.core._invoke._, !t)) {
+      throw cljs.core.missing_protocol.call(null, "IFn.-invoke", a);
+    }
+    return t.call(null, a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, u)
+  }, t = function(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, u, t) {
     if(a ? a.cljs$core$IFn$_invoke$arity$18 : a) {
-      return a.cljs$core$IFn$_invoke$arity$18(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, t, u)
+      return a.cljs$core$IFn$_invoke$arity$18(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, u, t)
     }
     var v;
     v = cljs.core._invoke[goog.typeOf(null == a ? null : a)];
     if(!v && (v = cljs.core._invoke._, !v)) {
       throw cljs.core.missing_protocol.call(null, "IFn.-invoke", a);
     }
-    return v.call(null, a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, t, u)
-  }, w = function(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, t, u, v) {
+    return v.call(null, a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, u, t)
+  }, w = function(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, u, t, v) {
     if(a ? a.cljs$core$IFn$_invoke$arity$19 : a) {
-      return a.cljs$core$IFn$_invoke$arity$19(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, t, u, v)
+      return a.cljs$core$IFn$_invoke$arity$19(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, u, t, v)
     }
     var w;
     w = cljs.core._invoke[goog.typeOf(null == a ? null : a)];
     if(!w && (w = cljs.core._invoke._, !w)) {
       throw cljs.core.missing_protocol.call(null, "IFn.-invoke", a);
     }
-    return w.call(null, a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, t, u, v)
-  }, B = function(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, t, u, v, w) {
+    return w.call(null, a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, u, t, v)
+  }, x = function(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, u, t, v, w) {
     if(a ? a.cljs$core$IFn$_invoke$arity$20 : a) {
-      return a.cljs$core$IFn$_invoke$arity$20(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, t, u, v, w)
+      return a.cljs$core$IFn$_invoke$arity$20(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, u, t, v, w)
     }
-    var B;
-    B = cljs.core._invoke[goog.typeOf(null == a ? null : a)];
-    if(!B && (B = cljs.core._invoke._, !B)) {
+    var x;
+    x = cljs.core._invoke[goog.typeOf(null == a ? null : a)];
+    if(!x && (x = cljs.core._invoke._, !x)) {
       throw cljs.core.missing_protocol.call(null, "IFn.-invoke", a);
     }
-    return B.call(null, a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, t, u, v, w)
-  }, I = function(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, t, u, v, w, B) {
+    return x.call(null, a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, u, t, v, w)
+  }, I = function(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, u, t, v, w, x) {
     if(a ? a.cljs$core$IFn$_invoke$arity$21 : a) {
-      return a.cljs$core$IFn$_invoke$arity$21(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, t, u, v, w, B)
+      return a.cljs$core$IFn$_invoke$arity$21(a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, u, t, v, w, x)
     }
     var I;
     I = cljs.core._invoke[goog.typeOf(null == a ? null : a)];
     if(!I && (I = cljs.core._invoke._, !I)) {
       throw cljs.core.missing_protocol.call(null, "IFn.-invoke", a);
     }
-    return I.call(null, a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, t, u, v, w, B)
-  }, a = function(a, x, y, z, A, C, D, E, F, G, H, J, K, L, M, N, O, P, Q, S, T) {
+    return I.call(null, a, b, c, d, e, f, h, g, m, k, n, l, p, q, r, s, u, t, v, w, x)
+  }, a = function(a, y, z, A, B, C, D, E, F, G, H, J, K, L, M, N, O, P, Q, S, T) {
     switch(arguments.length) {
       case 1:
         return b.call(this, a);
       case 2:
-        return c.call(this, a, x);
+        return c.call(this, a, y);
       case 3:
-        return d.call(this, a, x, y);
+        return d.call(this, a, y, z);
       case 4:
-        return e.call(this, a, x, y, z);
+        return e.call(this, a, y, z, A);
       case 5:
-        return f.call(this, a, x, y, z, A);
+        return f.call(this, a, y, z, A, B);
       case 6:
-        return h.call(this, a, x, y, z, A, C);
+        return h.call(this, a, y, z, A, B, C);
       case 7:
-        return g.call(this, a, x, y, z, A, C, D);
+        return g.call(this, a, y, z, A, B, C, D);
       case 8:
-        return k.call(this, a, x, y, z, A, C, D, E);
+        return k.call(this, a, y, z, A, B, C, D, E);
       case 9:
-        return l.call(this, a, x, y, z, A, C, D, E, F);
+        return l.call(this, a, y, z, A, B, C, D, E, F);
       case 10:
-        return m.call(this, a, x, y, z, A, C, D, E, F, G);
+        return m.call(this, a, y, z, A, B, C, D, E, F, G);
       case 11:
-        return n.call(this, a, x, y, z, A, C, D, E, F, G, H);
+        return n.call(this, a, y, z, A, B, C, D, E, F, G, H);
       case 12:
-        return p.call(this, a, x, y, z, A, C, D, E, F, G, H, J);
+        return p.call(this, a, y, z, A, B, C, D, E, F, G, H, J);
       case 13:
-        return q.call(this, a, x, y, z, A, C, D, E, F, G, H, J, K);
+        return q.call(this, a, y, z, A, B, C, D, E, F, G, H, J, K);
       case 14:
-        return r.call(this, a, x, y, z, A, C, D, E, F, G, H, J, K, L);
+        return r.call(this, a, y, z, A, B, C, D, E, F, G, H, J, K, L);
       case 15:
-        return s.call(this, a, x, y, z, A, C, D, E, F, G, H, J, K, L, M);
+        return s.call(this, a, y, z, A, B, C, D, E, F, G, H, J, K, L, M);
       case 16:
-        return t.call(this, a, x, y, z, A, C, D, E, F, G, H, J, K, L, M, N);
+        return u.call(this, a, y, z, A, B, C, D, E, F, G, H, J, K, L, M, N);
       case 17:
-        return u.call(this, a, x, y, z, A, C, D, E, F, G, H, J, K, L, M, N, O);
+        return v.call(this, a, y, z, A, B, C, D, E, F, G, H, J, K, L, M, N, O);
       case 18:
-        return v.call(this, a, x, y, z, A, C, D, E, F, G, H, J, K, L, M, N, O, P);
+        return t.call(this, a, y, z, A, B, C, D, E, F, G, H, J, K, L, M, N, O, P);
       case 19:
-        return w.call(this, a, x, y, z, A, C, D, E, F, G, H, J, K, L, M, N, O, P, Q);
+        return w.call(this, a, y, z, A, B, C, D, E, F, G, H, J, K, L, M, N, O, P, Q);
       case 20:
-        return B.call(this, a, x, y, z, A, C, D, E, F, G, H, J, K, L, M, N, O, P, Q, S);
+        return x.call(this, a, y, z, A, B, C, D, E, F, G, H, J, K, L, M, N, O, P, Q, S);
       case 21:
-        return I.call(this, a, x, y, z, A, C, D, E, F, G, H, J, K, L, M, N, O, P, Q, S, T)
+        return I.call(this, a, y, z, A, B, C, D, E, F, G, H, J, K, L, M, N, O, P, Q, S, T)
     }
     throw Error("Invalid arity: " + arguments.length);
   };
@@ -1834,11 +1834,11 @@ cljs.core._invoke = function() {
   a.cljs$core$IFn$_invoke$arity$13 = q;
   a.cljs$core$IFn$_invoke$arity$14 = r;
   a.cljs$core$IFn$_invoke$arity$15 = s;
-  a.cljs$core$IFn$_invoke$arity$16 = t;
-  a.cljs$core$IFn$_invoke$arity$17 = u;
-  a.cljs$core$IFn$_invoke$arity$18 = v;
+  a.cljs$core$IFn$_invoke$arity$16 = u;
+  a.cljs$core$IFn$_invoke$arity$17 = v;
+  a.cljs$core$IFn$_invoke$arity$18 = t;
   a.cljs$core$IFn$_invoke$arity$19 = w;
-  a.cljs$core$IFn$_invoke$arity$20 = B;
+  a.cljs$core$IFn$_invoke$arity$20 = x;
   a.cljs$core$IFn$_invoke$arity$21 = I;
   return a
 }();
@@ -5979,35 +5979,35 @@ cljs.core.apply_to = function(a, b, c) {
   if(13 === b) {
     return a.cljs$core$IFn$_invoke$arity$13 ? a.cljs$core$IFn$_invoke$arity$13(c, d, e, f, h, a, g, k, l, m, n, p, q) : a.call(null, c, d, e, f, h, a, g, k, l, m, n, p, q)
   }
-  var r = cljs.core._first.call(null, s), t = cljs.core._rest.call(null, s);
+  var r = cljs.core._first.call(null, s), u = cljs.core._rest.call(null, s);
   if(14 === b) {
     return a.cljs$core$IFn$_invoke$arity$14 ? a.cljs$core$IFn$_invoke$arity$14(c, d, e, f, h, a, g, k, l, m, n, p, q, r) : a.call(null, c, d, e, f, h, a, g, k, l, m, n, p, q, r)
   }
-  var s = cljs.core._first.call(null, t), u = cljs.core._rest.call(null, t);
+  var s = cljs.core._first.call(null, u), v = cljs.core._rest.call(null, u);
   if(15 === b) {
     return a.cljs$core$IFn$_invoke$arity$15 ? a.cljs$core$IFn$_invoke$arity$15(c, d, e, f, h, a, g, k, l, m, n, p, q, r, s) : a.call(null, c, d, e, f, h, a, g, k, l, m, n, p, q, r, s)
   }
-  var t = cljs.core._first.call(null, u), v = cljs.core._rest.call(null, u);
+  var u = cljs.core._first.call(null, v), t = cljs.core._rest.call(null, v);
   if(16 === b) {
-    return a.cljs$core$IFn$_invoke$arity$16 ? a.cljs$core$IFn$_invoke$arity$16(c, d, e, f, h, a, g, k, l, m, n, p, q, r, s, t) : a.call(null, c, d, e, f, h, a, g, k, l, m, n, p, q, r, s, t)
+    return a.cljs$core$IFn$_invoke$arity$16 ? a.cljs$core$IFn$_invoke$arity$16(c, d, e, f, h, a, g, k, l, m, n, p, q, r, s, u) : a.call(null, c, d, e, f, h, a, g, k, l, m, n, p, q, r, s, u)
   }
-  var u = cljs.core._first.call(null, v), w = cljs.core._rest.call(null, v);
+  var v = cljs.core._first.call(null, t), w = cljs.core._rest.call(null, t);
   if(17 === b) {
-    return a.cljs$core$IFn$_invoke$arity$17 ? a.cljs$core$IFn$_invoke$arity$17(c, d, e, f, h, a, g, k, l, m, n, p, q, r, s, t, u) : a.call(null, c, d, e, f, h, a, g, k, l, m, n, p, q, r, s, t, u)
+    return a.cljs$core$IFn$_invoke$arity$17 ? a.cljs$core$IFn$_invoke$arity$17(c, d, e, f, h, a, g, k, l, m, n, p, q, r, s, u, v) : a.call(null, c, d, e, f, h, a, g, k, l, m, n, p, q, r, s, u, v)
   }
-  var v = cljs.core._first.call(null, w), B = cljs.core._rest.call(null, w);
+  var t = cljs.core._first.call(null, w), x = cljs.core._rest.call(null, w);
   if(18 === b) {
-    return a.cljs$core$IFn$_invoke$arity$18 ? a.cljs$core$IFn$_invoke$arity$18(c, d, e, f, h, a, g, k, l, m, n, p, q, r, s, t, u, v) : a.call(null, c, d, e, f, h, a, g, k, l, m, n, p, q, r, s, t, u, v)
+    return a.cljs$core$IFn$_invoke$arity$18 ? a.cljs$core$IFn$_invoke$arity$18(c, d, e, f, h, a, g, k, l, m, n, p, q, r, s, u, v, t) : a.call(null, c, d, e, f, h, a, g, k, l, m, n, p, q, r, s, u, v, t)
   }
-  w = cljs.core._first.call(null, B);
-  B = cljs.core._rest.call(null, B);
+  w = cljs.core._first.call(null, x);
+  x = cljs.core._rest.call(null, x);
   if(19 === b) {
-    return a.cljs$core$IFn$_invoke$arity$19 ? a.cljs$core$IFn$_invoke$arity$19(c, d, e, f, h, a, g, k, l, m, n, p, q, r, s, t, u, v, w) : a.call(null, c, d, e, f, h, a, g, k, l, m, n, p, q, r, s, t, u, v, w)
+    return a.cljs$core$IFn$_invoke$arity$19 ? a.cljs$core$IFn$_invoke$arity$19(c, d, e, f, h, a, g, k, l, m, n, p, q, r, s, u, v, t, w) : a.call(null, c, d, e, f, h, a, g, k, l, m, n, p, q, r, s, u, v, t, w)
   }
-  var I = cljs.core._first.call(null, B);
-  cljs.core._rest.call(null, B);
+  var I = cljs.core._first.call(null, x);
+  cljs.core._rest.call(null, x);
   if(20 === b) {
-    return a.cljs$core$IFn$_invoke$arity$20 ? a.cljs$core$IFn$_invoke$arity$20(c, d, e, f, h, a, g, k, l, m, n, p, q, r, s, t, u, v, w, I) : a.call(null, c, d, e, f, h, a, g, k, l, m, n, p, q, r, s, t, u, v, w, I)
+    return a.cljs$core$IFn$_invoke$arity$20 ? a.cljs$core$IFn$_invoke$arity$20(c, d, e, f, h, a, g, k, l, m, n, p, q, r, s, u, v, t, w, I) : a.call(null, c, d, e, f, h, a, g, k, l, m, n, p, q, r, s, u, v, t, w, I)
   }
   throw Error("Only up to 20 arguments supported on functions");
 };
@@ -16344,19 +16344,19 @@ cljs.core.async.merge = function() {
             return g = b[2], b[2] = g, b[1] = 3, new cljs.core.Keyword(null, "recur", "recur", 1122293407)
           }
           if(7 === e) {
-            var k = b[8], r = b[9], s = b[2], g = cljs.core.nth.call(null, s, 0, null), t = cljs.core.nth.call(null, s, 1, null);
-            b[10] = t;
+            var k = b[8], r = b[9], s = b[2], g = cljs.core.nth.call(null, s, 0, null), u = cljs.core.nth.call(null, s, 1, null);
+            b[10] = u;
             b[8] = g;
             b[9] = s;
             cljs.core.truth_(null == g) ? b[1] = 8 : b[1] = 9;
             return new cljs.core.Keyword(null, "recur", "recur", 1122293407)
           }
-          return 8 === e ? (h = b[7], t = b[10], k = b[8], r = b[9], g = function() {
+          return 8 === e ? (h = b[7], u = b[10], k = b[8], r = b[9], g = function() {
             return function(a, b, c, d, e, f, h, g, k) {
               return function(b) {
                 return cljs.core.not_EQ_.call(null, a, b)
               }
-            }(t, k, r, h, h, t, k, r, e)
+            }(u, k, r, h, h, u, k, r, e)
           }(), g = cljs.core.filterv.call(null, g, h), b[7] = g, b[2] = null, b[1] = 2, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 9 === e ? (k = b[8], cljs.core.async.impl.ioc_helpers.put_BANG_.call(null, b, 11, c, k)) : 10 === e ? (g = b[2], b[2] = g, b[1] = 6, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 11 === e ? (h = b[7], g = b[2], b[11] = g, b[7] = h, b[2] = null, b[1] = 2, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : null
         })
       }(), e = function() {
@@ -16798,6 +16798,149 @@ cmsnew.log_utils.log_chan = function(a) {
     cmsnew.log_utils.ld.call(null, a);
     return a
   }, a)
+};
+var clojure = {string:{}};
+clojure.string.seq_reverse = function(a) {
+  return cljs.core.reduce.call(null, cljs.core.conj, cljs.core.List.EMPTY, a)
+};
+clojure.string.reverse = function(a) {
+  return a.split("").reverse().join("")
+};
+clojure.string.replace = function(a, b, c) {
+  if("string" === typeof b) {
+    return a.replace(RegExp(goog.string.regExpEscape(b), "g"), c)
+  }
+  if(cljs.core.truth_(b.hasOwnProperty("source"))) {
+    return a.replace(RegExp(b.source, "g"), c)
+  }
+  if(new cljs.core.Keyword(null, "else", "else", 1017020587)) {
+    throw[cljs.core.str("Invalid match arg: "), cljs.core.str(b)].join("");
+  }
+  return null
+};
+clojure.string.replace_first = function(a, b, c) {
+  return a.replace(b, c)
+};
+clojure.string.join = function() {
+  var a = null, b = function(a) {
+    return cljs.core.apply.call(null, cljs.core.str, a)
+  }, c = function(a, b) {
+    return cljs.core.apply.call(null, cljs.core.str, cljs.core.interpose.call(null, a, b))
+  }, a = function(a, e) {
+    switch(arguments.length) {
+      case 1:
+        return b.call(this, a);
+      case 2:
+        return c.call(this, a, e)
+    }
+    throw Error("Invalid arity: " + arguments.length);
+  };
+  a.cljs$core$IFn$_invoke$arity$1 = b;
+  a.cljs$core$IFn$_invoke$arity$2 = c;
+  return a
+}();
+clojure.string.upper_case = function(a) {
+  return a.toUpperCase()
+};
+clojure.string.lower_case = function(a) {
+  return a.toLowerCase()
+};
+clojure.string.capitalize = function(a) {
+  return 2 > cljs.core.count.call(null, a) ? clojure.string.upper_case.call(null, a) : [cljs.core.str(clojure.string.upper_case.call(null, cljs.core.subs.call(null, a, 0, 1))), cljs.core.str(clojure.string.lower_case.call(null, cljs.core.subs.call(null, a, 1)))].join("")
+};
+clojure.string.pop_last_while_empty = function(a) {
+  for(;;) {
+    if(cljs.core._EQ_.call(null, "", cljs.core.peek.call(null, a))) {
+      a = cljs.core.pop.call(null, a)
+    }else {
+      return a
+    }
+  }
+};
+clojure.string.discard_trailing_if_needed = function(a, b) {
+  return cljs.core._EQ_.call(null, 0, a) ? clojure.string.pop_last_while_empty.call(null, b) : b
+};
+clojure.string.split_with_empty_regex = function(a, b) {
+  if(0 >= b || b >= 2 + cljs.core.count.call(null, a)) {
+    return cljs.core.conj.call(null, cljs.core.vec.call(null, cljs.core.cons.call(null, "", cljs.core.map.call(null, cljs.core.str, cljs.core.seq.call(null, a)))), "")
+  }
+  var c = cljs.core._EQ_;
+  if(c.call(null, 1, b)) {
+    return cljs.core.PersistentVector.fromArray.call(null, [a], !0)
+  }
+  if(c.call(null, 2, b)) {
+    return cljs.core.PersistentVector.fromArray.call(null, ["", a], !0)
+  }
+  c = b - 2;
+  return cljs.core.conj.call(null, cljs.core.vec.call(null, cljs.core.cons.call(null, "", cljs.core.subvec.call(null, cljs.core.vec.call(null, cljs.core.map.call(null, cljs.core.str, cljs.core.seq.call(null, a))), 0, c))), cljs.core.subs.call(null, a, c))
+};
+clojure.string.split = function() {
+  var a = null, b = function(b, c) {
+    return a.call(null, b, c, 0)
+  }, c = function(a, b, c) {
+    return clojure.string.discard_trailing_if_needed.call(null, c, cljs.core._EQ_.call(null, "" + cljs.core.str(b), "/(?:)/") ? clojure.string.split_with_empty_regex.call(null, a, c) : 1 > c ? cljs.core.vec.call(null, ("" + cljs.core.str(a)).split(b)) : function() {
+      for(var h = a, g = c, k = cljs.core.PersistentVector.EMPTY;;) {
+        if(cljs.core._EQ_.call(null, g, 1)) {
+          return cljs.core.conj.call(null, k, h)
+        }
+        var l = cljs.core.re_find.call(null, b, h);
+        if(cljs.core.truth_(l)) {
+          var m = l, l = h.indexOf(m), m = h.substring(l + cljs.core.count.call(null, m)), g = g - 1, k = cljs.core.conj.call(null, k, h.substring(0, l)), h = m
+        }else {
+          return cljs.core.conj.call(null, k, h)
+        }
+      }
+    }())
+  }, a = function(a, e, f) {
+    switch(arguments.length) {
+      case 2:
+        return b.call(this, a, e);
+      case 3:
+        return c.call(this, a, e, f)
+    }
+    throw Error("Invalid arity: " + arguments.length);
+  };
+  a.cljs$core$IFn$_invoke$arity$2 = b;
+  a.cljs$core$IFn$_invoke$arity$3 = c;
+  return a
+}();
+clojure.string.split_lines = function(a) {
+  return clojure.string.split.call(null, a, /\n|\r\n/)
+};
+clojure.string.trim = function(a) {
+  return goog.string.trim(a)
+};
+clojure.string.triml = function(a) {
+  return goog.string.trimLeft(a)
+};
+clojure.string.trimr = function(a) {
+  return goog.string.trimRight(a)
+};
+clojure.string.trim_newline = function(a) {
+  for(var b = a.length;;) {
+    if(0 === b) {
+      return""
+    }
+    var c = cljs.core.get.call(null, a, b - 1);
+    if(cljs.core._EQ_.call(null, c, "\n") || cljs.core._EQ_.call(null, c, "\r")) {
+      b -= 1
+    }else {
+      return a.substring(0, b)
+    }
+  }
+};
+clojure.string.blank_QMARK_ = function(a) {
+  return goog.string.isEmptySafe(a)
+};
+clojure.string.escape = function(a, b) {
+  for(var c = new goog.string.StringBuffer, d = a.length, e = 0;;) {
+    if(cljs.core._EQ_.call(null, d, e)) {
+      return c.toString()
+    }
+    var f = a.charAt(e), h = cljs.core.get.call(null, b, f);
+    cljs.core.truth_(h) ? c.append("" + cljs.core.str(h)) : c.append(f);
+    e += 1
+  }
 };
 goog.userAgent = {};
 goog.userAgent.ASSUME_IE = !1;
@@ -20654,149 +20797,6 @@ goog.net.XhrIo.prototype.formatMsg_ = function(a) {
 goog.debug.entryPointRegistry.register(function(a) {
   goog.net.XhrIo.prototype.onReadyStateChangeEntryPoint_ = a(goog.net.XhrIo.prototype.onReadyStateChangeEntryPoint_)
 });
-var clojure = {string:{}};
-clojure.string.seq_reverse = function(a) {
-  return cljs.core.reduce.call(null, cljs.core.conj, cljs.core.List.EMPTY, a)
-};
-clojure.string.reverse = function(a) {
-  return a.split("").reverse().join("")
-};
-clojure.string.replace = function(a, b, c) {
-  if("string" === typeof b) {
-    return a.replace(RegExp(goog.string.regExpEscape(b), "g"), c)
-  }
-  if(cljs.core.truth_(b.hasOwnProperty("source"))) {
-    return a.replace(RegExp(b.source, "g"), c)
-  }
-  if(new cljs.core.Keyword(null, "else", "else", 1017020587)) {
-    throw[cljs.core.str("Invalid match arg: "), cljs.core.str(b)].join("");
-  }
-  return null
-};
-clojure.string.replace_first = function(a, b, c) {
-  return a.replace(b, c)
-};
-clojure.string.join = function() {
-  var a = null, b = function(a) {
-    return cljs.core.apply.call(null, cljs.core.str, a)
-  }, c = function(a, b) {
-    return cljs.core.apply.call(null, cljs.core.str, cljs.core.interpose.call(null, a, b))
-  }, a = function(a, e) {
-    switch(arguments.length) {
-      case 1:
-        return b.call(this, a);
-      case 2:
-        return c.call(this, a, e)
-    }
-    throw Error("Invalid arity: " + arguments.length);
-  };
-  a.cljs$core$IFn$_invoke$arity$1 = b;
-  a.cljs$core$IFn$_invoke$arity$2 = c;
-  return a
-}();
-clojure.string.upper_case = function(a) {
-  return a.toUpperCase()
-};
-clojure.string.lower_case = function(a) {
-  return a.toLowerCase()
-};
-clojure.string.capitalize = function(a) {
-  return 2 > cljs.core.count.call(null, a) ? clojure.string.upper_case.call(null, a) : [cljs.core.str(clojure.string.upper_case.call(null, cljs.core.subs.call(null, a, 0, 1))), cljs.core.str(clojure.string.lower_case.call(null, cljs.core.subs.call(null, a, 1)))].join("")
-};
-clojure.string.pop_last_while_empty = function(a) {
-  for(;;) {
-    if(cljs.core._EQ_.call(null, "", cljs.core.peek.call(null, a))) {
-      a = cljs.core.pop.call(null, a)
-    }else {
-      return a
-    }
-  }
-};
-clojure.string.discard_trailing_if_needed = function(a, b) {
-  return cljs.core._EQ_.call(null, 0, a) ? clojure.string.pop_last_while_empty.call(null, b) : b
-};
-clojure.string.split_with_empty_regex = function(a, b) {
-  if(0 >= b || b >= 2 + cljs.core.count.call(null, a)) {
-    return cljs.core.conj.call(null, cljs.core.vec.call(null, cljs.core.cons.call(null, "", cljs.core.map.call(null, cljs.core.str, cljs.core.seq.call(null, a)))), "")
-  }
-  var c = cljs.core._EQ_;
-  if(c.call(null, 1, b)) {
-    return cljs.core.PersistentVector.fromArray.call(null, [a], !0)
-  }
-  if(c.call(null, 2, b)) {
-    return cljs.core.PersistentVector.fromArray.call(null, ["", a], !0)
-  }
-  c = b - 2;
-  return cljs.core.conj.call(null, cljs.core.vec.call(null, cljs.core.cons.call(null, "", cljs.core.subvec.call(null, cljs.core.vec.call(null, cljs.core.map.call(null, cljs.core.str, cljs.core.seq.call(null, a))), 0, c))), cljs.core.subs.call(null, a, c))
-};
-clojure.string.split = function() {
-  var a = null, b = function(b, c) {
-    return a.call(null, b, c, 0)
-  }, c = function(a, b, c) {
-    return clojure.string.discard_trailing_if_needed.call(null, c, cljs.core._EQ_.call(null, "" + cljs.core.str(b), "/(?:)/") ? clojure.string.split_with_empty_regex.call(null, a, c) : 1 > c ? cljs.core.vec.call(null, ("" + cljs.core.str(a)).split(b)) : function() {
-      for(var h = a, g = c, k = cljs.core.PersistentVector.EMPTY;;) {
-        if(cljs.core._EQ_.call(null, g, 1)) {
-          return cljs.core.conj.call(null, k, h)
-        }
-        var l = cljs.core.re_find.call(null, b, h);
-        if(cljs.core.truth_(l)) {
-          var m = l, l = h.indexOf(m), m = h.substring(l + cljs.core.count.call(null, m)), g = g - 1, k = cljs.core.conj.call(null, k, h.substring(0, l)), h = m
-        }else {
-          return cljs.core.conj.call(null, k, h)
-        }
-      }
-    }())
-  }, a = function(a, e, f) {
-    switch(arguments.length) {
-      case 2:
-        return b.call(this, a, e);
-      case 3:
-        return c.call(this, a, e, f)
-    }
-    throw Error("Invalid arity: " + arguments.length);
-  };
-  a.cljs$core$IFn$_invoke$arity$2 = b;
-  a.cljs$core$IFn$_invoke$arity$3 = c;
-  return a
-}();
-clojure.string.split_lines = function(a) {
-  return clojure.string.split.call(null, a, /\n|\r\n/)
-};
-clojure.string.trim = function(a) {
-  return goog.string.trim(a)
-};
-clojure.string.triml = function(a) {
-  return goog.string.trimLeft(a)
-};
-clojure.string.trimr = function(a) {
-  return goog.string.trimRight(a)
-};
-clojure.string.trim_newline = function(a) {
-  for(var b = a.length;;) {
-    if(0 === b) {
-      return""
-    }
-    var c = cljs.core.get.call(null, a, b - 1);
-    if(cljs.core._EQ_.call(null, c, "\n") || cljs.core._EQ_.call(null, c, "\r")) {
-      b -= 1
-    }else {
-      return a.substring(0, b)
-    }
-  }
-};
-clojure.string.blank_QMARK_ = function(a) {
-  return goog.string.isEmptySafe(a)
-};
-clojure.string.escape = function(a, b) {
-  for(var c = new goog.string.StringBuffer, d = a.length, e = 0;;) {
-    if(cljs.core._EQ_.call(null, d, e)) {
-      return c.toString()
-    }
-    var f = a.charAt(e), h = cljs.core.get.call(null, b, f);
-    cljs.core.truth_(h) ? c.append("" + cljs.core.str(h)) : c.append(f);
-    e += 1
-  }
-};
 cljs.reader = {};
 cljs.reader.PushbackReader = {};
 cljs.reader.read_char = function(a) {
@@ -21262,13 +21262,13 @@ cljs.reader.parse_and_validate_timestamp = function(a) {
   }(), s = function() {
     var a = cljs.reader.parse_int.call(null, cljs.reader.zero_fill_right_and_truncate.call(null, k, 3));
     return cljs.core.truth_(a) ? a : 0
-  }(), l = cljs.core._EQ_.call(null, l, "-") ? -1 : 1, t = function() {
+  }(), l = cljs.core._EQ_.call(null, l, "-") ? -1 : 1, u = function() {
     var a = cljs.reader.parse_int.call(null, m);
     return cljs.core.truth_(a) ? a : 0
-  }(), u = function() {
+  }(), v = function() {
     var a = cljs.reader.parse_int.call(null, n);
     return cljs.core.truth_(a) ? a : 0
-  }(), l = l * (60 * t + u);
+  }(), l = l * (60 * u + v);
   return cljs.core.PersistentVector.fromArray([a, cljs.reader.check.call(null, 1, b, 12, "timestamp month field must be in range 1..12"), cljs.reader.check.call(null, 1, c, cljs.reader.days_in_month.call(null, b, cljs.reader.leap_year_QMARK_.call(null, a)), "timestamp day field must be in range 1..last day in month"), cljs.reader.check.call(null, 0, p, 23, "timestamp hour field must be in range 0..23"), cljs.reader.check.call(null, 0, q, 59, "timestamp minute field must be in range 0..59"), cljs.reader.check.call(null, 
   0, r, cljs.core._EQ_.call(null, q, 59) ? 60 : 59, "timestamp second field must be in range 0..60"), cljs.reader.check.call(null, 0, s, 999, "timestamp millisecond field must be in range 0..999"), l], !0)
 };
@@ -22526,6 +22526,31 @@ cmsnew.datastore.s3.extract_versions = function(a) {
 cmsnew.datastore.s3.extract_paths = function(a) {
   return cmsnew.datastore.s3.extract_key_value.call(null, a, "Key")
 };
+cmsnew.datastore.s3.node_list_seq = function(a) {
+  return cljs.core.map.call(null, function(b) {
+    return a.item(b)
+  }, cljs.core.range.call(null, a.length))
+};
+cmsnew.datastore.s3.node_value = function(a) {
+  return a[0].textContent
+};
+cmsnew.datastore.s3.extract_tag_paths = function(a, b, c) {
+  a = a.getResponseXml();
+  b = cmsnew.datastore.s3.node_list_seq.call(null, a.getElementsByTagName(b));
+  return cljs.core.mapv.call(null, function(a) {
+    return cljs.core.into.call(null, cljs.core.PersistentArrayMap.EMPTY, cljs.core.map.call(null, function(b) {
+      return cljs.core.PersistentVector.fromArray([b, cmsnew.datastore.s3.node_value.call(null, a.getElementsByTagName(b))], !0)
+    }, c))
+  }, b)
+};
+cmsnew.datastore.s3.extract_path_etag = function(a) {
+  var b = function(a) {
+    return cljs.core.get.call(null, clojure.string.split.call(null, a, /\"/), 1)
+  };
+  return cljs.core.map.call(null, function(a) {
+    return cljs.core.PersistentArrayMap.fromArray([new cljs.core.Keyword(null, "path", "path", 1017337751), cljs.core.get.call(null, a, "Key"), new cljs.core.Keyword(null, "etag", "etag", 1017027719), b.call(null, cljs.core.get.call(null, a, "ETag"))], !0)
+  }, cmsnew.datastore.s3.extract_tag_paths.call(null, a, "Contents", cljs.core.PersistentVector.fromArray(["Key", "ETag"], !0)))
+};
 cmsnew.datastore.s3.get_versions_of_file = function(a, b, c) {
   return cmsnew.datastore.s3.xhr_request.call(null, [cljs.core.str("http://s3.amazonaws.com/"), cljs.core.str(a), cljs.core.str("/?versions\x26prefix\x3d"), cljs.core.str(b)].join(""), function(a) {
     return c.call(null, cmsnew.datastore.s3.extract_versions.call(null, a))
@@ -22533,7 +22558,7 @@ cmsnew.datastore.s3.get_versions_of_file = function(a, b, c) {
 };
 cmsnew.datastore.s3.get_bucket_list = function(a, b, c) {
   return cmsnew.datastore.s3.xhr_request.call(null, [cljs.core.str("http://s3.amazonaws.com/"), cljs.core.str(a), cljs.core.str("/?\x26prefix\x3d"), cljs.core.str(b)].join(""), function(a) {
-    return c.call(null, cmsnew.datastore.s3.extract_paths.call(null, a))
+    return c.call(null, cmsnew.datastore.s3.extract_path_etag.call(null, a))
   })
 };
 cmsnew.heckle = {};
@@ -22567,9 +22592,9 @@ cmsnew.heckle.render_template_to_path = function(a, b, c, d) {
     })
   })
 };
-var conv_class_2262747 = Showdown.converter, converter_2262748 = new conv_class_2262747;
+var conv_class_2684249 = Showdown.converter, converter_2684250 = new conv_class_2684249;
 cmsnew.heckle.markdown_to_html = function(a) {
-  return converter_2262748.makeHtml(a)
+  return converter_2684250.makeHtml(a)
 };
 cmsnew.heckle.get_front_matter = function(a) {
   try {
@@ -22663,7 +22688,7 @@ cmsnew.heckle.file_list = function(a, b) {
     }
   }(c);
   cmsnew.datastore.s3.get_bucket_list.call(null, a, b, function(a) {
-    return cljs.core.async.onto_chan.call(null, c, cljs.core.filter.call(null, d, a))
+    return cljs.core.async.onto_chan.call(null, c, cljs.core.filter.call(null, d, cljs.core.map.call(null, new cljs.core.Keyword(null, "path", "path", 1017337751), a)))
   });
   return c
 };
@@ -23173,7 +23198,7 @@ cmsnew.heckle.process = function(a) {
       return function(a) {
         return function() {
           var b = null, c = function() {
-            var a = Array(12);
+            var a = Array(13);
             a[0] = b;
             a[1] = 1;
             return a
@@ -23217,20 +23242,21 @@ cmsnew.heckle.process = function(a) {
       }(function(b) {
         var c = b[1];
         if(5 === c) {
-          var d = b[7], g = b[8], k = b[9], l = b[10], m = b[2], n = [d, l, k, m, a], p = cljs.core.PersistentHashMap.fromArrays.call(null, g, n), q = cmsnew.heckle.template_data.call(null, p), r = cljs.core.clj__GT_js.call(null, q), s = jayq.util.log.call(null, r), t = function() {
-            return function(a, b, c, d, e, f, h, g, k, l, m, n, p) {
+          var d = b[7], g = b[8], k = b[9], l = b[10], m = b[2], n = [l, g, d, m, a], p = cljs.core.PersistentHashMap.fromArrays.call(null, k, n), q = cmsnew.heckle.template_data.call(null, p), r = cljs.core.clj__GT_js.call(null, q), s = jayq.util.log.call(null, r), u = cljs.core.clj__GT_js.call(null, p), v = jayq.util.log.call(null, u), t = function() {
+            return function(a, b, c, d, e, f, h, g, k, l, m, n, p, q, r) {
               return function(c) {
                 return cmsnew.heckle.self_assoc.call(null, c, new cljs.core.Keyword(null, "rendered-body", "rendered-body", 809187116), cljs.core.partial.call(null, cmsnew.heckle.render_page_with_templates, b, a))
               }
-            }(q, p, d, g, k, l, m, n, p, q, r, s, c)
-          }(), u = (new cljs.core.Keyword(null, "posts", "posts", 1120759621)).cljs$core$IFn$_invoke$arity$1(p), u = cljs.core.async.to_chan.call(null, u), v = (new cljs.core.Keyword(null, "pages", "pages", 1120330550)).cljs$core$IFn$_invoke$arity$1(p), v = cljs.core.async.to_chan.call(null, v), u = cljs.core.PersistentVector.fromArray.call(null, [u, v], !0), u = cljs.core.async.merge.call(null, u), t = cljs.core.async.map_LT_.call(null, t, u), t = cmsnew.heckle.store_files.call(null, a, t), t = 
+            }(q, p, d, g, k, l, m, n, p, q, r, s, u, v, c)
+          }(), w = (new cljs.core.Keyword(null, "posts", "posts", 1120759621)).cljs$core$IFn$_invoke$arity$1(p), w = cljs.core.async.to_chan.call(null, w), x = (new cljs.core.Keyword(null, "pages", "pages", 1120330550)).cljs$core$IFn$_invoke$arity$1(p), x = cljs.core.async.to_chan.call(null, x), w = cljs.core.PersistentVector.fromArray.call(null, [w, x], !0), w = cljs.core.async.merge.call(null, w), t = cljs.core.async.map_LT_.call(null, t, w), t = cmsnew.heckle.store_files.call(null, a, t), t = 
           cljs.core.async.into.call(null, cljs.core.PersistentVector.EMPTY, t);
-          b[11] = s;
+          b[11] = v;
+          b[12] = s;
           return cljs.core.async.impl.ioc_helpers.return_chan.call(null, b, t)
         }
-        return 4 === c ? (k = b[2], t = cmsnew.heckle.get_pages.call(null, a), b[9] = k, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, b, 5, t)) : 3 === c ? (t = b[2], l = cmsnew.heckle.map_to_key.call(null, new cljs.core.Keyword(null, "name", "name", 1017277949), t), t = cmsnew.heckle.get_posts.call(null, a), b[10] = l, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, b, 4, t)) : 2 === c ? (t = b[2], d = cmsnew.heckle.map_to_key.call(null, new cljs.core.Keyword(null, "name", "name", 
-        1017277949), t), t = cmsnew.heckle.get_data.call(null, a), b[7] = d, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, b, 3, t)) : 1 === c ? (g = [new cljs.core.Keyword(null, "templates", "templates", 2995631787), new cljs.core.Keyword(null, "data", "data", 1016980252), new cljs.core.Keyword(null, "posts", "posts", 1120759621), new cljs.core.Keyword(null, "pages", "pages", 1120330550), new cljs.core.Keyword(null, "system", "system", 4421543329)], t = cmsnew.heckle.get_templates.call(null, 
-        a), b[8] = g, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, b, 2, t)) : null
+        return 4 === c ? (d = b[2], t = cmsnew.heckle.get_pages.call(null, a), b[7] = d, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, b, 5, t)) : 3 === c ? (t = b[2], g = cmsnew.heckle.map_to_key.call(null, new cljs.core.Keyword(null, "name", "name", 1017277949), t), t = cmsnew.heckle.get_posts.call(null, a), b[8] = g, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, b, 4, t)) : 2 === c ? (t = b[2], l = cmsnew.heckle.map_to_key.call(null, new cljs.core.Keyword(null, "name", "name", 
+        1017277949), t), t = cmsnew.heckle.get_data.call(null, a), b[10] = l, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, b, 3, t)) : 1 === c ? (k = [new cljs.core.Keyword(null, "templates", "templates", 2995631787), new cljs.core.Keyword(null, "data", "data", 1016980252), new cljs.core.Keyword(null, "posts", "posts", 1120759621), new cljs.core.Keyword(null, "pages", "pages", 1120330550), new cljs.core.Keyword(null, "system", "system", 4421543329)], t = cmsnew.heckle.get_templates.call(null, 
+        a), b[9] = k, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, b, 2, t)) : null
       })
     }(), d = function() {
       var a = c.call(null);
@@ -23241,6 +23267,294 @@ cmsnew.heckle.process = function(a) {
   });
   return b
 };
+cmsnew.heckle.filter_for_prefix = function(a, b) {
+  var c = RegExp([cljs.core.str("^"), cljs.core.str(b)].join(""));
+  return cljs.core.filter.call(null, function(a) {
+    return c.test((new cljs.core.Keyword(null, "path", "path", 1017337751)).cljs$core$IFn$_invoke$arity$1(a))
+  }, cljs.core.vals.call(null, a))
+};
+cmsnew.heckle.new_get_templates = function(a, b) {
+  return cljs.core.map.call(null, function(a) {
+    return cmsnew.heckle.self_assoc.call(null, a, new cljs.core.Keyword(null, "name", "name", 1017277949), cmsnew.heckle.filename_without_ext)
+  }, cljs.core.map.call(null, cmsnew.heckle.parse_front_matter, cmsnew.heckle.filter_for_prefix.call(null, b, (new cljs.core.Keyword(null, "template-path", "template-path", 787573002)).cljs$core$IFn$_invoke$arity$1(a))))
+};
+cmsnew.heckle.new_get_posts = function(a, b) {
+  return cljs.core.map.call(null, function(a) {
+    return cmsnew.heckle.self_assoc.call(null, a, new cljs.core.Keyword(null, "target-path", "target-path", 3177994835), cmsnew.heckle.make_post_target_path)
+  }, cljs.core.map.call(null, function(a) {
+    return cmsnew.heckle.self_assoc.call(null, a, new cljs.core.Keyword(null, "date", "date", 1016980256), cmsnew.heckle.parse_file_date)
+  }, cljs.core.map.call(null, function(a) {
+    return cljs.core.assoc.call(null, a, new cljs.core.Keyword(null, "page-type", "page-type", 1851622186), new cljs.core.Keyword(null, "post", "post", 1017351186))
+  }, cljs.core.map.call(null, cmsnew.heckle.parse_front_matter, cmsnew.heckle.filter_for_prefix.call(null, b, (new cljs.core.Keyword(null, "post-path", "post-path", 2970567844)).cljs$core$IFn$_invoke$arity$1(a))))))
+};
+cmsnew.heckle.new_get_pages = function(a, b) {
+  return cljs.core.map.call(null, function(a) {
+    return cmsnew.heckle.self_assoc.call(null, a, new cljs.core.Keyword(null, "target-path", "target-path", 3177994835), cmsnew.heckle.make_page_target_path)
+  }, cljs.core.map.call(null, function(a) {
+    return cljs.core.assoc.call(null, a, new cljs.core.Keyword(null, "page-type", "page-type", 1851622186), new cljs.core.Keyword(null, "page", "page", 1017337345))
+  }, cljs.core.map.call(null, cmsnew.heckle.parse_front_matter, cmsnew.heckle.filter_for_prefix.call(null, b, (new cljs.core.Keyword(null, "page-path", "page-path", 1851480085)).cljs$core$IFn$_invoke$arity$1(a)))))
+};
+cmsnew.heckle.new_get_data = function(a, b) {
+  return cljs.core.map.call(null, cmsnew.heckle.parse_data_file, cmsnew.heckle.filter_for_prefix.call(null, b, (new cljs.core.Keyword(null, "data-path", "data-path", 604226522)).cljs$core$IFn$_invoke$arity$1(a)))
+};
+cmsnew.heckle.new_process = function(a, b) {
+  var c = cljs.core.async.chan.call(null, 1);
+  cljs.core.async.impl.dispatch.run.call(null, function() {
+    var d = function() {
+      return function(a) {
+        return function() {
+          var b = null, c = function() {
+            var a = Array(8);
+            a[0] = b;
+            a[1] = 1;
+            return a
+          }, d = function(b) {
+            for(;;) {
+              var c = function() {
+                try {
+                  for(;;) {
+                    var c = a.call(null, b);
+                    if(!cljs.core.keyword_identical_QMARK_.call(null, c, new cljs.core.Keyword(null, "recur", "recur", 1122293407))) {
+                      return c
+                    }
+                  }
+                }catch(d) {
+                  if(d instanceof Object) {
+                    return b[5] = d, cljs.core.async.impl.ioc_helpers.process_exception.call(null, b), new cljs.core.Keyword(null, "recur", "recur", 1122293407)
+                  }
+                  if(new cljs.core.Keyword(null, "else", "else", 1017020587)) {
+                    throw d;
+                  }
+                  return null
+                }
+              }();
+              if(!cljs.core.keyword_identical_QMARK_.call(null, c, new cljs.core.Keyword(null, "recur", "recur", 1122293407))) {
+                return c
+              }
+            }
+          }, b = function(a) {
+            switch(arguments.length) {
+              case 0:
+                return c.call(this);
+              case 1:
+                return d.call(this, a)
+            }
+            throw Error("Invalid arity: " + arguments.length);
+          };
+          b.cljs$core$IFn$_invoke$arity$0 = c;
+          b.cljs$core$IFn$_invoke$arity$1 = d;
+          return b
+        }()
+      }(function(c) {
+        if(1 === c[1]) {
+          var d = [new cljs.core.Keyword(null, "templates", "templates", 2995631787), new cljs.core.Keyword(null, "data", "data", 1016980252), new cljs.core.Keyword(null, "posts", "posts", 1120759621), new cljs.core.Keyword(null, "pages", "pages", 1120330550), new cljs.core.Keyword(null, "system", "system", 4421543329)], e = cmsnew.heckle.new_get_templates.call(null, a, b), e = cmsnew.heckle.map_to_key.call(null, new cljs.core.Keyword(null, "name", "name", 1017277949), e), k = cmsnew.heckle.new_get_data.call(null, 
+          a, b), k = cmsnew.heckle.map_to_key.call(null, new cljs.core.Keyword(null, "name", "name", 1017277949), k), l = cmsnew.heckle.new_get_posts.call(null, a, b), m = cmsnew.heckle.new_get_pages.call(null, a, b), d = cljs.core.PersistentHashMap.fromArrays.call(null, d, [e, k, l, m, a]), e = cmsnew.heckle.template_data.call(null, d), e = cljs.core.clj__GT_js.call(null, e), e = jayq.util.log.call(null, e), d = cljs.core.clj__GT_js.call(null, d), d = jayq.util.log.call(null, d);
+          c[7] = e;
+          return cljs.core.async.impl.ioc_helpers.return_chan.call(null, c, d)
+        }
+        return null
+      })
+    }(), e = function() {
+      var a = d.call(null);
+      a[cljs.core.async.impl.ioc_helpers.USER_START_IDX] = c;
+      return a
+    }();
+    return cljs.core.async.impl.ioc_helpers.run_state_machine_wrapped.call(null, e)
+  });
+  return c
+};
+cmsnew.heckle.files_that_changed = function(a, b) {
+  var c = cljs.core.set.call(null, cljs.core.concat.call(null, cljs.core.keys.call(null, a), cljs.core.keys.call(null, b)));
+  return cljs.core.keep.call(null, function(c) {
+    var e = cljs.core.get.call(null, a, c), f = cljs.core.get.call(null, b, c);
+    return cljs.core._EQ_.call(null, e, f) ? null : null == f && null != e ? cljs.core.PersistentVector.fromArray([new cljs.core.Keyword(null, "deleted", "deleted", 2564367243), c], !0) : new cljs.core.Keyword(null, "else", "else", 1017020587) ? cljs.core.PersistentVector.fromArray([new cljs.core.Keyword(null, "changed", "changed", 1752847910), c], !0) : null
+  }, c)
+};
+var dir_path_rx_2684699 = /\/$/, hash_rx_2684700 = /\#$/;
+cmsnew.heckle.good_file_path_QMARK_ = function(a) {
+  return cljs.core.not.call(null, function() {
+    var b = dir_path_rx_2684699.test(a);
+    return cljs.core.truth_(b) ? b : hash_rx_2684700.test(a)
+  }())
+};
+cmsnew.heckle.files_changed_list = function(a) {
+  return cljs.core.async.to_chan.call(null, cljs.core.map.call(null, cljs.core.last, a))
+};
+cmsnew.heckle.get_changed_files = function(a, b) {
+  return cljs.core.async.into.call(null, cljs.core.PersistentVector.EMPTY, cmsnew.heckle.fetch_files.call(null, a, cmsnew.heckle.files_changed_list.call(null, b)))
+};
+cmsnew.heckle.files_chan = function() {
+  var a = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), b = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY);
+  cljs.core.add_watch.call(null, a, new cljs.core.Keyword(null, "watch-change", "watch-change", 1899132384), function(a, c, f, h) {
+    var g = cljs.core.async.chan.call(null, 1);
+    cljs.core.async.impl.dispatch.run.call(null, function() {
+      var a = function() {
+        return function(a) {
+          return function() {
+            var b = null, c = function() {
+              var a = Array(9);
+              a[0] = b;
+              a[1] = 1;
+              return a
+            }, d = function(b) {
+              for(;;) {
+                var c = function() {
+                  try {
+                    for(;;) {
+                      var c = a.call(null, b);
+                      if(!cljs.core.keyword_identical_QMARK_.call(null, c, new cljs.core.Keyword(null, "recur", "recur", 1122293407))) {
+                        return c
+                      }
+                    }
+                  }catch(d) {
+                    if(d instanceof Object) {
+                      return b[5] = d, cljs.core.async.impl.ioc_helpers.process_exception.call(null, b), new cljs.core.Keyword(null, "recur", "recur", 1122293407)
+                    }
+                    if(new cljs.core.Keyword(null, "else", "else", 1017020587)) {
+                      throw d;
+                    }
+                    return null
+                  }
+                }();
+                if(!cljs.core.keyword_identical_QMARK_.call(null, c, new cljs.core.Keyword(null, "recur", "recur", 1122293407))) {
+                  return c
+                }
+              }
+            }, b = function(a) {
+              switch(arguments.length) {
+                case 0:
+                  return c.call(this);
+                case 1:
+                  return d.call(this, a)
+              }
+              throw Error("Invalid arity: " + arguments.length);
+            };
+            b.cljs$core$IFn$_invoke$arity$0 = c;
+            b.cljs$core$IFn$_invoke$arity$1 = d;
+            return b
+          }()
+        }(function(a) {
+          var c = a[1];
+          if(5 === c) {
+            return cljs.core.async.impl.ioc_helpers.return_chan.call(null, a, a[2])
+          }
+          if(4 === c) {
+            return a[2] = null, a[1] = 5, new cljs.core.Keyword(null, "recur", "recur", 1122293407)
+          }
+          if(3 === c) {
+            return c = a[7], c = cmsnew.heckle.map_to_key.call(null, new cljs.core.Keyword(null, "path", "path", 1017337751), c), c = cljs.core.swap_BANG_.call(null, b, cljs.core.merge, c), a[2] = c, a[1] = 5, new cljs.core.Keyword(null, "recur", "recur", 1122293407)
+          }
+          if(2 === c) {
+            var d = a[8], c = a[2], d = 0 < cljs.core.count.call(null, d);
+            a[7] = c;
+            cljs.core.truth_(d) ? a[1] = 3 : a[1] = 4;
+            return new cljs.core.Keyword(null, "recur", "recur", 1122293407)
+          }
+          return 1 === c ? (c = cmsnew.heckle.files_that_changed.call(null, f, h), d = cmsnew.heckle.get_changed_files.call(null, cmsnew.heckle.system, c), a[8] = c, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, a, 2, d)) : null
+        })
+      }(), c = function() {
+        var b = a.call(null);
+        b[cljs.core.async.impl.ioc_helpers.USER_START_IDX] = g;
+        return b
+      }();
+      return cljs.core.async.impl.ioc_helpers.run_state_machine_wrapped.call(null, c)
+    });
+    return g
+  });
+  cljs.core.add_watch.call(null, b, new cljs.core.Keyword(null, "files-change", "files-change", 2457228088), function(a, b, c, h) {
+    cmsnew.heckle.new_process.call(null, cmsnew.heckle.system, h);
+    return jayq.util.log.call(null, cljs.core.clj__GT_js.call(null, cljs.core.PersistentVector.fromArray([a, b, c, h], !0)))
+  });
+  var c = cljs.core.async.chan.call(null, 1);
+  cljs.core.async.impl.dispatch.run.call(null, function() {
+    var b = function() {
+      return function(a) {
+        return function() {
+          var b = null, c = function() {
+            var a = Array(8);
+            a[0] = b;
+            a[1] = 1;
+            return a
+          }, d = function(b) {
+            for(;;) {
+              var c = function() {
+                try {
+                  for(;;) {
+                    var c = a.call(null, b);
+                    if(!cljs.core.keyword_identical_QMARK_.call(null, c, new cljs.core.Keyword(null, "recur", "recur", 1122293407))) {
+                      return c
+                    }
+                  }
+                }catch(d) {
+                  if(d instanceof Object) {
+                    return b[5] = d, cljs.core.async.impl.ioc_helpers.process_exception.call(null, b), new cljs.core.Keyword(null, "recur", "recur", 1122293407)
+                  }
+                  if(new cljs.core.Keyword(null, "else", "else", 1017020587)) {
+                    throw d;
+                  }
+                  return null
+                }
+              }();
+              if(!cljs.core.keyword_identical_QMARK_.call(null, c, new cljs.core.Keyword(null, "recur", "recur", 1122293407))) {
+                return c
+              }
+            }
+          }, b = function(a) {
+            switch(arguments.length) {
+              case 0:
+                return c.call(this);
+              case 1:
+                return d.call(this, a)
+            }
+            throw Error("Invalid arity: " + arguments.length);
+          };
+          b.cljs$core$IFn$_invoke$arity$0 = c;
+          b.cljs$core$IFn$_invoke$arity$1 = d;
+          return b
+        }()
+      }(function(b) {
+        var c = b[1];
+        if(4 === c) {
+          var d = b;
+          d[2] = b[2];
+          d[1] = 3;
+          return new cljs.core.Keyword(null, "recur", "recur", 1122293407)
+        }
+        if(3 === c) {
+          return d = b[2], cljs.core.async.impl.ioc_helpers.return_chan.call(null, b, d)
+        }
+        if(2 === c) {
+          var d = function() {
+            return function(b) {
+              return function(c) {
+                return cljs.core.reset_BANG_.call(null, a, cljs.core.into.call(null, cljs.core.PersistentArrayMap.EMPTY, cljs.core.filter.call(null, function(a) {
+                  return function(a) {
+                    var b = cljs.core.nth.call(null, a, 0, null);
+                    cljs.core.nth.call(null, a, 1, null);
+                    return cmsnew.heckle.good_file_path_QMARK_.call(null, b)
+                  }
+                }(b), cljs.core.map.call(null, cljs.core.juxt.call(null, new cljs.core.Keyword(null, "path", "path", 1017337751), new cljs.core.Keyword(null, "etag", "etag", 1017027719)), c))))
+              }
+            }(c)
+          }(), d = cmsnew.datastore.s3.get_bucket_list.call(null, "immubucket", "_", d), e = cljs.core.async.timeout.call(null, 5E3);
+          b[7] = d;
+          return cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, b, 4, e)
+        }
+        return 1 === c ? (b[2] = null, b[1] = 2, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : null
+      })
+    }(), e = function() {
+      var a = b.call(null);
+      a[cljs.core.async.impl.ioc_helpers.USER_START_IDX] = c;
+      return a
+    }();
+    return cljs.core.async.impl.ioc_helpers.run_state_machine_wrapped.call(null, e)
+  });
+  return c
+};
+cmsnew.heckle.files_chan.call(null);
+jayq.util.log.call(null, cmsnew.heckle.good_file_path_QMARK_.call(null, "_data/"));
+jayq.util.log.call(null, cmsnew.heckle.good_file_path_QMARK_.call(null, "_data/something.edn"));
+jayq.util.log.call(null, cmsnew.heckle.good_file_path_QMARK_.call(null, "_data/something.edn#"));
 var crate = {util:{}};
 crate.util._STAR_base_url_STAR_ = null;
 crate.util.as_str = function() {
@@ -25767,9 +26081,9 @@ cmsnew.core.touch_click_event = function(a, b) {
         }
         if(4 === d) {
           var d = a[7], e = a[2], d = cljs.core.nth.call(null, e, 0, null), e = cljs.core.nth.call(null, e, 1, null), f = cljs.core.prn_str.call(null, d), f = jayq.util.log.call(null, f), m = cljs.core._EQ_.call(null, new cljs.core.Keyword(null, "click", "click", 1108654330), d);
-          a[7] = d;
           a[8] = e;
           a[9] = f;
+          a[7] = d;
           a[1] = m ? 5 : 6;
           return new cljs.core.Keyword(null, "recur", "recur", 1122293407)
         }
@@ -25887,8 +26201,8 @@ cmsnew.core.heading_form_behavior = function() {
         var c = b[1];
         if(4 === c) {
           var d = b[2], c = cljs.core.nth.call(null, d, 0, null), d = cljs.core.nth.call(null, d, 1, null), g = jayq.core.$.call(null, ".heading-size-btn", c), g = jayq.core.remove_class.call(null, g, "active"), k = jayq.core.$.call(null, "[name\x3dsize]", c), k = jayq.core.val.call(null, k, d), c = jayq.core.$.call(null, ".heading-input", c), c = jayq.core.attr.call(null, c, "data-size", d);
-          b[7] = c;
-          b[8] = g;
+          b[7] = g;
+          b[8] = c;
           b[9] = k;
           b[2] = null;
           b[1] = 2;
@@ -26381,19 +26695,19 @@ cmsnew.core.tooltip_popover_loop = function(a, b, c) {
           return e = d[2], cljs.core.async.impl.ioc_helpers.return_chan.call(null, d, e)
         }
         if(4 === e) {
-          var f = d[7], l = d[8], f = d[2], e = cljs.core.nth.call(null, f, 0, null), f = cljs.core.nth.call(null, f, 1, null), l = cljs.core.PersistentVector.fromArray.call(null, [e, f], !0), l = cmsnew.log_utils.ld.call(null, l), m = cljs.core._EQ_.call(null, new cljs.core.Keyword(null, "add-heading-item", "add-heading-item", 1472265500), e);
-          d[7] = e;
-          d[9] = l;
-          d[8] = f;
+          var f = d[7], l = d[8], l = d[2], e = cljs.core.nth.call(null, l, 0, null), l = cljs.core.nth.call(null, l, 1, null), f = cljs.core.PersistentVector.fromArray.call(null, [e, l], !0), f = cmsnew.log_utils.ld.call(null, f), m = cljs.core._EQ_.call(null, new cljs.core.Keyword(null, "add-heading-item", "add-heading-item", 1472265500), e);
+          d[7] = l;
+          d[8] = e;
+          d[9] = f;
           d[1] = m ? 5 : 6;
           return new cljs.core.Keyword(null, "recur", "recur", 1122293407)
         }
-        return 5 === e ? (e = cmsnew.tooltipper.popover_hide.call(null), f = cmsnew.tooltipper.tooltip_hide.call(null), l = [new cljs.core.Keyword(null, "type", "type", 1017479852), new cljs.core.Keyword(null, "size", "size", 1017434995)], m = [new cljs.core.Keyword(null, "heading", "heading", 1809215860), 2], l = cljs.core.PersistentHashMap.fromArrays.call(null, l, m), l = cmsnew.core.add_id_QMARK_.call(null, l), l = cmsnew.core.handle_add_item.call(null, l, b, a, c), d[10] = f, d[11] = e, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, 
-        d, 8, l)) : 6 === e ? (f = d[7], e = cljs.core._EQ_.call(null, new cljs.core.Keyword(null, "add-text-item", "add-text-item", 1998210297), f), d[1] = e ? 9 : 10, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 7 === e ? (e = d[2], d[2] = e, d[1] = 3, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 8 === e ? (e = d[2], d[2] = e, d[1] = 7, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 9 === e ? (e = cmsnew.tooltipper.popover_hide.call(null), f = cmsnew.tooltipper.tooltip_hide.call(null), 
-        l = cmsnew.core.new_item.call(null, new cljs.core.Keyword(null, "markdown", "markdown", 1260843105)), l = cmsnew.core.handle_add_item.call(null, l, b, a, c), d[12] = f, d[13] = e, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, d, 12, l)) : 10 === e ? (f = d[7], e = cljs.core._EQ_.call(null, new cljs.core.Keyword(null, "image-selected", "image-selected", 4169864767), f), d[1] = e ? 13 : 14, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 11 === e ? (e = d[2], d[2] = e, 
-        d[1] = 7, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 12 === e ? (e = d[2], d[2] = e, d[1] = 11, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 13 === e ? (l = d[8], e = cmsnew.tooltipper.popover_hide.call(null), f = cmsnew.tooltipper.tooltip_hide.call(null), l = cmsnew.core.handle_add_image.call(null, l, b, a, c), d[14] = f, d[15] = e, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, d, 16, l)) : 14 === e ? (f = d[7], e = cljs.core._EQ_.call(null, new cljs.core.Keyword(null, 
-        "tooltip-click", "tooltip-click", 2239844016), f), d[1] = e ? 17 : 18, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 15 === e ? (e = d[2], d[2] = e, d[1] = 11, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 16 === e ? (e = d[2], d[2] = e, d[1] = 15, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 17 === e ? (f = d[7], e = cmsnew.tooltipper.popover_hide.call(null), f = cljs.core.PersistentVector.fromArray.call(null, [f], !0), f = cljs.core.prn_str.call(null, 
-        f), f = jayq.util.log.call(null, f), d[16] = e, d[17] = f, d[2] = a, d[1] = 19, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 18 === e ? (d[2] = null, d[1] = 2, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 19 === e ? (e = d[2], d[2] = e, d[1] = 15, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : null
+        return 5 === e ? (e = cmsnew.tooltipper.popover_hide.call(null), l = cmsnew.tooltipper.tooltip_hide.call(null), f = [new cljs.core.Keyword(null, "type", "type", 1017479852), new cljs.core.Keyword(null, "size", "size", 1017434995)], m = [new cljs.core.Keyword(null, "heading", "heading", 1809215860), 2], f = cljs.core.PersistentHashMap.fromArrays.call(null, f, m), f = cmsnew.core.add_id_QMARK_.call(null, f), f = cmsnew.core.handle_add_item.call(null, f, b, a, c), d[10] = e, d[11] = l, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, 
+        d, 8, f)) : 6 === e ? (l = d[8], e = cljs.core._EQ_.call(null, new cljs.core.Keyword(null, "add-text-item", "add-text-item", 1998210297), l), d[1] = e ? 9 : 10, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 7 === e ? (e = d[2], d[2] = e, d[1] = 3, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 8 === e ? (e = d[2], d[2] = e, d[1] = 7, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 9 === e ? (e = cmsnew.tooltipper.popover_hide.call(null), l = cmsnew.tooltipper.tooltip_hide.call(null), 
+        f = cmsnew.core.new_item.call(null, new cljs.core.Keyword(null, "markdown", "markdown", 1260843105)), f = cmsnew.core.handle_add_item.call(null, f, b, a, c), d[12] = l, d[13] = e, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, d, 12, f)) : 10 === e ? (l = d[8], e = cljs.core._EQ_.call(null, new cljs.core.Keyword(null, "image-selected", "image-selected", 4169864767), l), d[1] = e ? 13 : 14, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 11 === e ? (e = d[2], d[2] = e, 
+        d[1] = 7, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 12 === e ? (e = d[2], d[2] = e, d[1] = 11, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 13 === e ? (f = d[7], e = cmsnew.tooltipper.popover_hide.call(null), l = cmsnew.tooltipper.tooltip_hide.call(null), f = cmsnew.core.handle_add_image.call(null, f, b, a, c), d[14] = e, d[15] = l, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, d, 16, f)) : 14 === e ? (l = d[8], e = cljs.core._EQ_.call(null, new cljs.core.Keyword(null, 
+        "tooltip-click", "tooltip-click", 2239844016), l), d[1] = e ? 17 : 18, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 15 === e ? (e = d[2], d[2] = e, d[1] = 11, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 16 === e ? (e = d[2], d[2] = e, d[1] = 15, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 17 === e ? (l = d[8], e = cmsnew.tooltipper.popover_hide.call(null), l = cljs.core.PersistentVector.fromArray.call(null, [l], !0), l = cljs.core.prn_str.call(null, 
+        l), l = jayq.util.log.call(null, l), d[16] = l, d[17] = e, d[2] = a, d[1] = 19, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 18 === e ? (d[2] = null, d[1] = 2, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 19 === e ? (e = d[2], d[2] = e, d[1] = 15, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : null
       })
     }(), f = function() {
       var a = e.call(null);
@@ -26494,7 +26808,7 @@ cmsnew.core.edit_edn_page_loop = function(a, b) {
           return d = a[2], a[2] = d, a[1] = 3, new cljs.core.Keyword(null, "recur", "recur", 1122293407)
         }
         if(8 === d) {
-          return e = a[7], d = cmsnew.core.initial_item_to_empty_page.call(null, a[2]), f = cmsnew.core.render_page.call(null, d), a[12] = f, a[7] = e, a[8] = d, a[2] = null, a[1] = 2, new cljs.core.Keyword(null, "recur", "recur", 1122293407)
+          return e = a[7], d = cmsnew.core.initial_item_to_empty_page.call(null, a[2]), f = cmsnew.core.render_page.call(null, d), a[7] = e, a[12] = f, a[8] = d, a[2] = null, a[1] = 2, new cljs.core.Keyword(null, "recur", "recur", 1122293407)
         }
         if(9 === d) {
           return e = a[9], f = a[10], d = a[8], f = cljs.core.PersistentVector.fromArray.call(null, [f, e], !0), f = cmsnew.tooltipper.tooltip_render.call(null, f), e = cljs.core.last.call(null, e), a[13] = f, a[7] = e, a[8] = d, a[2] = null, a[1] = 2, new cljs.core.Keyword(null, "recur", "recur", 1122293407)
@@ -26526,9 +26840,9 @@ cmsnew.core.edit_edn_page_loop = function(a, b) {
         if(18 === d) {
           e = a[7];
           var d = cmsnew.core.initial_item_to_empty_page.call(null, a[2]), f = jayq.util.log.call(null, "getting here"), m = cmsnew.log_utils.ld.call(null, d), n = cmsnew.core.render_page.call(null, d);
-          a[15] = f;
+          a[15] = n;
           a[16] = m;
-          a[17] = n;
+          a[17] = f;
           a[7] = e;
           a[8] = d;
           a[2] = null;
@@ -26546,74 +26860,8 @@ cmsnew.core.edit_edn_page_loop = function(a, b) {
   });
   return d
 };
-var c__5536__auto___1664049 = cljs.core.async.chan.call(null, 1);
-cljs.core.async.impl.dispatch.run.call(null, function() {
-  var a = function() {
-    return function(a) {
-      return function() {
-        var b = null, e = function() {
-          var a = Array(9);
-          a[0] = b;
-          a[1] = 1;
-          return a
-        }, f = function(b) {
-          for(;;) {
-            var d = function() {
-              try {
-                for(;;) {
-                  var d = a.call(null, b);
-                  if(!cljs.core.keyword_identical_QMARK_.call(null, d, new cljs.core.Keyword(null, "recur", "recur", 1122293407))) {
-                    return d
-                  }
-                }
-              }catch(e) {
-                if(e instanceof Object) {
-                  return b[5] = e, cljs.core.async.impl.ioc_helpers.process_exception.call(null, b), new cljs.core.Keyword(null, "recur", "recur", 1122293407)
-                }
-                if(new cljs.core.Keyword(null, "else", "else", 1017020587)) {
-                  throw e;
-                }
-                return null
-              }
-            }();
-            if(!cljs.core.keyword_identical_QMARK_.call(null, d, new cljs.core.Keyword(null, "recur", "recur", 1122293407))) {
-              return d
-            }
-          }
-        }, b = function(a) {
-          switch(arguments.length) {
-            case 0:
-              return e.call(this);
-            case 1:
-              return f.call(this, a)
-          }
-          throw Error("Invalid arity: " + arguments.length);
-        };
-        b.cljs$core$IFn$_invoke$arity$0 = e;
-        b.cljs$core$IFn$_invoke$arity$1 = f;
-        return b
-      }()
-    }(function(a) {
-      var b = a[1];
-      if(3 === b) {
-        return cljs.core.async.impl.ioc_helpers.return_chan.call(null, a, a[2])
-      }
-      if(2 === b) {
-        var b = cljs.core.filter.call(null, cmsnew.heckle.edn_page_QMARK_, a[2]), b = cljs.core.first.call(null, b), e = [new cljs.core.Keyword(null, "front-matter", "front-matter", 1516015191), new cljs.core.Keyword(null, "items", "items", 1114430258)], e = cljs.core.PersistentVector.fromArray.call(null, e, !0), e = cljs.core.get_in.call(null, b, e), e = cljs.core.map.call(null, cmsnew.core.add_id_QMARK_, e), f = [new cljs.core.Keyword(null, "front-matter", "front-matter", 1516015191), new cljs.core.Keyword(null, 
-        "items", "items", 1114430258)], f = cljs.core.PersistentVector.fromArray.call(null, f, !0), b = cljs.core.assoc_in.call(null, b, f, e), e = jayq.core.$.call(null, "#cmsnew"), f = (new cljs.core.Keyword(null, "front-matter", "front-matter", 1516015191)).cljs$core$IFn$_invoke$arity$1(b), f = cmsnew.templates.edit_page.call(null, f), f = crate.core.html.call(null, f), e = jayq.core.append.call(null, e, f), f = cmsnew.core.position_event_chan.call(null, ".edit-items-list", ".item"), h = cmsnew.core.click_chan.call(null, 
-        ".add-heading-item", new cljs.core.Keyword(null, "add-heading-item", "add-heading-item", 1472265500)), g = cmsnew.core.click_chan.call(null, ".add-text-item", new cljs.core.Keyword(null, "add-text-item", "add-text-item", 1998210297)), k = cmsnew.core.add_image_chan.call(null), l = cmsnew.core.form_submit_chan.call(null), m = cmsnew.core.form_cancel_chan.call(null), n = cmsnew.core.click_chan.call(null, "button.form-delete", new cljs.core.Keyword(null, "form-delete", "form-delete", 3114185286)), 
-        p = cmsnew.core.click_chan.call(null, "#tooltipper", new cljs.core.Keyword(null, "tooltip-click", "tooltip-click", 2239844016)), q = cmsnew.tooltipper.tooltip_position_chan.call(null, ".edit-items-list"), f = cljs.core.PersistentVector.fromArray.call(null, [f, l, m, q, p, h, g, k, n], !0), h = cljs.core.async.merge.call(null, f), f = cmsnew.tooltipper.add_popover_to_tooltip.call(null), b = cmsnew.core.edit_edn_page_loop.call(null, b, h);
-        a[7] = e;
-        a[8] = f;
-        return cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, a, 3, b)
-      }
-      return 1 === b ? (b = cmsnew.heckle.get_pages.call(null, cmsnew.heckle.system), cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, a, 2, b)) : null
-    })
-  }(), b = function() {
-    var b = a.call(null);
-    b[cljs.core.async.impl.ioc_helpers.USER_START_IDX] = c__5536__auto___1664049;
-    return b
-  }();
-  return cljs.core.async.impl.ioc_helpers.run_state_machine_wrapped.call(null, b)
-});
+cmsnew.core.publish_it = function() {
+  return cmsnew.heckle.process.call(null, cmsnew.heckle.system)
+};
+goog.exportSymbol("cmsnew.core.publish_it", cmsnew.core.publish_it);
 cmsnew.site = {};

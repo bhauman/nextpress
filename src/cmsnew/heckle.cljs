@@ -160,8 +160,9 @@
         not-prefix? (fn [x] (not (or (= (str path-prefix "/") x)
                                     (= path-prefix x))))]
     (store/get-bucket-list bucket path-prefix
-                           (fn [filenames]
-                             (async/onto-chan out (filter not-prefix? filenames))))
+                           (fn [path-etags]
+                             (async/onto-chan out (filter not-prefix?
+                                                          (map :path path-etags)))))
     out))
 
 (defn fetch-file [system file]
@@ -303,6 +304,7 @@
           }
          data-for-templates (template-data system-data)]
      (log (clj->js data-for-templates))
+     (log (clj->js system-data))
      (->> (async/merge [(to-chan (:posts system-data)) (to-chan (:pages system-data))])
                             (map< #(self-assoc % :rendered-body
                                                (partial render-page-with-templates
@@ -312,6 +314,122 @@
                             (async/into []))
      )))
 
+(defn filter-for-prefix [files prefix]
+  (let [rx (js/RegExp. (str "^" prefix))] 
+    (filter #(.test rx (:path %)) (vals files))))
+
+(defn new-get-templates [system files]
+  (->> (filter-for-prefix files (:template-path system))
+       (map parse-front-matter)
+       (map #(self-assoc % :name filename-without-ext))))
+
+(defn new-get-posts [system files]
+  (->> (filter-for-prefix files (:post-path system))
+       (map parse-front-matter)
+       (map #(assoc % :page-type :post))
+       (map #(self-assoc % :date parse-file-date))
+       (map #(self-assoc % :target-path make-post-target-path))))
+
+(defn new-get-pages [system files]
+  (->> (filter-for-prefix files (:page-path system))
+       (map parse-front-matter)
+       (map #(assoc % :page-type :page))               
+       (map #(self-assoc % :target-path make-page-target-path))))
+
+(defn new-get-data [system files]
+  (->> (filter-for-prefix files (:data-path system))
+       (map parse-data-file)))
+
+(defn new-process [system files]
+  (go
+   (let [system-data
+         { :templates  (map-to-key :name (new-get-templates system files))
+           :data       (map-to-key :name (new-get-data system files))
+           :posts      (new-get-posts system files)
+           :pages      (new-get-pages system files)
+           :system     system
+          }
+         data-for-templates (template-data system-data)]
+     (log (clj->js data-for-templates))
+     (log (clj->js system-data))
+     #_(->> (async/merge [(to-chan (:posts system-data)) (to-chan (:pages system-data))])
+                            (map< #(self-assoc % :rendered-body
+                                               (partial render-page-with-templates
+                                                        system-data
+                                                        data-for-templates)))
+                            (store-files system)
+                            (async/into []))
+     )))
+
+; working on detecting file changes
+
+(defn files-that-changed [old-etag-map new-etag-map]
+  (let [paths (set (concat (keys old-etag-map) (keys new-etag-map)))]
+    (keep (fn [p]
+           (let [old-etag (get old-etag-map p)
+                 new-etag (get new-etag-map p)]
+             (cond
+              (= old-etag new-etag) nil
+              (and (nil? new-etag) (not (nil? old-etag))) [:deleted p]
+              :else [:changed p])
+             )) paths)
+    )
+  )
 
 
+(let [dir-path-rx #"/$"
+      hash-rx #"\#$"]
+  (defn good-file-path? [path]
+    (not (or (.test dir-path-rx path)
+             (.test hash-rx path)))))
+
+(defn files-changed-list [files-changed]
+  (to-chan (map last files-changed)))
+
+(defn get-changed-files [system changed-files]
+  (->> (files-changed-list changed-files)
+       (fetch-files system)
+       (async/into [])))
+
+(defn files-chan []
+  (let [path-etag-map (atom {})
+        files-atom (atom {})]
+    (add-watch path-etag-map :watch-change (fn [k a oldv newv]
+                                             (go
+                                              (let [changes  (files-that-changed oldv newv)
+                                                    fetched-files (<! (get-changed-files system
+                                                                                         changes))]
+                                                (if (pos? (count changes))
+                                                  (swap! files-atom merge (map-to-key :path fetched-files)))))))
+
+    (add-watch files-atom :files-change (fn [k a oldv newv]
+                                          #_(log (clj->js (filter-for-prefix newv "_data")))
+                                          #_(log (clj->js (new-get-templates system newv)))
+                                          (new-process system newv)
+                                          (log (clj->js [k a oldv newv]))
+                                          #_(log (clj->js newv))))
+
+    (go-loop []
+
+             (store/get-bucket-list "immubucket" "_"
+                                    (fn [res]
+                                      (reset! path-etag-map (into {}
+                                                                  (filter (fn [[path _]] (good-file-path? path))
+                                                                          (map (juxt :path :etag) res))))))
+             (<! (timeout 5000))
+             #_(recur))
+    
+    )
+
+  )
+
+
+
+(files-chan)
+
+(log (good-file-path? "_data/"))
+(log (good-file-path? "_data/something.edn"))
+(log (good-file-path? "_data/something.edn#"))
+
+#_(store/get-bucket-list "immubucket" "_" (fn [filenames]  (log (clj->js filenames))))
 

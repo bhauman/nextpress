@@ -333,7 +333,7 @@
 
 ;; this is just env setup for playing
 
-(go
+#_(go
  (let [pages (<! (heckle/get-pages heckle/system))
        orig-edn-page (first (filter heckle/edn-page? pages))
        page-items (map add-id? (get-in orig-edn-page [:front-matter :items]))
@@ -360,7 +360,10 @@
      (tip/add-popover-to-tooltip)
      (<! (edit-edn-page-loop start-edn-page all-chans)))))
 
+(defn ^:export publish-it [] (heckle/process heckle/system))
+
+
 #_(go
- (log (clj->js (<! (<! (heckle/process heckle/system))))))
+ (log (clj->js (<! (<! (publish-it))))))
 
 

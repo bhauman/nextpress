@@ -1,6 +1,7 @@
 (ns cmsnew.datastore.s3
   (:require
    [cljs-uuid-utils :refer [make-random-uuid uuid-string]]   
+   [clojure.string :as string]
    [jayq.core :refer [$ append ajax inner css $deferred
                       when done resolve pipe on bind attr
                       offset] :as jq]
@@ -98,11 +99,35 @@
 (defn extract-versions [response] (extract-key-value response "VersionId"))
 (defn extract-paths [response] (extract-key-value response "Key"))
 
+(defn node-list-seq [node-list]
+  (map #(.item node-list %) (range (.-length node-list))))
+
+(defn node-value [node-list]
+  (.-textContent (aget node-list 0)))
+
+(defn extract-tag-paths [response list-element child-tags]
+  (let [xml (.getResponseXml response)
+        contents (node-list-seq (.getElementsByTagName xml list-element))]
+    (mapv (fn [c]
+            (into {}
+                  (map (fn [tag] [tag (node-value (.getElementsByTagName c tag))])
+                       child-tags)))
+          contents)))
+
+(defn extract-path-etag [response]
+  (let [unq (fn [x] (get (string/split x #"\"") 1))]
+    (map
+     (fn [x] {:path (get x "Key")
+             :etag (unq (get x "ETag"))})
+     (extract-tag-paths response "Contents" ["Key" "ETag"]))))
+
 (defn get-versions-of-file [bucket path-name callback]
   (xhr-request (str "http://s3.amazonaws.com/" bucket "/?versions&prefix=" path-name)
-               (fn [res] (callback (extract-versions res)))))
+               (fn [res]
+                 (callback (extract-versions res)))))
 
 (defn get-bucket-list [bucket path-name callback]
   (xhr-request (str "http://s3.amazonaws.com/" bucket "/?&prefix=" path-name)
-               (fn [res] (callback (extract-paths res)))))
+               (fn [res]
+                 (callback (extract-path-etag res)))))
 
