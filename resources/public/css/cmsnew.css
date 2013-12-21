@@ -1,13 +1,13 @@
 body {
    margin: 0;
-   font-family: Roboto, arial, sans-serif;
+   font-family: Roboto, arial, serif;
 /*   font-size: 13px;
    line-height: 20px; */
 }
 
 h1, h2, h3, h4, h5, h6 {
    font-family: inherit;
-   font-weight: 300;
+   /* font-weight: 300; */
 /*   line-height: 20px; */
    color: inherit;
    text-rendering: optimizelegibility;
@@ -17,7 +17,7 @@ h1, h2, h3, h4, h5, h6 {
    width: 100%;
    border: 1px solid #eee;
    font-family: inherit;
-   font-weight: 300;
+   /* font-weight: 300; */
 /*   line-height: 20px; */
    color: inherit;
    text-rendering: optimizelegibility;
@@ -35,6 +35,55 @@ h1, h2, h3, h4, h5, h6 {
    outline: none;
 }
 
-.heading-input[data-size="2"] {
+.heading-input[data-size="1"], .btn.h1 {
+  font-size: 36px;
+}
+
+.heading-input[data-size="2"], .btn.h2 {
   font-size: 30px;
+}
+
+.heading-input[data-size="3"], .btn.h3 {
+  font-size: 24px;
+}
+
+.heading-input[data-size="4"], .btn.h4 {
+  font-size: 18px;
+}
+
+.heading-input[data-size="5"], btn.h5 {
+  font-size: 14px;
+}
+
+
+[data-pageitem] {
+   margin-bottom: 30px;
+}
+
+.tooltipper {
+   opacity: 0.0;
+   position: absolute;
+   border: 2px solid #999;
+   color: #999;
+   width: 20px;
+   height: 20px;
+   border-radius: 10px;
+   text-align: center;
+   line-height: 16px;
+   cursor: pointer;
+
+   -webkit-transition: opacity 0.1s ease-in-out;
+  -moz-transition: opacity 0.1s ease-in-out;
+   -ms-transition: opacity 0.1s ease-in-out;
+   -o-transition: opacity 0.1s ease-in-out;
+   transition: opacity 0.1s ease-in-out;
+}
+
+.tooltipper-active {
+   opacity: 1.0;
+}
+
+.tooltipper:hover {
+   color:#57ad68;
+   border-color: #57ad68;
 }

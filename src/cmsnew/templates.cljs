@@ -1,11 +1,21 @@
 (ns cmsnew.templates
-  (:require [crate.form :refer [form-to text-field text-area
+  (:require [crate.form :refer [form-to text-field text-area hidden-field
                                 submit-button reset-button drop-down label]]
             [crate.core :as crate]
             [cmsnew.heckle :refer [markdown-to-html]]
             [jayq.util :refer [log]]))
 
+;; helpers
+(defn delete-button []
+  [:button {:type "button" :class "btn btn-danger form-delete pull-right"} "Delete"])
+
 ;; rendering items
+
+(defn tooltip-template []
+  [:div {:class "btn-group"}
+   [:button {:type "button" :class "btn btn-default add-heading-item"} "Heading"]
+   [:button {:type "button" :class "btn btn-default add-text-item"} "Text"]
+   [:button {:type "button" :class "btn btn-default add-image-item"} "Image"]])
 
 (defn edit-page [page-data]
   [:div {:class "edit-page"}
@@ -13,6 +23,9 @@
     [:a {:class "navbar-brand" :href "#"} (:title page-data)]
     ]
    [:div {:id "main-area" :class "container"}]
+   [:div {:id "tooltipper" :class "tooltipper"} "+"]
+   [:div.hidden {:id "image-upload"}
+    [:input.image-upload {:type "file" :name "image-upload-file" }]]
    ])
 
 (defn item-list [id name items]
@@ -22,6 +35,12 @@
   [:div {:id id :data-pageitem (str type) :class "item"} content])
 
 (defmulti render-item #(:type %))
+
+(defmethod render-item :default [{:keys [id type] :as item}]
+  (item-container id type [:div (prn-str item)]))
+
+(defmethod render-item :image [{:keys [id type url] :as item}]
+  (item-container id type [:img.img-responsive {:src url}]))
 
 (defmethod render-item :heading [{:keys [id content type size]}]
   (item-container id type [(keyword (str "h" size)) content]))
@@ -42,14 +61,33 @@
 (defmethod item-form :heading [item errors]
   (form-to [:post (str "#heading-item-" (:id item))]
            (control-group :content errors
-                          (text-field {:class "heading-input" :data-size (item :size)} :content (item :content)))
+                          (text-field {:class "heading-input" :data-size (item :size)
+                                       :placeholder "New Heading"} :content (item :content)))
+           (hidden-field :size (item :size))
            (control-group :size errors
+                          [:div.btn-group.heading-size
+                           (map (fn [x]
+                                  [:button {:type "button"
+                                            :class (str "heading-size-btn btn btn-default h" x
+                                                        (if (= (str x) (str (item :size))) " active" ""))
+                                            :data-size x} (str "H" x)]
+                                  ) (range 1 6))])
+           #_(control-group :size errors
                           (label {:class "control-label"} :size "Size")
                           (drop-down {:class "form-control"} :size
                                      (map #(do [% %]) (range 1 6))
                                      (int (:size item))))
            (submit-button {:class "btn btn-primary"} "Save")
            (reset-button {:class "btn btn-default"} "Cancel")))
+
+(defmethod item-form :image [item errors]
+  (form-to [:post (str "#image-item-" (:id item))]
+           (control-group :description errors
+                          (text-field {:class "heading-input" :placeholder "Description"} :description (item :description)))
+           (submit-button {:class "btn btn-primary"} "Save")
+           (reset-button {:class "btn btn-default"} "Cancel")
+           (delete-button)
+           ))
 
 
 (defmethod item-form :markdown [item errors]

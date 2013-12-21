@@ -5,24 +5,15 @@
    [crate.core :as crate]
    [cmsnew.datastore.s3 :as store]
    [cmsnew.heckle :as heckle]
-   [cmsnew.templates :as templ]   
-   [cljs-uuid-utils :refer [make-random-uuid uuid-string]]   
+   [cmsnew.templates :as templ]
+   [cmsnew.tooltipper :as tip]
+   [cmsnew.log-utils :refer [ld lp log-chan]]
+   [cljs-uuid-utils :refer [make-random-uuid uuid-string]]
    [clojure.string :as string]
    [cljs.reader :refer [push-back-reader read-string]]
    [jayq.core :refer [$] :as jq]
    [jayq.util :refer [log]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]))
-
-;; logging utils
-(defn ld [arg]
-  "log data"
-  (log (clj->js arg)))
-
-(defn lp [arg]
-  "print edn data"
-  (log (prn-str arg)))
-
-(defn log-chan [in] (map< #(do (ld %) %) in))
 
 ;; DOM helpers
 
@@ -37,11 +28,40 @@
 
 ;; event channels
 
-(defn click-chan [selector] 
+(defn touch-click-event [selector callback]
+  (let [tchan (chan)]
+    (jq/on ($ "body") "touchstart" selector (fn [e] (put! tchan [:touchstart e])))
+    (jq/on ($ "body") "touchend"   selector (fn [e] (put! tchan [:touchend e])))
+    (jq/on ($ "body") "touchmove"   selector (fn [e] (put! tchan [:touchmove e])))    
+    (jq/on ($ "body") "click"      selector (fn [e] (put! tchan [:click e])))        
+    (go-loop []
+             (let [[msg d] (<! tchan)]
+               (log (prn-str msg))
+               (condp = msg
+                 :click (callback d)
+                 :touchstart (let [[value ch] (alts! [tchan (timeout 500)])]
+                               (when (and (= ch tchan)
+                                          (or (= (first value) :touchend)
+                                              (= (first value) :click)))
+                                 (do (log "touch-cluck")
+                                     (callback (last value))
+                                     ;; if click happens in next 400ms
+                                     ;; ignore
+                                     (when (not= (first value) :click)
+                                       (let [t (timeout 400)]
+                                         (loop []
+                                           (let [[value ch] (alts! [tchan t])]
+                                             (when (not= ch t)
+                                               (recur)))))))))
+                 false)
+               (recur)))))
+
+(defn click-chan [selector ev-name]
   (let [out (chan)]
-    (jq/on ($ "body") "click" selector
-        {} (fn [e]
-             (put! out [:click e])))
+    (touch-click-event selector
+                       (fn [e]
+                         (jq/prevent e)
+                         (put! out [ev-name e])))
     out))
 
 (defn form-submit-chan []
@@ -62,6 +82,37 @@
            (put! out [:form-cancel %])))
     out))
 
+(defn add-image-chan []
+  (let [out (chan)]
+    (jq/on ($ "body") "click" ".add-image-item" {}
+           (fn [_] (.click ($ "input.image-upload"))))
+    (jq/on ($ "body") "change" "input.image-upload" {}
+           (fn [e] (put! out [:image-selected e])))
+    out))
+
+;; behaviors
+
+
+(defn heading-form-behavior []
+  (let [hclicks (->> (click-chan ".heading-size-btn" :doh)
+                     (map< (fn [[_ e]]
+                             (log "got here")
+                             (let [target (.-target e)
+                                   size   (.-size (.data ($ target)))
+                                   form   (enclosing-form target)]
+                               (log e)
+                               (log target)
+                               (log size)                               
+                               [form size]))))]
+    (go-loop []
+             (let [[form size] (<! hclicks)]
+               
+               (jq/remove-class ($ ".heading-size-btn" form) "active")
+               (jq/val ($ "[name=size]" form) size)
+               (jq/attr ($ ".heading-input" form) "data-size" size)
+               (recur)))
+    ))
+
 ;; getting the position of an element, this is ridiculous
 (defn click-event-to-position-event [container-selector item-selector [msg event]]
   (let [target (.-currentTarget event)
@@ -79,140 +130,235 @@
   [:data-item (get (vec items) position)])
 
 (defn position-event-chan [container-selector item-selector]
-  (->> (click-chan (str container-selector " " item-selector))
+  (->> (click-chan (str container-selector " " item-selector) :edit-item-click)
        (map< (partial click-event-to-position-event container-selector item-selector))))
 
 (defn render-data-page [page]
   (crate/html (templ/item-list "list-1" "list-1" (map templ/render-item (get-in page [:front-matter :items])))))
 
-(defn edit-item [start-item-data input-chan]
-  (go
-   (jq/html ($ "#main-area") (crate/html (templ/item-form start-item-data {})))
-   (loop [[msg new-data] (<! input-chan)
-          item-data start-item-data]
-     (ld new-data)
-     (condp = msg
-       :form-cancel false
-       :form-submit (merge start-item-data new-data)
-       (recur (<! input-chan) item-data)))))
+;; page helpers
+
+(def items-key [:front-matter :items])
+
+(defn get-page-items [page]
+  (get-in page items-key))
+
+(defn empty-page? [page]
+  (zero? (count (get-page-items page))))
+
+(defn random-uuid []
+  (uuid-string (make-random-uuid)))
 
 (defn add-id? [{:keys [id] :as item}]
   (if id item (assoc item :id (uuid-string (make-random-uuid)))))
 
+(defn new-item [type]
+  (add-id? {:type type}))
+
+(defn blank? [st]
+  (or (nil? st)
+      (not (.test #"\S" st))))
+
+(defmulti deleted? #(:type %))
+
+(defmethod deleted? :default [{:keys [deleted]}]
+  deleted)
+
+(defmethod deleted? :heading [{:keys [content deleted]}]
+  (or deleted (blank? content)))
+
+(defmethod deleted? :markdown [{:keys [content deleted]}]
+  (or deleted (blank? content)))
+
 (defn merge-data-item-into-page [page data-item]
-  (assoc-in page [:front-matter :items]
-         (map (fn [x] (if (= (:id x) (:id data-item))
-                       data-item x))
-              (get-in page [:front-matter :items]))))
-;; page helpers
+  (let [items (get-page-items page)]
+    (assoc-in page items-key
+              (if (deleted? data-item)
+                (remove #(= (:id %) (:id data-item)) items)
+                (map (fn [x] (if (= (:id x) (:id data-item))
+                              data-item x))
+                     items)))))
 
-(defn get-page-items [page]
-  (get-in page [:front-matter :items]))
+(defn insert-data-item-into-page [page position data-item]
+  (let [items (get-page-items page)]
+    (if (deleted? data-item)
+      page
+      (assoc-in page [:front-matter :items]
+                (vec (concat (take position items)
+                             [data-item]
+                             (drop position items)))))))
 
+(defn initial-item-to-empty-page [page]
+  (if (empty-page? page)
+    (assoc-in page items-key
+              [(add-id? {:type :heading :size 2 :content "Edit this heading"})])
+    page))
 
+;; interaction controllers
 
+(defn edit-item [start-item-data input-chan]
+  (go
+   (-> ($ (str "#" (:id start-item-data)))
+       (jq/html (crate/html (templ/item-form start-item-data {})))
+       (jq/remove-class "item"))
+   (loop [[msg new-data] (<! input-chan)
+          item-data start-item-data]
+     (condp = msg
+       :form-cancel false
+       :form-submit (merge start-item-data new-data)
+       :form-delete (merge start-item-data {:deleted true}) 
+       (recur (<! input-chan) item-data)))))
 
-;; new flow
-;; receive edit page event [:edit-page page-id]
-;; emit [:render edit-page]
+(defn add-item [position start-item-data input-chan]
+  (-> ($ "[data-pagename]")
+      .children
+      (aget position)
+      $
+      (.prepend (crate/html [:div {:id (:id start-item-data) :data-pageitem "placeholder"} "Placeholder for form"])))
+  (edit-item start-item-data input-chan))
 
-;; edit page item event [:edit-page-item item-id]
-;; emit [:render-edit-page-item page-item-id]
+(defn handle-edit-page-item [msg edn-page input-chan]
+  (go
+   (let [[_ item-data] (position-to-data-item (get-page-items edn-page) msg)    
+         new-data-item (<! (edit-item item-data input-chan))]
+     (if new-data-item
+       (let [new-page (merge-data-item-into-page edn-page new-data-item)]
+         (heckle/store-source-file heckle/system new-page)
+         new-page)
+       edn-page))))
 
-;; submit page item event [:submit-page-item new-page-item-data]
+(defn render-page [edn-page]
+  (-> ($ "#main-area")
+      (jq/html (render-data-page edn-page))))
 
-(comment
+(defn handle-add-item [start-item position edn-page input-chan]
+  (go
+   (let [item-data start-item
+         new-data-item (<! (add-item position item-data input-chan))]
+     (if new-data-item
+       (let [new-page (insert-data-item-into-page edn-page position new-data-item)]
+         (heckle/store-source-file heckle/system new-page)
+         new-page)
+       edn-page))))
 
-  (defn edit-page [[msg data env]]
-  (if (= msg :edit-page)
-    [:render {:name :edit-page :page-path data} env]
-    [msg data env]))
-
-(defn edit-page-item [[msg data env]]
-  (if (= msg :edit-page-item)
-    [:render {:name :edit-page-item :data data} env]
-    [msg data env]))
-
-(defn find-with-key-like [items key value]
-  (first (drop-while #(not= (key %) value) items)))
-
-(defn render-edit-page-item [[msg data env]]
-  "takes a [:render {:name :render-page-item :data {:position 5 :page-path some-path}}]"
-  (if (and (= msg :render)
-           (= :edit-page-item (:name data)))
-    (let [page      (find-with-key-like (:pages env) :path (:page-path (:data data)))
-          page-item (get (vec (get-page-items page)) (:position data))]
-      (jq/html ($ "#main-area") (crate/html (templ/item-form page-item {})))      
-      [msg data env]
-      )
-    [msg data env]
-    )
-  )
-
-(defn render-edit-page [[msg data env]]
-  (if (and (= msg :render)
-           (= :edit-page (:name data)))
-    (let [page (find-with-key-like (:pages env) :path (:page-path data))]
-      (-> ($ "#cmsnew")
-          (jq/html (crate/html (templ/edit-page (:front-matter page)))))
-      (-> ($ "#main-area")
-          (jq/html (render-data-page page)))
-      [msg data env])
-    [msg data env]))
-
-
-(defn dataflow [in]
+(defn upload-image-file [uuid file]
   (let [out (chan)]
-    (->> in
-         log-chan
-         (map< edit-page)
-         (map< edit-page-item)         
-         log-chan
-         (map< render-edit-page)
-         (map< render-edit-page-item)         
-         (async/into []))
+    (store/upload-image-file uuid file
+                             (fn [file url]
+                               (put! out [:success {:uuid uuid :url url :file file}])
+                               (close! out))
+                             (fn [file url]
+                               (put! out [:failed  {:uuid uuid :url url :file file}])
+                               (close! out))
+                             (fn [percent]
+                               (put! out [:progress percent])))
     out))
-  )
 
-#_(go
- (let [pages (<! (heckle/get-pages heckle/system))
-       start-edn-page (first (filter heckle/edn-page? pages))
-       input-chan (chan)
-       dflow-out (dataflow input-chan)
-       env {:pages pages}]
-   (>! input-chan [:edit-page (:path start-edn-page) env])
-   (<! (async/timeout 1000))
-   (log "here we are")
-   (>! input-chan [:edit-page-item {:page-path (:path start-edn-page)
-                                    :position 0}
-                   env])))
+(defn new-image-item [uuid url file]
+  {:id uuid
+   :type :image
+   :url  url
+   :name (.-name file)
+   :mime-type (.-type file)})
 
+(defn handle-add-image [data position edn-page input-chan]
+  (let [file (aget (.-files (.-target data)) 0)
+        file-upload-uuid (random-uuid)
+        upload-chan (upload-image-file file-upload-uuid file)]
+    (go-loop []
+             (let [[msg _data] (<! upload-chan)]
+               (condp = msg
+                 :failed edn-page
+                 :success
+                 (let [new-page (insert-data-item-into-page edn-page position
+                                                            (new-image-item file-upload-uuid (:url _data) file))]
+                   (heckle/store-source-file heckle/system new-page)
+                   new-page)
+                 :progress (do (log _data) (recur))
+                 (recur))))))
+
+(defn tooltip-popover-loop [edn-page position input-chan]
+  (tip/popover-show)
+  (go-loop []
+           (let [[msg data] (<! input-chan)]
+             (ld [msg data])
+             (condp = msg
+               :add-heading-item
+               (do
+                 (tip/popover-hide)
+                 (tip/tooltip-hide)
+                 (<! (handle-add-item (add-id? {:type :heading :size 2}) position edn-page input-chan)))
+               :add-text-item
+               (do
+                 (tip/popover-hide)
+                 (tip/tooltip-hide)
+                 (<! (handle-add-item (new-item :markdown) position edn-page input-chan)))
+               :image-selected
+               (do
+                 (tip/popover-hide)
+                 (tip/tooltip-hide)
+                 (<! (handle-add-image data position edn-page input-chan))
+                 )               
+               :tooltip-click (do
+                                (tip/popover-hide)
+                                (log (prn-str [msg])) edn-page) 
+               (recur)
+               ))
+           ))
+
+;; right now this never exits as there is no exit event
+(defn edit-edn-page-loop [start-edn-page input-chan]
+  (let [start-edn-page (initial-item-to-empty-page start-edn-page)]
+    (render-page start-edn-page)
+    (heading-form-behavior)
+    (go-loop [edn-page start-edn-page
+              tool-tip-pos 0]
+             (let [[msg data] (<! input-chan)]
+               (log (prn-str [msg data]))
+               (condp = msg
+                 :position-event
+                 (let [res-page (<! (handle-edit-page-item [msg data] edn-page input-chan))
+                       new-page (initial-item-to-empty-page res-page)]
+                   (render-page new-page)
+                   (recur new-page tool-tip-pos))
+                 :tooltip-position (do (tip/tooltip-render [msg data]) (recur edn-page (last data)))
+                 :tooltip-hidden   (do (tip/tooltip-render [msg]) (recur edn-page tool-tip-pos))
+                 :tooltip-click (let [res-page (<! (tooltip-popover-loop edn-page tool-tip-pos input-chan))
+                                      new-page (initial-item-to-empty-page res-page)]
+                                  (log "getting here")
+                                  (ld new-page)
+                                  (render-page new-page)
+                                  (recur new-page tool-tip-pos))
+                 (recur edn-page tool-tip-pos))))))
+
+;; this is just env setup for playing
 
 (go
  (let [pages (<! (heckle/get-pages heckle/system))
        orig-edn-page (first (filter heckle/edn-page? pages))
        page-items (map add-id? (get-in orig-edn-page [:front-matter :items]))
-       start-edn-page (assoc-in orig-edn-page [:front-matter :items] page-items) 
-       edit-chan (position-event-chan ".edit-items-list" ".item")
-       submit-chan (form-submit-chan)
-       cancel-chan (form-cancel-chan)
-       all-chans   (async/merge [edit-chan submit-chan cancel-chan])]
+       start-edn-page (assoc-in orig-edn-page [:front-matter :items] page-items)]
    (-> ($ "#cmsnew")
        (jq/append (crate/html (templ/edit-page (:front-matter start-edn-page)))))
-   (loop [edn-page start-edn-page]
-     (-> ($ "#main-area")
-         (jq/html (render-data-page edn-page)))
-     (let [[msg data] (<! all-chans)]
-       (if (= msg :position-event)
-         (let [[_ item-data] (position-to-data-item (get-page-items edn-page) [msg data])    
-               new-data-item (<! (edit-item item-data all-chans))]
-           (if new-data-item
-             (let [new-page (merge-data-item-into-page edn-page new-data-item)]
-               (ld new-page)
-               (heckle/store-source-file heckle/system new-page)
-               (recur new-page))
-             (recur edn-page)))
-         (recur edn-page))))))
+   ;; edit page has been fired by now so page should be rendered and
+   ;; we should be able to attach all event handlers
+   (let [edit-chan (position-event-chan ".edit-items-list" ".item")
+         add-heading-item-chan (click-chan ".add-heading-item" :add-heading-item)
+         add-text-item-chan (click-chan ".add-text-item" :add-text-item)
+         add-image-item-chan (add-image-chan)         
+         ;; clickout-chan (click-chan "" :clickout)         
+         submit-chan (form-submit-chan)
+         cancel-chan (form-cancel-chan)
+         delete-chan (click-chan "button.form-delete" :form-delete)
+         tooltip-click-chan (click-chan "#tooltipper" :tooltip-click)
+         tooltip-pos-chan (tip/tooltip-position-chan ".edit-items-list")
+         all-chans   (async/merge [edit-chan submit-chan cancel-chan tooltip-pos-chan tooltip-click-chan
+                                   add-heading-item-chan add-text-item-chan add-image-item-chan
+                                   delete-chan])]
+     #_(touch-click-event ".edit-items-list .item" (fn [e] (log "it's a touch-click-event") (log e) ))
+
+     (tip/add-popover-to-tooltip)
+     (<! (edit-edn-page-loop start-edn-page all-chans)))))
 
 #_(go
  (log (clj->js (<! (<! (heckle/process heckle/system))))))
