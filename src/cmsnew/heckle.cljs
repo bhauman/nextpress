@@ -3,6 +3,9 @@
    [cljs.core.async :as async
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan]]
    [cmsnew.datastore.s3 :as store]
+   [cmsnew.markdown :refer [markdown-to-html]]
+   [cmsnew.templates :as templ]
+   [crate.core :as crate]
    [clojure.string :as string]
    [cljs.reader :refer [push-back-reader read-string]]
    [jayq.util :refer [log]])
@@ -43,14 +46,6 @@
                                              "text/html"
                                              (fn [e] (log (.getResponseHeader e
                                                                              "x-amz-version-id")))))))
-;; markdown parsing
-;; this requires showdown.js to be available
-
-(let [conv-class (.-converter js/Showdown)
-      converter (conv-class.)]
-  (defn markdown-to-html [markdown-txt]
-    (.makeHtml converter markdown-txt)))
-
 ;; getting front matter
 
 (defn get-front-matter [reader]
@@ -239,11 +234,19 @@
                  :pages (map file-to-page-data (:pages system-data))
                 }} )))
 
+(defn render-edn-page [page-file-map]
+  (.-outerHTML
+   (crate/html
+    (templ/item-list "list-1" "list-1"
+                     (map templ/render-item (get-in page-file-map
+                                                    [:front-matter :items]))))))
+
 (defn render-raw-page [page-file-map data-for-page]
   (condp = (-> page-file-map :path extention-from-path)
     "md"    (markdown-to-html (:body page-file-map))
     "html"  (render-template (:body page-file-map)
                              data-for-page)
+    "edn"   (render-edn-page page-file-map)
     (:body page-file-map)))
 
 (defn render-page-with-templates [system-data data-for-templates page-file-map]
@@ -306,12 +309,12 @@
      (log (clj->js data-for-templates))
      (log (clj->js system-data))
      (->> (async/merge [(to-chan (:posts system-data)) (to-chan (:pages system-data))])
-                            (map< #(self-assoc % :rendered-body
-                                               (partial render-page-with-templates
-                                                        system-data
-                                                        data-for-templates)))
-                            (store-files system)
-                            (async/into []))
+          (map< #(self-assoc % :rendered-body
+                             (partial render-page-with-templates
+                                      system-data
+                                      data-for-templates)))
+          (store-files system)
+          (async/into []))
      )))
 
 (defn filter-for-prefix [files prefix]
@@ -341,25 +344,22 @@
        (map parse-data-file)))
 
 (defn new-process [system files]
-  (go
-   (let [system-data
+  (let [system-data
          { :templates  (map-to-key :name (new-get-templates system files))
            :data       (map-to-key :name (new-get-data system files))
            :posts      (new-get-posts system files)
            :pages      (new-get-pages system files)
-           :system     system
-          }
+           :system     system }
          data-for-templates (template-data system-data)]
      (log (clj->js data-for-templates))
      (log (clj->js system-data))
-     #_(->> (async/merge [(to-chan (:posts system-data)) (to-chan (:pages system-data))])
-                            (map< #(self-assoc % :rendered-body
-                                               (partial render-page-with-templates
-                                                        system-data
-                                                        data-for-templates)))
-                            (store-files system)
-                            (async/into []))
-     )))
+     (->> (concat (:posts system-data) (:pages system-data))
+          (map #(self-assoc % :rendered-body
+                            (partial render-page-with-templates
+                                     system-data
+                                     data-for-templates)))
+          (map (juxt :path identity))
+          (into {}))))
 
 ; working on detecting file changes
 
@@ -373,9 +373,7 @@
               (and (nil? new-etag) (not (nil? old-etag))) [:deleted p]
               :else [:changed p])
              )) paths)
-    )
-  )
-
+    ))
 
 (let [dir-path-rx #"/$"
       hash-rx #"\#$"]
@@ -393,7 +391,8 @@
 
 (defn files-chan []
   (let [path-etag-map (atom {})
-        files-atom (atom {})]
+        files-atom (atom {})
+        rendered-files (atom {})]
     (add-watch path-etag-map :watch-change (fn [k a oldv newv]
                                              (go
                                               (let [changes  (files-that-changed oldv newv)
@@ -403,11 +402,21 @@
                                                   (swap! files-atom merge (map-to-key :path fetched-files)))))))
 
     (add-watch files-atom :files-change (fn [k a oldv newv]
-                                          #_(log (clj->js (filter-for-prefix newv "_data")))
-                                          #_(log (clj->js (new-get-templates system newv)))
-                                          (new-process system newv)
-                                          (log (clj->js [k a oldv newv]))
-                                          #_(log (clj->js newv))))
+                                          (let [rendered (new-process system newv)]
+                                            (reset! rendered-files rendered))))
+
+    (add-watch rendered-files :rendered-change (fn [k a oldv newv]
+                                                 (log (clj->js newv))
+                                                 (log "rendered change")
+                                                 (let [changes (files-that-changed oldv newv)
+                                                       files-to-store (vals (select-keys newv (map last changes)))]
+                                                   (log "changed files")
+                                                   (log (clj->js files-to-store))
+                                                   (->> (to-chan files-to-store)
+                                                        (store-files system)
+                                                        (async/into []))
+                                                   )
+                                                 ))
 
     (go-loop []
 
@@ -417,7 +426,7 @@
                                                                   (filter (fn [[path _]] (good-file-path? path))
                                                                           (map (juxt :path :etag) res))))))
              (<! (timeout 5000))
-             #_(recur))
+             (recur))
     
     )
 

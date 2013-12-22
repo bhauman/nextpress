@@ -333,7 +333,7 @@
 
 ;; this is just env setup for playing
 
-#_(go
+(go
  (let [pages (<! (heckle/get-pages heckle/system))
        orig-edn-page (first (filter heckle/edn-page? pages))
        page-items (map add-id? (get-in orig-edn-page [:front-matter :items]))

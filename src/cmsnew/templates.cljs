@@ -2,7 +2,7 @@
   (:require [crate.form :refer [form-to text-field text-area hidden-field
                                 submit-button reset-button drop-down label]]
             [crate.core :as crate]
-            [cmsnew.heckle :refer [markdown-to-html]]
+            [cmsnew.markdown :refer [markdown-to-html]]
             [jayq.util :refer [log]]))
 
 ;; helpers
@@ -40,7 +40,7 @@
   (item-container id type [:div (prn-str item)]))
 
 (defmethod render-item :image [{:keys [id type url] :as item}]
-  (item-container id type [:img.img-responsive {:src url}]))
+  (item-container id type [:p [:img.img-responsive {:src url}]]))
 
 (defmethod render-item :heading [{:keys [id content type size]}]
   (item-container id type [(keyword (str "h" size)) content]))
