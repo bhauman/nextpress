@@ -333,8 +333,10 @@
 
 ;; this is just env setup for playing
 
-#_(go
- (let [pages (<! (heckle/get-pages heckle/system))
+
+(go
+   (let [source-files (last (<! (heckle/atom-chan heckle/source-files)))
+         pages (heckle/get-pages heckle/system source-files)
        orig-edn-page (first (filter heckle/edn-page? pages))
        page-items (map add-id? (get-in orig-edn-page [:front-matter :items]))
        start-edn-page (assoc-in orig-edn-page [:front-matter :items] page-items)]

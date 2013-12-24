@@ -295,8 +295,6 @@
            :pages      (get-pages system files)
            :system     system }
          data-for-templates (template-data system-data)]
-     (log (clj->js data-for-templates))
-     (log (clj->js system-data))
      (->> (concat (:posts system-data) (:pages system-data))
           (map #(self-assoc % :rendered-body
                             (partial render-page-with-templates
@@ -381,7 +379,7 @@
        (map< #(map-to-key :path %))
        (map< (fn [file-map]
                (swap! source-files merge file-map)
-               file-map))
+               @source-files))
        (map< (partial process system))
        map-to-atom ;; this atom contains the rendered files
        atom-chan 
