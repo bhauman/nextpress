@@ -32,8 +32,16 @@
   ([url callback method content] (xhr-request url callback method content nil nil))
   ([url callback method content headers] (xhr-request url callback method content (clj->js headers) nil)))
 
+(defn unquote-etag [etag]
+  (get (string/split etag #"\"") 1))
+
 (defn get-text [url callback]
-  (xhr-request url (fn [resp] (callback (.getResponseText resp)))))
+  (xhr-request url (fn [resp]
+                     (callback
+                      {:headers { :etag (unquote-etag (.getResponseHeader resp "ETag"))
+                                  :content-type (.getResponseHeader resp "Content-Type")
+                                  :version (.getResponseHeader resp "x-amz-version-id") }
+                       :body (.getResponseText resp)}))))
 
 (defn get-version [url callback]
   (log url)
@@ -115,11 +123,10 @@
           contents)))
 
 (defn extract-path-etag [response]
-  (let [unq (fn [x] (get (string/split x #"\"") 1))]
-    (map
+  (map
      (fn [x] {:path (get x "Key")
-             :etag (unq (get x "ETag"))})
-     (extract-tag-paths response "Contents" ["Key" "ETag"]))))
+             :etag (unquote-etag (get x "ETag"))})
+     (extract-tag-paths response "Contents" ["Key" "ETag"])))
 
 (defn get-versions-of-file [bucket path-name callback]
   (xhr-request (str "http://s3.amazonaws.com/" bucket "/?versions&prefix=" path-name)
