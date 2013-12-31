@@ -44,13 +44,15 @@
                        :body (.getResponseText resp)}))))
 
 (defn get-version [url callback]
-  (log url)
   (xhr-request url (fn [resp] (callback (.getResponseHeader resp "x-amz-version-id"))) "HEAD"))
 
 (defn get-signed-put [name mime-type callback]
-  (xhr-request
-   (url-for-name-type name mime-type)
-   (fn [e] (callback (.getResponseJson e)))))
+  (.ajax js/jQuery
+         (clj->js {:type "GET"
+                   :crossDomain true
+                   :xhrFields { :withCredentials true }
+                   :url (url-for-name-type name mime-type)
+                   :success (fn [e] (callback e))})))
 
 (defn upload-data [url data mime-type callback]
   (xhr-request url callback "PUT" data {"Content-Type" mime-type "x-amz-acl" "public-read"}))
@@ -62,8 +64,12 @@
                     (upload-data (.-puturl res) data mime-type callback))))
 
 (defn get-signed-image-post [uuid filename mime-type callback]
-  (xhr-request (url-for-image-upload filename uuid mime-type)
-               (fn [e] (callback (js->clj (.getResponseJson e) :keywordize-keys true)))))
+  (.ajax js/jQuery
+         (clj->js {:type "GET"
+                   :crossDomain true
+                   :xhrFields { :withCredentials true }
+                   :url (url-for-image-upload filename uuid mime-type)
+                   :success (fn [e] (callback (js->clj e) :keywordize-keys true))})))
 
 (defn make-form-data [file fields]
   (let [fd (js/FormData.)]

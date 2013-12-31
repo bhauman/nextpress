@@ -347,9 +347,25 @@
              (recur (<! input)))
     out))
 
+;; local storage
+
+(defn local-storage-set [key clj-val]
+  (.setItem (.-localStorage js/window) (name key) (prn-str clj-val)))
+
+(defn local-storage-get [key]
+  (let [x (.getItem (.-localStorage js/window) (name key))]
+    (when x (read-string x))))
+
+(defn local-storage-remove [key]
+  (.removeItem (.-localStorage js/window) (name key)))
+
 ;; setting up reactive system
 
-(def source-files (atom {}))
+(def source-files (atom (or (local-storage-get :next-press-source-files)
+                            {})))
+
+(def rendered-files (atom (or (local-storage-get :next-press-rendered-files)
+                               {})))
 
 (defn source-file-list [system]
   (let [out (chan)]
@@ -367,6 +383,11 @@
     (keep (fn [k] (if (not (= (old-map k) (new-map k))) k)) key-list)))
 
 (defn system-flow [system input]
+  (add-watch source-files :files-changed
+             (fn [_ _ o n] (local-storage-set :next-press-source-files n)))
+  (add-watch rendered-files :fields-changed
+             (fn [_ _ o n] (local-storage-set :next-press-rendered-files n)))
+  
   (->> input
        (map< (fn [x] (source-file-list system)))
        async-flatten-chans
@@ -381,7 +402,8 @@
                (swap! source-files merge file-map)
                @source-files))
        (map< (partial process system))
-       map-to-atom ;; this atom contains the rendered files
+       (map-to-atom rendered-files)
+       ;; this atom contains the rendered files
        atom-chan 
        (map< (fn [[ov nv]] (->> (changed-map-keys [ov nv])
                                (select-keys nv)
@@ -396,13 +418,19 @@
 
 (let [input-chan (chan)
       flow (system-flow system input-chan)]
-  (go-loop []
-   (log "this is running")
-   (put! input-chan 1)
-   (<! (timeout 8000))
-   (recur)
-   ))
+  (defn publish []
+    (put! input-chan 1))
+  (defn clear-cache []
+    (local-storage-remove :next-press-source-files)    
+    (local-storage-remove :next-press-rendered-files))
+  (defn force-publish []
+    (clear-cache)
+    (publish)))
 
+#_(go-loop []
+         (publish)
+         (<! (timeout 5000))
+         (recur))
 
 
 

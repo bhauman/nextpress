@@ -3,6 +3,7 @@
    [cljs.core.async :as async
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
    [crate.core :as crate]
+   [cmsnew.authorization.persona :as session]
    [cmsnew.datastore.s3 :as store]
    [cmsnew.heckle :as heckle]
    [cmsnew.templates :as templ]
@@ -335,8 +336,10 @@
 
 
 (go
-   (let [source-files (last (<! (heckle/atom-chan heckle/source-files)))
-         pages (heckle/get-pages heckle/system source-files)
+ (let [user-email (<! (session/init "http://localhost:4567"))
+       user-email (<! (session/get-login "http://localhost:4567"))
+       source-files @heckle/source-files ; (last (<! (heckle/atom-chan )))
+       pages (heckle/get-pages heckle/system source-files)
        orig-edn-page (first (filter heckle/edn-page? pages))
        page-items (map add-id? (get-in orig-edn-page [:front-matter :items]))
        start-edn-page (assoc-in orig-edn-page [:front-matter :items] page-items)]
@@ -364,8 +367,9 @@
 
 #_(defn ^:export publish-it [] (heckle/process heckle/system))
 
-
 #_(go
- (log (clj->js (<! (<! (publish-it))))))
+   (log (clj->js (<! (<! (publish-it))))))
+
+
 
 
