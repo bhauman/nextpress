@@ -11,14 +11,15 @@
    [jayq.util :refer [log]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]))
 
-(def system {
+(def current-site (atom {}))
+
+(def system-defaults {
              :bucket "immubucket"
              :store-root "http://s3.amazonaws.com"
              :template-path "_layouts"
              :post-path "_posts"
              :page-path "_site_src"             
-             :data-path "_data"             
-             })
+             :data-path "_data" })
 
 (defn bucket-path [{:keys [store-root bucket]}]
   (str store-root "/" bucket))
@@ -205,6 +206,15 @@
 (defn edn-page? [fpm]
   (= "edn" (last (string/split (:path fpm) #"\."))))
 
+(defn get-config [site-url]
+  (let [out (chan)]
+    (store/get-text (str site-url "/_config.edn" )
+                    (fn [e] (put! out
+                                 (merge system-defaults
+                                        (-> e :body read-string)))
+                      (close! out)))
+    out))
+
 ;; rendering pages
 
 (defn map-to-key [key x]
@@ -311,7 +321,7 @@
     (not (or (.test dir-path-rx path)
              (.test hash-rx path)))))
 
-(defn fetch-file-list [input]
+(defn fetch-file-list [system input]
   (let [out (chan)]
     (go-loop [file-list (<! input)]
              (put! out (<! (->> (to-chan file-list)
@@ -396,7 +406,7 @@
        (map< changed-map-keys)
        (map< (fn [file-list] (filter good-file-path? file-list)))
        (filter< #(pos? (count %)))
-       fetch-file-list
+       (fetch-file-list system) 
        (map< #(map-to-key :path %))
        (map< (fn [file-map]
                (swap! source-files merge file-map)
@@ -416,21 +426,32 @@
                     (async/into []))))
        (async/into [])))
 
-(let [input-chan (chan)
-      flow (system-flow system input-chan)]
-  (defn publish []
-    (put! input-chan 1))
-  (defn clear-cache []
-    (local-storage-remove :next-press-source-files)    
-    (local-storage-remove :next-press-rendered-files))
-  (defn force-publish []
-    (clear-cache)
-    (publish)))
+(defn publish [{:keys [touch-chan]}]
+  (put! touch-chan 1))
+
+(defn clear-cache [system]
+  (local-storage-remove :next-press-source-files)    
+  (local-storage-remove :next-press-rendered-files))
+
+(defn force-publish [site]
+  (clear-cache site)
+  (publish site))
+
+(defn create-heckle-for-url [url]
+  (go
+   (let [config (<! (get-config url)) 
+         input-chan (chan)
+         flow (system-flow config input-chan)]
+     (assoc config :touch-chan input-chan))))
+
+#_(go
+ (let [site (<! (create-heckle-for-url
+                 "http://immubucket.s3-website-us-east-1.amazonaws.com"))]
+   (log site)
+   (force-publish site)))
+
 
 #_(go-loop []
          (publish)
          (<! (timeout 5000))
          (recur))
-
-
-

@@ -13,9 +13,9 @@
 
 (defn xhr-connection [] (goog.net.XhrIo.))
 
-(def signing-service-url "http://localhost:4567/signput")
+(def signing-service-url "http://nextpress-signer.herokuapp.com/signput")
 
-(def image-signing-service-url "http://localhost:4567/sign-image-post")
+(def image-signing-service-url "http://nextpress-signer.herokuapp.com/sign-image-post")
 
 (defn url-for-name-type [name mime-type]
   (str signing-service-url "?name=" name "&mime=" mime-type))
