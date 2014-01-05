@@ -424,8 +424,9 @@
                                (select-keys nv)
                                vals)))
        (filter< #(pos? (count %)))
-       (log-it system (fn [x] {:msg (str "Rendered pages have changed: ") :list-data x}))
-       (log-it system (fn [x] {:msg (str "Uploading rendered pages to site: ") :list-data x}))
+       log-chan
+       (log-it system (fn [x] {:msg (str "Rendered pages have changed: ") :list-data (map :target-path x)}))
+       (log-it system (fn [x] {:msg (str "Uploading rendered pages to site: ") :list-data (map :target-path x)}))
        (map< (fn [files-to-store]
                (->> (to-chan files-to-store)
                     (store-files system)
@@ -473,10 +474,10 @@
      (add-watch (:rendered-files heckle-site) :fields-changed
                 (fn [_ _ o n] (local-storage-set (localstorage-rendered-files-key heckle-site)  n)))
      (system-flow heckle-site)
-     (go-loop []
-              (let [msg (<! (:log-chan heckle-site))]
-                (log (:msg msg))
-                (recur)))
+     #_(go-loop []
+                (let [msg (<! (:log-chan heckle-site))]
+                  (log (:msg msg))
+                  (recur)))
      heckle-site)))
 
 #_(go

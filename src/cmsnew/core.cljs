@@ -10,6 +10,7 @@
    [cmsnew.tooltipper :as tip]
    [cmsnew.log-utils :refer [ld lp log-chan]]
    [cmsnew.edn-page-editor :as page-edit]
+   [cmsnew.heckle-publisher :as publisher]   
    [cljs-uuid-utils :refer [make-random-uuid uuid-string]]
    [clojure.string :as string]
    [cljs.reader :refer [push-back-reader read-string]]
@@ -28,6 +29,10 @@
        page-items (get-in orig-edn-page [:front-matter :items])
        start-edn-page (assoc-in orig-edn-page [:front-matter :items] page-items)]
    (ld start-edn-page)
+
+   #_(page-edit/edit-page heckle-site start-edn-page)
+
+   (publisher/init heckle-site)
    #_(heckle/publish heckle-site)
-   (page-edit/edit-page heckle-site start-edn-page)))
+   ))
 
