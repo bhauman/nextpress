@@ -18,18 +18,16 @@
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]))
 
 (go
- (reset! heckle/current-site
-         (<! (heckle/create-heckle-for-url
-              "http://immubucket.s3-website-us-east-1.amazonaws.com")))
- (log @heckle/current-site)
- (let [
-       user-email (<! (session/init (:signing-service @heckle/current-site)))
-       user-email (<! (session/get-login (:signing-service @heckle/current-site)))
+ (let [heckle-site (<! (heckle/create-heckle-for-url
+                        "http://immubucket.s3-website-us-east-1.amazonaws.com"))
+       user-email (<! (session/init (:signing-service heckle-site)))
+       user-email (<! (session/get-login (:signing-service heckle-site)))
        source-files @heckle/source-files
-       pages (heckle/get-pages @heckle/current-site source-files)
+       pages (heckle/get-pages heckle-site source-files)
        orig-edn-page (first (filter heckle/edn-page? pages))
        page-items (get-in orig-edn-page [:front-matter :items])
        start-edn-page (assoc-in orig-edn-page [:front-matter :items] page-items)]
    (ld start-edn-page)
-   (page-edit/edit-page start-edn-page)))
+   (page-edit/edit-page heckle-site start-edn-page)))
+
 

@@ -213,15 +213,15 @@
       (.prepend (crate/html [:div {:id (:id start-item-data) :data-pageitem "placeholder"} "Placeholder for form"])))
   (edit-item start-item-data input-chan))
 
-(defn handle-edit-page-item [msg edn-page input-chan]
+(defn handle-edit-page-item [heckle-site msg edn-page input-chan]
   (go
    (let [[_ item-data] (position-to-data-item (get-page-items edn-page) msg)    
          new-data-item (<! (edit-item item-data input-chan))]
      (if new-data-item
        (let [new-page (merge-data-item-into-page edn-page new-data-item)]
-         (heckle/store-source-file @heckle/current-site new-page)
+         (heckle/store-source-file heckle-site new-page)
          (go (<! (timeout 1000))
-             (heckle/publish @heckle/current-site))
+             (heckle/publish heckle-site))
          new-page)
        edn-page))))
 
@@ -229,15 +229,15 @@
   (-> ($ "#main-area")
       (jq/html (render-data-page edn-page))))
 
-(defn handle-add-item [start-item position edn-page input-chan]
+(defn handle-add-item [heckle-site start-item position edn-page input-chan]
   (go
    (let [item-data start-item
          new-data-item (<! (add-item position item-data input-chan))]
      (if new-data-item
        (let [new-page (insert-data-item-into-page edn-page position new-data-item)]
-         (heckle/store-source-file @heckle/current-site new-page)
+         (heckle/store-source-file heckle-site new-page)
          (go (<! (timeout 1000))
-             (heckle/publish @heckle/current-site))
+             (heckle/publish heckle-site))
          new-page)
        edn-page))))
 
@@ -261,7 +261,7 @@
    :name (.-name file)
    :mime-type (.-type file)})
 
-(defn handle-add-image [data position edn-page input-chan]
+(defn handle-add-image [heckle-site data position edn-page input-chan]
   (let [file (aget (.-files (.-target data)) 0)
         file-upload-uuid (random-uuid)
         upload-chan (upload-image-file file-upload-uuid file)]
@@ -272,14 +272,14 @@
                  :success
                  (let [new-page (insert-data-item-into-page edn-page position
                                                             (new-image-item file-upload-uuid (:url _data) file))]
-                   (heckle/store-source-file @heckle/current-site new-page)
+                   (heckle/store-source-file heckle-site new-page)
                    (go (<! (timeout 1000))
-                       (heckle/publish @heckle/current-site))                   
+                       (heckle/publish heckle-site))                   
                    new-page)
                  :progress (do (log _data) (recur))
                  (recur))))))
 
-(defn tooltip-popover-loop [edn-page position input-chan]
+(defn tooltip-popover-loop [heckle-site edn-page position input-chan]
   (tip/popover-show)
   (go-loop []
            (let [[msg data] (<! input-chan)]
@@ -289,17 +289,20 @@
                (do
                  (tip/popover-hide)
                  (tip/tooltip-hide)
-                 (<! (handle-add-item (add-id? {:type :heading :size 2}) position edn-page input-chan)))
+                 (<! (handle-add-item heckle-site
+                                      (add-id? {:type :heading :size 2}) position edn-page input-chan)))
                :add-text-item
                (do
                  (tip/popover-hide)
                  (tip/tooltip-hide)
-                 (<! (handle-add-item (new-item :markdown) position edn-page input-chan)))
+                 (<! (handle-add-item heckle-site
+                                      (new-item :markdown) position edn-page input-chan)))
                :image-selected
                (do
                  (tip/popover-hide)
                  (tip/tooltip-hide)
-                 (<! (handle-add-image data position edn-page input-chan))
+                 (<! (handle-add-image heckle-site
+                                       data position edn-page input-chan))
                  )               
                :tooltip-click (do
                                 (tip/popover-hide)
@@ -309,7 +312,7 @@
            ))
 
 ;; right now this never exits as there is no exit event
-(defn edit-edn-page-loop [start-edn-page input-chan]
+(defn edit-edn-page-loop [heckle-site start-edn-page input-chan]
   (let [start-edn-page (initial-item-to-empty-page start-edn-page)]
     (render-page start-edn-page)
     (heading-form-behavior)
@@ -319,13 +322,13 @@
                (log (prn-str [msg data]))
                (condp = msg
                  :position-event
-                 (let [res-page (<! (handle-edit-page-item [msg data] edn-page input-chan))
+                 (let [res-page (<! (handle-edit-page-item heckle-site [msg data] edn-page input-chan))
                        new-page (initial-item-to-empty-page res-page)]
                    (render-page new-page)
                    (recur new-page tool-tip-pos))
                  :tooltip-position (do (tip/tooltip-render [msg data]) (recur edn-page (last data)))
                  :tooltip-hidden   (do (tip/tooltip-render [msg]) (recur edn-page tool-tip-pos))
-                 :tooltip-click (let [res-page (<! (tooltip-popover-loop edn-page tool-tip-pos input-chan))
+                 :tooltip-click (let [res-page (<! (tooltip-popover-loop heckle-site edn-page tool-tip-pos input-chan))
                                       new-page (initial-item-to-empty-page res-page)]
                                   (log "getting here")
                                   (ld new-page)
@@ -333,27 +336,25 @@
                                   (recur new-page tool-tip-pos))
                  (recur edn-page tool-tip-pos))))))
 
-(defn edit-page [start-edn-page]
-  (let [edit-chan (position-event-chan ".edit-items-list" ".item")
-        add-heading-item-chan (click-chan ".add-heading-item" :add-heading-item)
-        add-text-item-chan (click-chan ".add-text-item" :add-text-item)
-        add-image-item-chan (add-image-chan)         
-        ;; clickout-chan (click-chan "" :clickout)         
-        submit-chan (form-submit-chan)
-        cancel-chan (form-cancel-chan)
-        delete-chan (click-chan "button.form-delete" :form-delete)
-        tooltip-click-chan (click-chan "#tooltipper" :tooltip-click)
-        tooltip-pos-chan (tip/tooltip-position-chan ".edit-items-list")
-        all-chans   (async/merge [edit-chan submit-chan cancel-chan tooltip-pos-chan tooltip-click-chan
-                                  add-heading-item-chan add-text-item-chan add-image-item-chan
-                                  delete-chan])]
+
+(defn- hookup-editing-messages []
+  (async/merge [(position-event-chan ".edit-items-list" ".item")
+          (click-chan ".add-heading-item" :add-heading-item)
+          (click-chan ".add-text-item" :add-text-item)
+          (add-image-chan)
+          (form-submit-chan)
+          (form-cancel-chan)
+          (click-chan "button.form-delete" :form-delete)
+          (click-chan "#tooltipper" :tooltip-click)
+          (tip/tooltip-position-chan ".edit-items-list")
+          ]))
+
+(let [all-chans (hookup-editing-messages)]
+  (defn edit-page [heckle-site start-edn-page]
     (-> ($ "#cmsnew")
-       (jq/append (crate/html (templ/edit-page (:front-matter start-edn-page)))))
+        (jq/append (crate/html (templ/edit-page (:front-matter start-edn-page)))))
     (tip/add-popover-to-tooltip)
     (go
-     (<! (edit-edn-page-loop start-edn-page all-chans)))))
-
-
-
-
+     (<! (edit-edn-page-loop heckle-site start-edn-page all-chans)))
+    ))
 

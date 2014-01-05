@@ -11,8 +11,6 @@
    [jayq.util :refer [log]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]))
 
-(def current-site (atom {}))
-
 (def system-defaults {
              :bucket "immubucket"
              :store-root "http://s3.amazonaws.com"

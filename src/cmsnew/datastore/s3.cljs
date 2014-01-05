@@ -69,7 +69,7 @@
                    :crossDomain true
                    :xhrFields { :withCredentials true }
                    :url (url-for-image-upload filename uuid mime-type)
-                   :success (fn [e] (callback (js->clj e) :keywordize-keys true))})))
+                   :success (fn [e] (callback (js->clj e :keywordize-keys true)))})))
 
 (defn make-form-data [file fields]
   (let [fd (js/FormData.)]
@@ -96,6 +96,7 @@
 (defn upload-image-file [uuid file callback fail-callback progress-callback]
   (get-signed-image-post uuid (.-name file) (.-type file)
                          (fn [{:keys [url fields] :as res}]
+                           (log (prn-str res))
                            (let [form-data (make-form-data file fields)
                                  file-url (str url (:key fields))]
                              (log "uploaded url: " file-url)
