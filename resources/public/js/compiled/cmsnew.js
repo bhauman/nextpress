@@ -25521,11 +25521,11 @@ cmsnew.heckle.process = function(a, b) {
     return cmsnew.heckle.self_assoc.call(null, a, new cljs.core.Keyword(null, "rendered-body", "rendered-body", 809187116), cljs.core.partial.call(null, cmsnew.heckle.render_page_with_templates, c, d))
   }, cljs.core.concat.call(null, (new cljs.core.Keyword(null, "posts", "posts", 1120759621)).cljs$core$IFn$_invoke$arity$1(c), (new cljs.core.Keyword(null, "pages", "pages", 1120330550)).cljs$core$IFn$_invoke$arity$1(c)))))
 };
-var dir_path_rx_837769 = /\/$/, hash_rx_837770 = /\#$/;
+var dir_path_rx_862697 = /\/$/, hash_rx_862698 = /\#$/;
 cmsnew.heckle.good_file_path_QMARK_ = function(a) {
   return cljs.core.not.call(null, function() {
-    var b = dir_path_rx_837769.test(a);
-    return cljs.core.truth_(b) ? b : hash_rx_837770.test(a)
+    var b = dir_path_rx_862697.test(a);
+    return cljs.core.truth_(b) ? b : hash_rx_862698.test(a)
   }())
 };
 cmsnew.heckle.fetch_file_list = function(a, b) {
@@ -25801,7 +25801,7 @@ cmsnew.heckle.log_it = function(a, b, c) {
 };
 cmsnew.heckle.system_flow = function(a) {
   return cljs.core.async.into.call(null, cljs.core.PersistentVector.EMPTY, cmsnew.heckle.log_it.call(null, a, function(a) {
-    return cljs.core.PersistentArrayMap.fromArray([new cljs.core.Keyword(null, "msg", "msg", 1014012659), "" + cljs.core.str("Site changes published"), new cljs.core.Keyword(null, "list-data", "list-data", 4038133483), a], !0)
+    return cljs.core.PersistentArrayMap.fromArray([new cljs.core.Keyword(null, "msg", "msg", 1014012659), "" + cljs.core.str("Site changes published")], !0)
   }, cljs.core.async.map_LT_.call(null, function(b) {
     return cljs.core.async.into.call(null, cljs.core.PersistentVector.EMPTY, cmsnew.heckle.store_files.call(null, a, cljs.core.async.to_chan.call(null, b)))
   }, cmsnew.heckle.log_it.call(null, a, function(a) {
@@ -26002,9 +26002,9 @@ cmsnew.heckle.create_heckle_for_url = function(a) {
             }(L, r, d, d, h, k, l, m, n, p, q, r, s, t, u, v, x, y, z, L, c)
           }(), w = cljs.core.async.impl.dispatch.run.call(null, w);
           b[7] = w;
-          b[8] = y;
+          b[8] = u;
           b[9] = z;
-          b[10] = u;
+          b[10] = y;
           return cljs.core.async.impl.ioc_helpers.return_chan.call(null, b, r)
         }
         return 1 === c ? (w = cmsnew.heckle.get_config.call(null, a), cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, b, 2, w)) : null

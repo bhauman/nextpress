@@ -430,7 +430,7 @@
                (->> (to-chan files-to-store)
                     (store-files system)
                     (async/into []))))
-       (log-it system (fn [x] {:msg (str "Site changes published") :list-data x}))
+       (log-it system (fn [x] {:msg (str "Site changes published")}))
        (async/into [])))
 
 (defn localstorage-source-files-key [heckle-site]
