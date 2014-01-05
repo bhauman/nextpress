@@ -39,17 +39,20 @@
 
 ;; getting front matter
 
-(defn get-front-matter [reader]
+(defn get-front-matter [log-chan path reader]
   (try
     (let [front-matter-map (cljs.reader/read reader true nil false)]
       (if (map? front-matter-map) front-matter-map false))
     (catch js/Object e
-      (.log js/console e) ; consider using an error channel
+      (put! log-chan {:msg (str "Error parsing file "
+                                path ": "
+                                (.-message e))})
       false)))
 
-(defn parse-front-matter [file-map]
+(defn parse-front-matter [heckle-site file-map]
   (let [r (push-back-reader (:body file-map))]
-    (if-let [front-matter (get-front-matter r)]
+    (if-let [front-matter (get-front-matter (:log-chan heckle-site)
+                                            (:path file-map) r)]
       (assoc file-map
         :front-matter front-matter
         :body (.substr (:body file-map) (inc (.-idx r))))
@@ -125,7 +128,7 @@
 
 ;; parse data file
 
-(defn parse-data-file [file-map]
+(defn parse-data-file [system file-map]
   (try
     (assoc file-map
       :data (read-string (:body file-map))
@@ -133,7 +136,10 @@
                 filename-from-path
                 (replace-extention "")))
     (catch js/Object e
-      (.log js/console e) ; consider using an error channel
+      (put! (:log-chan system)
+            {:msg (str "Error parsing file "
+                       (:path file-map) ": "
+                       (.-message e))})
       file-map)))
 
 ;; fetching pipeline helpers
@@ -277,25 +283,25 @@
 
 (defn get-templates [system files]
   (->> (filter-for-prefix files (:template-path system))
-       (map parse-front-matter)
+       (map (partial parse-front-matter system))
        (map #(self-assoc % :name filename-without-ext))))
 
 (defn get-posts [system files]
   (->> (filter-for-prefix files (:post-path system))
-       (map parse-front-matter)
+       (map (partial parse-front-matter system))
        (map #(assoc % :page-type :post))
        (map #(self-assoc % :date parse-file-date))
        (map #(self-assoc % :target-path make-post-target-path))))
 
 (defn get-pages [system files]
   (->> (filter-for-prefix files (:page-path system))
-       (map parse-front-matter)
+       (map (partial parse-front-matter system))
        (map #(assoc % :page-type :page))               
        (map #(self-assoc % :target-path make-page-target-path))))
 
 (defn get-data [system files]
   (->> (filter-for-prefix files (:data-path system))
-       (map parse-data-file)))
+       (map (partial parse-data-file system))))
 
 (defn process [system files]
   (let [system-data
@@ -351,7 +357,6 @@
                (let [real-val (<! chan-val)]
                  (if (not (nil? real-val))
                    (do
-                     (log "processing input")
                      (put! out real-val)
                      (recur)))))
              (recur (<! input)))
@@ -386,20 +391,31 @@
   (let [key-list (set (apply concat (map keys maps)))]
     (keep (fn [k] (if (not (= (old-map k) (new-map k))) k)) key-list)))
 
+(defn log-it [system func in-chan]
+  (map< (fn [x] (put! (:log-chan system) (func x)) x)
+        in-chan))
+
 (defn system-flow [system]
   (->> (:touch-chan system)
+       (log-it system (fn [x] {:msg (str "Publising site to bucket: " (:bucket system))}))
        (map< (fn [x] (source-file-list system)))
        async-flatten-chans
+       (log-it system (fn [x] {:msg (str "Finished fetching source file list")}))
        (map< (fn [new-file-list] [(path-etag-map (vals @(:source-files system)))
                                  (path-etag-map new-file-list)]))
        (map< changed-map-keys)
        (map< (fn [file-list] (filter good-file-path? file-list)))
        (filter< #(pos? (count %)))
-       (fetch-file-list system) 
+       (log-it system (fn [x] {:msg (str "Source files have changed: ") :list-data x}))
+       
+       (log-it system (fn [x] {:msg (str "Fetching changed files ...")}))
+       (fetch-file-list system)
+       (log-it system (fn [x] {:msg (str "Received changed files ...")}))
        (map< #(map-to-key :path %))
        (map< (fn [file-map]
                (swap! (:source-files system) merge file-map)
                @(:source-files system)))
+       (log-it system (fn [x] {:msg (str "Rendering site ...")}))       
        (map< (partial process system))
        (map-to-atom (:rendered-files system))
        ;; this atom contains the rendered files
@@ -408,11 +424,13 @@
                                (select-keys nv)
                                vals)))
        (filter< #(pos? (count %)))
-       log-chan
+       (log-it system (fn [x] {:msg (str "Rendered pages have changed: ") :list-data x}))
+       (log-it system (fn [x] {:msg (str "Uploading rendered pages to site: ") :list-data x}))
        (map< (fn [files-to-store]
                (->> (to-chan files-to-store)
                     (store-files system)
                     (async/into []))))
+       (log-it system (fn [x] {:msg (str "Site changes published") :list-data x}))
        (async/into [])))
 
 (defn localstorage-source-files-key [heckle-site]
@@ -444,8 +462,10 @@
   (go
    (let [config (<! (get-config url))
          heckle-site (assoc config
+                       :site-url url
                        :s3-store (store/create-s3-store (:signing-service config) (:bucket config))
                        :touch-chan (chan)
+                       :log-chan (chan)
                        :source-files (obtain-source-files config)
                        :rendered-files (obtain-rendered-files config))]
      (add-watch (:source-files heckle-site) :files-changed
@@ -453,8 +473,11 @@
      (add-watch (:rendered-files heckle-site) :fields-changed
                 (fn [_ _ o n] (local-storage-set (localstorage-rendered-files-key heckle-site)  n)))
      (system-flow heckle-site)
+     (go-loop []
+              (let [msg (<! (:log-chan heckle-site))]
+                (log (:msg msg))
+                (recur)))
      heckle-site)))
-
 
 #_(go
  (let [site (<! (create-heckle-for-url
