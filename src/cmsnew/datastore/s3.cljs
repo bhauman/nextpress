@@ -13,15 +13,21 @@
 
 (defn xhr-connection [] (goog.net.XhrIo.))
 
-(def signing-service-url "http://nextpress-signer.herokuapp.com/signput")
+(defn signing-service-url [signing-host]
+  (str signing-host "/signput"))
 
-(def image-signing-service-url "http://nextpress-signer.herokuapp.com/sign-image-post")
+(defn image-signing-service-url [signing-host]
+  (str signing-host "/sign-image-post"))
+ 
+(defn url-for-name-type [{:keys [signing-service] :as s3-store}
+                         name mime-type]
+  (str (signing-service-url signing-service) 
+       "?name=" name "&mime=" mime-type))
 
-(defn url-for-name-type [name mime-type]
-  (str signing-service-url "?name=" name "&mime=" mime-type))
-
-(defn url-for-image-upload [filename uuid mime-type]
-  (str image-signing-service-url "?filename=" filename "&uuid=" uuid "&type=" mime-type))
+(defn url-for-image-upload [{:keys [signing-service] :as s3-store}
+                            filename uuid mime-type]
+  (str (image-signing-service-url signing-service)
+       "?filename=" filename "&uuid=" uuid "&type=" mime-type))
 
 (defn xhr-request
   ([url callback method content headers timeoutInterval]
@@ -46,29 +52,30 @@
 (defn get-version [url callback]
   (xhr-request url (fn [resp] (callback (.getResponseHeader resp "x-amz-version-id"))) "HEAD"))
 
-(defn get-signed-put [name mime-type callback]
+(defn get-signed-put [s3-store name mime-type callback]
   (.ajax js/jQuery
          (clj->js {:type "GET"
                    :crossDomain true
                    :xhrFields { :withCredentials true }
-                   :url (url-for-name-type name mime-type)
+                   :url (url-for-name-type s3-store name mime-type)
                    :success (fn [e] (callback e))})))
 
 (defn upload-data [url data mime-type callback]
   (xhr-request url callback "PUT" data {"Content-Type" mime-type "x-amz-acl" "public-read"}))
 
-(defn save-data-to-file [path-name data mime-type callback]
-  (get-signed-put path-name
+(defn save-data-to-file [s3-store path-name data mime-type callback]
+  (get-signed-put s3-store
+                  path-name
                   mime-type
                   (fn [res]
                     (upload-data (.-puturl res) data mime-type callback))))
 
-(defn get-signed-image-post [uuid filename mime-type callback]
+(defn get-signed-image-post [s3-store uuid filename mime-type callback]
   (.ajax js/jQuery
          (clj->js {:type "GET"
                    :crossDomain true
                    :xhrFields { :withCredentials true }
-                   :url (url-for-image-upload filename uuid mime-type)
+                   :url (url-for-image-upload s3-store filename uuid mime-type)
                    :success (fn [e] (callback (js->clj e :keywordize-keys true)))})))
 
 (defn make-form-data [file fields]
@@ -93,8 +100,8 @@
     (.open xhr "POST" url true)
     (.send xhr form-data)))
 
-(defn upload-image-file [uuid file callback fail-callback progress-callback]
-  (get-signed-image-post uuid (.-name file) (.-type file)
+(defn upload-image-file [s3-store uuid file callback fail-callback progress-callback]
+  (get-signed-image-post s3-store uuid (.-name file) (.-type file)
                          (fn [{:keys [url fields] :as res}]
                            (log (prn-str res))
                            (let [form-data (make-form-data file fields)
@@ -144,4 +151,8 @@
   (xhr-request (str "http://s3.amazonaws.com/" bucket "/?&prefix=" path-name)
                (fn [res]
                  (callback (extract-path-etag res)))))
+
+(defn create-s3-store [signing-service-host bucket]
+  {:signing-service signing-service-host
+   :bucket bucket})
 

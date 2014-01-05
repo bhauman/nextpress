@@ -22,12 +22,12 @@
                         "http://immubucket.s3-website-us-east-1.amazonaws.com"))
        user-email (<! (session/init (:signing-service heckle-site)))
        user-email (<! (session/get-login (:signing-service heckle-site)))
-       source-files @heckle/source-files
+       source-files @(:source-files heckle-site) 
        pages (heckle/get-pages heckle-site source-files)
        orig-edn-page (first (filter heckle/edn-page? pages))
        page-items (get-in orig-edn-page [:front-matter :items])
        start-edn-page (assoc-in orig-edn-page [:front-matter :items] page-items)]
    (ld start-edn-page)
+   #_(heckle/publish heckle-site)
    (page-edit/edit-page heckle-site start-edn-page)))
-
 

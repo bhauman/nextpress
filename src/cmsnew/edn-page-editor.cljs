@@ -241,9 +241,10 @@
          new-page)
        edn-page))))
 
-(defn upload-image-file [uuid file]
+(defn upload-image-file [heckle-site uuid file]
   (let [out (chan)]
-    (store/upload-image-file uuid file
+    (store/upload-image-file (:s3-store heckle-site)
+                             uuid file
                              (fn [file url]
                                (put! out [:success {:uuid uuid :url url :file file}])
                                (close! out))
@@ -264,7 +265,7 @@
 (defn handle-add-image [heckle-site data position edn-page input-chan]
   (let [file (aget (.-files (.-target data)) 0)
         file-upload-uuid (random-uuid)
-        upload-chan (upload-image-file file-upload-uuid file)]
+        upload-chan (upload-image-file heckle-site file-upload-uuid file)]
     (go-loop []
              (let [[msg _data] (<! upload-chan)]
                (condp = msg
@@ -357,4 +358,3 @@
     (go
      (<! (edit-edn-page-loop heckle-site start-edn-page all-chans)))
     ))
-

@@ -168,7 +168,8 @@
 
 (defn store-rendered-file [system file-map]
   (let [out (chan)]
-    (store/save-data-to-file (:target-path file-map)
+    (store/save-data-to-file (:s3-store system)
+                             (:target-path file-map)
                              (:rendered-body file-map)
                              "text/html"
                              (fn [e] (let [version
@@ -180,7 +181,8 @@
 
 (defn store-source-file [system file-map]
   (let [out (chan)]
-    (store/save-data-to-file (:path file-map)
+    (store/save-data-to-file (:s3-store system)
+                             (:path file-map)
                              (str (prn-str (:front-matter file-map)) (:body file-map))
                              "text/plain"
                              (fn [e] (let [version
@@ -369,12 +371,6 @@
 
 ;; setting up reactive system
 
-(def source-files (atom (or (local-storage-get :next-press-source-files)
-                            {})))
-
-(def rendered-files (atom (or (local-storage-get :next-press-rendered-files)
-                               {})))
-
 (defn source-file-list [system]
   (let [out (chan)]
     (store/get-bucket-list (system :bucket) "_" #(do (put! out %) (close! out)))
@@ -390,16 +386,11 @@
   (let [key-list (set (apply concat (map keys maps)))]
     (keep (fn [k] (if (not (= (old-map k) (new-map k))) k)) key-list)))
 
-(defn system-flow [system input]
-  (add-watch source-files :files-changed
-             (fn [_ _ o n] (local-storage-set :next-press-source-files n)))
-  (add-watch rendered-files :fields-changed
-             (fn [_ _ o n] (local-storage-set :next-press-rendered-files n)))
-  
-  (->> input
+(defn system-flow [system]
+  (->> (:touch-chan system)
        (map< (fn [x] (source-file-list system)))
        async-flatten-chans
-       (map< (fn [new-file-list] [(path-etag-map (vals @source-files))
+       (map< (fn [new-file-list] [(path-etag-map (vals @(:source-files system)))
                                  (path-etag-map new-file-list)]))
        (map< changed-map-keys)
        (map< (fn [file-list] (filter good-file-path? file-list)))
@@ -407,10 +398,10 @@
        (fetch-file-list system) 
        (map< #(map-to-key :path %))
        (map< (fn [file-map]
-               (swap! source-files merge file-map)
-               @source-files))
+               (swap! (:source-files system) merge file-map)
+               @(:source-files system)))
        (map< (partial process system))
-       (map-to-atom rendered-files)
+       (map-to-atom (:rendered-files system))
        ;; this atom contains the rendered files
        atom-chan 
        (map< (fn [[ov nv]] (->> (changed-map-keys [ov nv])
@@ -424,23 +415,46 @@
                     (async/into []))))
        (async/into [])))
 
+(defn localstorage-source-files-key [heckle-site]
+  (keyword (str (:bucket heckle-site) "-next-press-source-files")))
+
+(defn localstorage-rendered-files-key [heckle-site]
+  (keyword (str (:bucket heckle-site) "-next-press-rendered-files")))
+
+(defn- obtain-source-files [heckle-site]
+  (atom (or (local-storage-get (localstorage-source-files-key heckle-site))
+            {})))
+
+(defn- obtain-rendered-files [heckle-site]
+  (atom (or (local-storage-get (localstorage-rendered-files-key heckle-site))
+            {})))
+
 (defn publish [{:keys [touch-chan]}]
   (put! touch-chan 1))
 
-(defn clear-cache [system]
-  (local-storage-remove :next-press-source-files)    
-  (local-storage-remove :next-press-rendered-files))
+(defn clear-cache [heckle-site]
+  (local-storage-remove (localstorage-source-files-key heckle-site))
+  (local-storage-remove (localstorage-rendered-files-key heckle-site)))
 
-(defn force-publish [site]
-  (clear-cache site)
-  (publish site))
+(defn force-publish [heckle-site]
+  (clear-cache heckle-site)
+  (publish heckle-site))
 
 (defn create-heckle-for-url [url]
   (go
-   (let [config (<! (get-config url)) 
-         input-chan (chan)
-         flow (system-flow config input-chan)]
-     (assoc config :touch-chan input-chan))))
+   (let [config (<! (get-config url))
+         heckle-site (assoc config
+                       :s3-store (store/create-s3-store (:signing-service config) (:bucket config))
+                       :touch-chan (chan)
+                       :source-files (obtain-source-files config)
+                       :rendered-files (obtain-rendered-files config))]
+     (add-watch (:source-files heckle-site) :files-changed
+                (fn [_ _ o n] (local-storage-set (localstorage-source-files-key heckle-site) n)))
+     (add-watch (:rendered-files heckle-site) :fields-changed
+                (fn [_ _ o n] (local-storage-set (localstorage-rendered-files-key heckle-site)  n)))
+     (system-flow heckle-site)
+     heckle-site)))
+
 
 #_(go
  (let [site (<! (create-heckle-for-url
