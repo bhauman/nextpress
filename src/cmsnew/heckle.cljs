@@ -406,16 +406,16 @@
        (map< changed-map-keys)
        (map< (fn [file-list] (filter good-file-path? file-list)))
        (filter< #(pos? (count %)))
-       (log-it system (fn [x] {:msg (str "Source files have changed: ") :list-data x}))
+       (log-it system (fn [x] {:msg (str "Source files have changed: ") :list-data x :type :source-files-changed}))
        
-       (log-it system (fn [x] {:msg (str "Fetching changed files ...")}))
+       (log-it system (fn [x] {:msg (str "Fetching changed files ...") :type :downloading}))
        (fetch-file-list system)
-       (log-it system (fn [x] {:msg (str "Received changed files ...")}))
+       (log-it system (fn [x] {:msg (str "Received changed files ...") :type :notice}))
        (map< #(map-to-key :path %))
        (map< (fn [file-map]
                (swap! (:source-files system) merge file-map)
                @(:source-files system)))
-       (log-it system (fn [x] {:msg (str "Rendering site ...")}))       
+       (log-it system (fn [x] {:msg (str "Rendering site ...") :type :processing}))
        (map< (partial process system))
        (map-to-atom (:rendered-files system))
        ;; this atom contains the rendered files
@@ -423,15 +423,18 @@
        (map< (fn [[ov nv]] (->> (changed-map-keys [ov nv])
                                (select-keys nv)
                                vals)))
+       (log-it system (fn [x] (if (pos? (count x))
+                               {:msg (str "Rendered pages have changed") :type :changes-detected}
+                               {:msg "No rendered pages have changed" :type :published})))
        (filter< #(pos? (count %)))
-       log-chan
-       (log-it system (fn [x] {:msg (str "Rendered pages have changed: ") :list-data (map :target-path x)}))
-       (log-it system (fn [x] {:msg (str "Uploading rendered pages to site: ") :list-data (map :target-path x)}))
+       (log-it system (fn [x] {:msg (str "Uploading rendered pages to site: ")
+                              :list-data (map :target-path x)
+                              :type :uploading }))
        (map< (fn [files-to-store]
                (->> (to-chan files-to-store)
                     (store-files system)
                     (async/into []))))
-       (log-it system (fn [x] {:msg (str "Site changes published")}))
+       (log-it system (fn [x] {:msg (str "Site changes published") :type :published}))
        (async/into [])))
 
 (defn localstorage-source-files-key [heckle-site]
@@ -453,11 +456,13 @@
 
 (defn clear-cache [heckle-site]
   (local-storage-remove (localstorage-source-files-key heckle-site))
-  (local-storage-remove (localstorage-rendered-files-key heckle-site)))
+  (reset! (:source-files heckle-site) {}))
 
 (defn force-publish [heckle-site]
-  (clear-cache heckle-site)
-  (publish heckle-site))
+  (go
+   (clear-cache heckle-site)
+   (<! (timeout 500))
+   (publish heckle-site)))
 
 (defn create-heckle-for-url [url]
   (go

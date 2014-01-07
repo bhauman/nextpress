@@ -87,3 +87,42 @@ h1, h2, h3, h4, h5, h6 {
    color:#57ad68;
    border-color: #57ad68;
 }
+
+/* publishing page */
+
+.publish-area .logger-area {
+   transition: all 1s;
+}
+
+.publish-area.inactive .logger-area {
+   height: 0px;
+   opacity: 0;
+}
+
+.publish-area .panel-heading {
+  transition: all 1s;
+}
+
+.publish-area.inactive .panel-heading {
+   color: #333;
+   background-color: #f5f5f5;
+   border-color: #ddd;
+}
+
+.publish-area {
+   font-size: 0.85em;
+}
+
+.icon-holder {
+   color: #666;
+   padding-right: 10px;
+   font-size: 1.2em;
+   vertical-align: middle;
+}
+
+.loading-spinner {
+  height: 20px;
+  width: 20px;
+  background: transparent url('./spinner1.gif') no-repeat 0 0;
+  display:  inline-block;
+}
