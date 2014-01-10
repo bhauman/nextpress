@@ -5,6 +5,7 @@
    [cmsnew.datastore.s3 :as store]
    [cmsnew.markdown :refer [markdown-to-html]]
    [cmsnew.templates :as templ]
+   [cmsnew.async-utils :as async-util]
    [crate.core :as crate]
    [clojure.string :as string]
    [cljs.reader :refer [push-back-reader read-string]]
@@ -336,32 +337,6 @@
              (recur (<! input)))
     out))
 
-(defn atom-chan [a]
-  (let [out (chan)]
-    (add-watch a :atom-change
-               (fn [_ _ ov nv] (put! out [ov nv])))
-    out))
-
-(defn map-to-atom
-  ([atom input]
-     (go-loop [v (<! input)]
-              (reset! atom v)
-              (recur (<! input))) 
-     atom)
-  ([input] (map-to-atom (atom {}) input)))
-
-(defn async-flatten-chans [input]
-  (let [out (chan)]
-    (go-loop [chan-val (<! input)]
-             (loop []
-               (let [real-val (<! chan-val)]
-                 (if (not (nil? real-val))
-                   (do
-                     (put! out real-val)
-                     (recur)))))
-             (recur (<! input)))
-    out))
-
 ;; local storage
 
 (defn local-storage-set [key clj-val]
@@ -399,7 +374,7 @@
   (->> (:touch-chan system)
        (log-it system (fn [x] {:msg (str "Publising site to bucket: " (:bucket system))}))
        (map< (fn [x] (source-file-list system)))
-       async-flatten-chans
+       async-util/flatten-chans
        (log-it system (fn [x] {:msg (str "Finished fetching source file list")}))
        (map< (fn [new-file-list] [(path-etag-map (vals @(:source-files system)))
                                  (path-etag-map new-file-list)]))
@@ -417,9 +392,9 @@
                @(:source-files system)))
        (log-it system (fn [x] {:msg (str "Rendering site ...") :type :processing}))
        (map< (partial process system))
-       (map-to-atom (:rendered-files system))
+       (async-util/map-to-atom (:rendered-files system))
        ;; this atom contains the rendered files
-       atom-chan 
+       async-util/atom-chan 
        (map< (fn [[ov nv]] (->> (changed-map-keys [ov nv])
                                (select-keys nv)
                                vals)))

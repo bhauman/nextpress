@@ -4,6 +4,32 @@
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]))
 
+(defn atom-chan [a]
+  (let [out (chan)]
+    (add-watch a :atom-change
+               (fn [_ _ ov nv] (put! out [ov nv])))
+    out))
+
+(defn map-to-atom
+  ([atom input]
+     (go-loop [v (<! input)]
+              (reset! atom v)
+              (recur (<! input))) 
+     atom)
+  ([input] (map-to-atom (atom {}) input)))
+
+(defn flatten-chans [input]
+  (let [out (chan)]
+    (go-loop [chan-val (<! input)]
+             (loop []
+               (let [real-val (<! chan-val)]
+                 (if (not (nil? real-val))
+                   (do
+                     (put! out real-val)
+                     (recur)))))
+             (recur (<! input)))
+    out))
+
 (defn take-while [valid-pred in out]
     (go (loop []
           (if-let [v (<! in)]

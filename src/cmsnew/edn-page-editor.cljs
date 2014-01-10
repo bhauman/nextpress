@@ -3,18 +3,39 @@
    [cljs.core.async :as async
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
    [crate.core :as crate]
+   [sablono.core :as sab :include-macros true]   
    [cmsnew.authorization.persona :as session]
    [cmsnew.datastore.s3 :as store]
    [cmsnew.heckle :as heckle]
    [cmsnew.templates :as templ]
    [cmsnew.tooltipper :as tip]
    [cmsnew.log-utils :refer [ld lp log-chan]]
+   [cmsnew.async-utils :as async-util]
    [cljs-uuid-utils :refer [make-random-uuid uuid-string]]
    [clojure.string :as string]
    [cljs.reader :refer [push-back-reader read-string]]
    [jayq.core :refer [$] :as jq]
    [jayq.util :refer [log]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]))
+
+(defn render-to [react-dom html-node callback]
+  (.renderComponent js/React react-dom html-node callback))
+
+(defn react-render [html-node react-dom]
+  "A blocking render call"
+  (let [out (chan)]
+    (render-to react-dom html-node (fn [] (put! out :rendered) (close! out)))
+    out))
+
+(defn react-render-loop [html-node react-dom-chan]
+  (go-loop []
+           
+           (let [react-dom (<! react-dom-chan)]
+             (log "rendering")
+             (if (nil? react-dom)
+               :finished
+               (do (<! (react-render html-node react-dom))
+                   (recur))))))
 
 ;; DOM helpers
 
@@ -129,8 +150,9 @@
   (->> (click-chan (str container-selector " " item-selector) :edit-item-click)
        (map< (partial click-event-to-position-event container-selector item-selector))))
 
-(defn render-data-page [page]
-  (crate/html (templ/item-list "list-1" "list-1" (map templ/render-item (get-in page [:front-matter :items])))))
+(defn render-data-page [{:keys [edn-page]}]
+  (crate/html (templ/item-list "list-1" "list-1" (map templ/render-editable-item
+                                                      (get-in edn-page [:front-matter :items])))))
 
 ;; page helpers
 
@@ -337,6 +359,46 @@
                                   (recur new-page tool-tip-pos))
                  (recur edn-page tool-tip-pos))))))
 
+(defn edit-item-new [state start-item-data]
+  (go
+   (swap! state assoc :editing-item start-item-data)
+   (loop [[msg new-data] (<! (:event-chan @state))
+          item-data start-item-data]
+     (ld [:yep msg new-data])
+     (condp = msg
+       :form-cancel false
+       :change-edited-item (let [new-item (merge item-data new-data)]
+                             (swap! state assoc :editing-item new-item)
+                             (recur (<! (:event-chan @state)) new-item))
+       :form-submit (merge item-data new-data)
+       :form-delete (merge item-data {:deleted true}) 
+       (recur (<! (:event-chan @state)) item-data)))))
+
+(defn handle-edit-page-item-new [state id]
+  (go
+   (let [item-data (first (filter #(= (:id %) id) (get-page-items (:edn-page @state))))
+         new-data-item (<! (edit-item-new state item-data))]
+     (if new-data-item
+       (let [new-page (merge-data-item-into-page (:edn-page @state) new-data-item)]
+         (heckle/store-source-file (:heckle-site @state) new-page)
+         (go (<! (timeout 1000))
+             (heckle/publish (:heckle-site @state)))
+         new-page)
+       (:edn-page @state)))))
+
+(defn edit-edn-page-loop-new [page-state]
+  (let [start-edn-page (initial-item-to-empty-page (:edn-page @page-state))]
+    (swap! page-state assoc :edn-page start-edn-page)
+    (go-loop [edn-page start-edn-page]
+             (let [[msg data] (<! (:event-chan @page-state))]
+               (log (prn-str [msg data]))
+               (condp = msg
+                 :edit-item
+                 (let [res-page (<! (handle-edit-page-item-new page-state (:id data)))
+                       new-page (initial-item-to-empty-page res-page)]
+                   (swap! page-state assoc :edn-page new-page :editing-item false)
+                   (recur new-page))
+                 (recur edn-page))))))
 
 (defn- hookup-editing-messages []
   (async/merge [(position-event-chan ".edit-items-list" ".item")
@@ -350,11 +412,35 @@
           (tip/tooltip-position-chan ".edit-items-list")
           ]))
 
-(let [all-chans (hookup-editing-messages)]
-  (defn edit-page [heckle-site start-edn-page]
-    (-> ($ "#cmsnew")
-        (jq/append (crate/html (templ/edit-page (:front-matter start-edn-page)))))
-    (tip/add-popover-to-tooltip)
+(defn edit-page [heckle-site start-edn-page]
+  (let [event-chan (chan)
+        page-state (atom { :heckle-site heckle-site
+                           :event-chan event-chan})
+        target-node (.getElementById js/document "cmsnew")
+        state-change-chan (async-util/atom-chan page-state)
+        ]
+    
+    ;; initial render
+    ;; (react-render target-node (templ/edit-page @page-state))
+    ;; reactive rendering
+    (->> state-change-chan
+         (map< #(templ/edit-page (last %)))
+         (react-render-loop target-node))
+    
+    (swap! page-state assoc :edn-page start-edn-page ) ;; initial render
+
+    
     (go
-     (<! (edit-edn-page-loop heckle-site start-edn-page all-chans)))
-    ))
+       (<! (edit-edn-page-loop-new page-state)))
+
+    )
+  
+  
+  
+
+  
+    #_(tip/add-popover-to-tooltip)
+    #_(go
+       (<! (edit-edn-page-loop heckle-site start-edn-page all-chans))))
+
+

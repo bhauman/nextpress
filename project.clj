@@ -18,7 +18,7 @@
                    :plugins [[com.cemerick/austin "0.1.3"]]}}
   :cljsbuild {
               :builds [{:id "cmsnew"
-                        :source-paths ["src/cmsnew"]
+                        :source-paths ["src/cmsnew" "src/reactor"]
                         :compiler {:output-to "resources/public/js/compiled/cmsnew.js"
                                    :externs ["resources/public/js/externs/jquery-1.9.js"]
                                    :optimizations :simple

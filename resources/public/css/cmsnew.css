@@ -22,6 +22,11 @@ h1, h2, h3, h4, h5, h6 {
    color: inherit;
    text-rendering: optimizelegibility;
    outline: none;
+   -webkit-transition: font-size 0.3s;
+   -moz-transition: font-size 0.3s;
+   -ms-transition: font-size 0.3s;
+   -o-transition: font-size 0.3s;
+   transition: font-size 0.3s;
 }
 
 .big-text-area {

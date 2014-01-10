@@ -30,9 +30,9 @@
        start-edn-page (assoc-in orig-edn-page [:front-matter :items] page-items)]
    (ld start-edn-page)
 
-   #_(page-edit/edit-page heckle-site start-edn-page)
+   (page-edit/edit-page heckle-site start-edn-page)
 
-   (publisher/init heckle-site)
+   #_(publisher/init heckle-site)
    #_(heckle/publish heckle-site)
    ))
 
