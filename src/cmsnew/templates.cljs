@@ -178,11 +178,18 @@
                                                                     (:event-chan state) owner)))))
     (reactm/pure item (render-editable-item item state))))
 
+(defn insert-at [items index item]
+  (concat (take index items) [item] (drop index items)))
+
 (defn render-edn-page [{:keys [edn-page] :as state}]
-  (sab/html
-   (item-list "list-1" "list-1" (map item-renderer
-                                     (get-in edn-page [:front-matter :items])
-                                     (repeat state)))))
+  (let [page-data (get-in edn-page [:front-matter :items])
+        page-data-inserted (if-let [insp (get-in state [:editing-item :insert-position])]
+                             (insert-at page-data insp (:editing-item state))
+                             page-data)]
+    (sab/html
+     (item-list "list-1" "list-1" (map item-renderer
+                                       page-data-inserted
+                                       (repeat state))))))
 
 (defn edit-page [{:keys [edn-page] :as state}]
   (log "rendering page")
@@ -195,13 +202,15 @@
      (render-edn-page state)]
     (if (not (:editing-item state))
       (tooltip/Tooltipper. #js{ :watching ".edit-items-list"
-                                :onPositionChange (fn [pos] (log (str "Position Changed " pos))) }
+                                :onPositionChange (fn [pos] (put! (:event-chan state) [:insert-position pos])) }
                            (sab/html
                             [:div.btn-group {:style {:width "200px" }}
                              [:button {:type "button"
-                                       :onClick (fn [] (put! (:event-chan state) []))
+                                       :onClick #(put! (:event-chan state) [:add-item {:type :heading}])
                                        :className "btn btn-default add-heading-item"} "Heading"]
-                             [:button {:type "button" :className "btn btn-default add-text-item"} "Text"]
+                             [:button {:type "button"
+                                       :onClick #(put! (:event-chan state) [:add-item {:type :markdown}])
+                                       :className "btn btn-default add-text-item"} "Text"]
                              [:button {:type "button" :className "btn btn-default add-image-item"} "Image"]]))
       [:span])          
     [:div.hidden {:id "image-upload"}

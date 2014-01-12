@@ -362,6 +362,7 @@
 (defn edit-item-new [state start-item-data]
   (go
    (swap! state assoc :editing-item start-item-data)
+   (log (prn-str start-item-data))
    (loop [[msg new-data] (<! (:event-chan @state))
           item-data start-item-data]
      (ld [:yep msg new-data])
@@ -386,19 +387,49 @@
          new-page)
        (:edn-page @state)))))
 
+(defn handle-add-item-new [state start-item position]
+  (go
+   (let [item-data (assoc start-item :insert-position position)
+         new-data-item (<! (edit-item-new state item-data))]
+     (if new-data-item
+       (let [fixed-data-item (dissoc new-data-item :insert-position)
+             new-page (insert-data-item-into-page (:edn-page @state) position fixed-data-item)]
+         (heckle/store-source-file (:heckle-site @state) new-page)
+         (go (<! (timeout 1000))
+             (heckle/publish (:heckle-site @state)))
+         new-page)
+       (:edn-page @state)))))
+
+(defn handle-adding-item [page-state item-type position]
+  (condp = item-type
+    :heading
+    (handle-add-item-new page-state
+                             (add-id? {:type :heading :size 2}) position)
+    :markdown
+    (handle-add-item-new page-state
+                             (new-item :markdown) position)
+    (go (:edn-page page-state))))
+
 (defn edit-edn-page-loop-new [page-state]
   (let [start-edn-page (initial-item-to-empty-page (:edn-page @page-state))]
     (swap! page-state assoc :edn-page start-edn-page)
-    (go-loop [edn-page start-edn-page]
+    (go-loop [edn-page start-edn-page
+              insert-position 0]
              (let [[msg data] (<! (:event-chan @page-state))]
                (log (prn-str [msg data]))
+               (log insert-position)
                (condp = msg
                  :edit-item
                  (let [res-page (<! (handle-edit-page-item-new page-state (:id data)))
                        new-page (initial-item-to-empty-page res-page)]
                    (swap! page-state assoc :edn-page new-page :editing-item false)
-                   (recur new-page))
-                 (recur edn-page))))))
+                   (recur new-page insert-position))
+                 :add-item
+                 (let [new-page (<! (handle-adding-item page-state (:type data) insert-position))]
+                   (swap! page-state assoc :edn-page new-page :editing-item false)
+                   (recur new-page insert-position))
+                 :insert-position (recur edn-page data)
+                 (recur edn-page insert-position))))))
 
 (defn- hookup-editing-messages []
   (async/merge [(position-event-chan ".edit-items-list" ".item")
