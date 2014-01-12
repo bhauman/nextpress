@@ -10,6 +10,10 @@
                (fn [_ _ ov nv] (put! out [ov nv])))
     out))
 
+(defn dev-null [in]
+  (go-loop [v (<! in)]
+           (if (nil? v) :closed (recur (<! in)))))
+
 (defn map-to-atom
   ([atom input]
      (go-loop [v (<! input)]

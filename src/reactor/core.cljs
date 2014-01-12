@@ -28,6 +28,17 @@
                    { :__html
                      raw-html-str }})))
 
+(defn get-state-val [owner state-key]
+  (if-let [state (.-state owner)]
+    (aget state (name state-key))))
+
+(defn get-prop-val [owner prop-key]
+  (if-let [state (.-props owner)]
+    (aget state (name prop-key))))
+
+(defn get-children [owner]
+  (.. owner -props -children))
+
 (defn get-ref [owner ref-name]
   (aget (.-refs owner) (name ref-name)))
 

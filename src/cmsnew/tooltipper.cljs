@@ -3,8 +3,10 @@
    [cljs.core.async :as async
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
    [crate.core :as crate]
-   [cmsnew.templates :as templ]
-   [cmsnew.log-utils :refer [ld lp log-chan]]   
+   [sablono.core :as sab :include-macros true]
+   [cmsnew.log-utils :refer [ld lp log-chan]]
+   [cmsnew.async-utils :as async-util]
+   [reactor.core :as rct]
    [clojure.string :as string]
    [jayq.core :refer [$] :as jq]
    [jayq.util :refer [log]])
@@ -15,6 +17,7 @@
 (defn top-bottom-boundary [item]
   (let [item   ($ item)
         height (.height item)
+        hover-margin (min 25 (int (/ height 2.0)))
         top    (.-top (.offset item))
         bottom (+ top height)]
     [top bottom]))
@@ -32,13 +35,6 @@
 (defn hover-position [y-offset boundaries]
   (first (keep-indexed (fn [i [t b]] (if (< t y-offset b) i))
                        boundaries)))
-
-(defn mouse-position-chan [selector]
-  (let [out (chan (sliding-buffer 1))]
-      (jq/bind ($ selector) :mousemove
-        #(do
-           (put! out {:x (.-pageX %) :y (.-pageY %)})))
-      out))
 
 (defn inset-tooltip? []
   (let [body-width (.width ($ "body"))
@@ -68,45 +64,71 @@
        (recur current-position)))
     out))
 
-(defn tooltip-hide []
-  (jq/remove-class ($ "#tooltipper")
-                   "tooltipper-active"))
-
-(defn tooltip-render [[msg [x y]]]
-  (condp = msg
-    :tooltip-position
-    (do
-      (jq/add-class ($ "#tooltipper") "tooltipper-active")
-      (jq/css ($ "#tooltipper") {:top (str y "px") :left (str x "px")}))
-    :tooltip-hidden (tooltip-hide)))
-
-(defn tooltip-renderer [tool-pos-chan]
-  (let [out (chan)]
-    (go-loop []
-             (let [msg (<! tool-pos-chan)]
-               (tooltip-render msg))
-             (recur))))
-
-(defn render-tooltip-content []
-  (crate/html (templ/tooltip-template)))
-
-(defn add-popover-to-tooltip []
-  (.popover ($ "#tooltipper") (clj->js { :html true :content render-tooltip-content :trigger "manual"})))
-
-(defn popover-show []
-  (.popover ($ "#tooltipper") "show"))
-
-(defn popover-hide []
-  (.popover ($ "#tooltipper") "hide"))
-
-(defn tooltip-position-chan [container-selector]
-  (->> (mouse-position-chan "body")
-       (tooltip-positions container-selector)))
-
-(defn tooltip-chain [container-selector]
-  (add-popover-to-tooltip)
-  (->> (mouse-position-chan "body")
-       (tooltip-positions container-selector)
-       (map< tooltip-render)
-       (async/into [])))
+(def Tooltipper
+  (.createClass
+   js/React
+   (js-obj
+    "getInitialState"
+    (fn [] #js{ :mousePositionChan (chan (sliding-buffer 1))
+               :top 0
+               :left 0
+               :hidden true
+               :display-popover false})
+    "componentDidMount"
+    (fn []
+      (this-as this
+               (let [mouse-chan (rct/get-state-val this :mousePositionChan)]
+                 (.bind ($ "body") "mousemove.tooltip"
+                        #(do
+                           (put! mouse-chan {:x (.-pageX %) :y (.-pageY %)})))
+                 (->> mouse-chan
+                      (async/filter< (fn [{:keys [y]}]
+                                       (let [disp-pos (rct/get-state-val this :display-popover)]
+                                         (if disp-pos
+                                           (not (< (- disp-pos 70) y (+ disp-pos 70)))
+                                           true))))
+                      (tooltip-positions (rct/get-prop-val this :watching))
+                      (map< (fn [[msg data]]
+                              (log this)
+                              (condp = msg
+                                :tooltip-hidden (.setState this #js{ :hidden true
+                                                                     :display-popover false}) 
+                                :tooltip-position (let [[x y pos] data
+                                                        callback (rct/get-prop-val this :onPositionChange)]
+                                                    (if callback (callback pos))
+                                                    (.setState this #js {:hidden false
+                                                                         :display-popover false
+                                                                         :top y
+                                                                         :left x})))
+                              true))
+                      (async-util/dev-null))
+                 )))
+    "componentWillUnmount"
+    (fn []
+      (this-as this
+               (let [mouse-chan (rct/get-state-val this :mousePositionChan)]
+                 (close! mouse-chan)
+                 (.unbind ($ "body") "mousemove.tooltip"))))
+    "render"
+    (fn []
+      (this-as this
+               (sab/html [:div#tooltipper.tooltipper
+                          { :style {:position "absolute"
+                                    :opacity (if (rct/get-state-val this :hidden) 0.0 1.0)
+                                    :top (str (rct/get-state-val this :top) "px")
+                                    :left (str (rct/get-state-val this :left) "px")}
+                           :onClick (fn [] (.setState
+                                           this
+                                           #js{ :display-popover
+                                                (if (rct/get-state-val this :display-popover)
+                                                  false
+                                                  (rct/get-state-val this :top))}))} "+"
+                          (let [children (rct/get-children this)]
+                            (log children)
+                            (if (and children
+                                     (rct/get-state-val this :display-popover))
+                              [:div.popover.fade.right.in {:style { :top "-24px" :left "24px" :display "block"}}
+                               [:div.arrow]
+                               [:div.popover-content children]])
+                            )]))))))
 

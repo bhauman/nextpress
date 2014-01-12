@@ -1,6 +1,7 @@
 (ns cmsnew.templates
   (:require [crate.form :refer [form-to text-field text-area hidden-field
                                 submit-button reset-button drop-down label]]
+            [cmsnew.tooltipper :as tooltip]
             [cljs.core.async :as async
              :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
             [crate.core :as crate]
@@ -23,7 +24,7 @@
    [:button {:type "button" :class "btn btn-default add-image-item"} "Image"]])
 
 (defn item-list [id name items]
-  [:div {:id id :data-pagename name :class "edit-items-list"} items])
+  [:div.edit-items-list {:id id :data-pagename name } items])
 
 (defn item-container [id type content]
   [:div {:id id :data-pageitem (str type) :class "item"} content])
@@ -53,22 +54,26 @@
 (defmulti render-editable-item #(:type %))
 
 (defmethod render-editable-item :default [{:keys [id type] :as item} {:keys [event-chan]}]
+  (log (str "rendering " (prn-str [type id])))
   (editable-item-container id type
                            (sab/html [:div (prn-str item)])
                            event-chan))
 
 (defmethod render-editable-item :image [{:keys [id type url] :as item} {:keys [event-chan]}]
+  (log (str "rendering " (prn-str [type id])))
   (editable-item-container id type
                            (sab/html [:p [:img.img-responsive {:src url}]])
                            event-chan))
 
 (defmethod render-editable-item :heading [{:keys [id content type size]} {:keys [event-chan]}]
+  (log (str "rendering " (prn-str [type id])))
   (editable-item-container id type
                            (sab/html
                             [(keyword (str "h" size)) content])
                            event-chan))
 
 (defmethod render-editable-item :markdown [{:keys [id type content]} {:keys [event-chan]}]
+  (log (str "rendering " (prn-str [type id])))
   (editable-item-container id type
                            (react/raw (markdown-to-html content))
                            event-chan))
@@ -143,6 +148,19 @@
                     :onClick #(put! event-chan [:form-cancel])} "Cancel"))
     )))
 
+(defn counter []
+  (reactm/owner-as
+   owner
+   (do
+     (let [state (-> owner .-state)
+           count (if state (.-counter state) 0)]
+       (sab/html [:div
+                  [:a {:href "#" :onClick #(do
+                                             (log (-> owner .-state))
+                                             (.setState owner (clj->js {:counter (inc count)}))
+                                             false)}
+                   "Counter: " count]])))))
+
 (defn edit-form-holder [contents]
   [:div.edit-form-holder
    contents])
@@ -158,7 +176,7 @@
                               (reactm/owner-as owner
                                                (sab/html (item-form (item-under-edit state) {}
                                                                     (:event-chan state) owner)))))
-    (render-editable-item item state)))
+    (reactm/pure item (render-editable-item item state))))
 
 (defn render-edn-page [{:keys [edn-page] :as state}]
   (sab/html
@@ -167,13 +185,26 @@
                                      (repeat state)))))
 
 (defn edit-page [{:keys [edn-page] :as state}]
-  (sab/html [:div.edit-page
-   [:div.navbar.navbar-default
-    [:a.navbar-brand { :href "#"} (-> edn-page :front-matter :title)]]
-   [:div#main-area.container
-    (render-edn-page state)
-    ]
-   [:div#tooltipper.tooltipper "+"]
-   [:div.hidden {:id "image-upload"}
-    [:input.image-upload {:type "file" :name "image-upload-file" }]]
-   ]))
+  (log "rendering page")
+  (sab/html
+   [:div.edit-page
+    [:div.navbar.navbar-default
+     [:a.navbar-brand { :href "#"} (-> edn-page :front-matter :title)]]
+    (counter)          
+    [:div#main-area.container
+     (render-edn-page state)]
+    (if (not (:editing-item state))
+      (tooltip/Tooltipper. #js{ :watching ".edit-items-list"
+                                :onPositionChange (fn [pos] (log (str "Position Changed " pos))) }
+                           (sab/html
+                            [:div.btn-group {:style {:width "200px" }}
+                             [:button {:type "button"
+                                       :onClick (fn [] (put! (:event-chan state) []))
+                                       :className "btn btn-default add-heading-item"} "Heading"]
+                             [:button {:type "button" :className "btn btn-default add-text-item"} "Text"]
+                             [:button {:type "button" :className "btn btn-default add-image-item"} "Image"]]))
+      [:span])          
+    [:div.hidden {:id "image-upload"}
+     [:input.image-upload {:type "file" :name "image-upload-file" }]]
+    ]))
+

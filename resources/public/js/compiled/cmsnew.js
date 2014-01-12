@@ -6464,8 +6464,8 @@ cljs.core.comp = function() {
   }, d = function(a, b, c) {
     return function() {
       var d = null, e = function() {
-        var d = function(d, e, m, k) {
-          return a.call(null, b.call(null, cljs.core.apply.call(null, c, d, e, m, k)));
+        var d = function(d, e, k, m) {
+          return a.call(null, b.call(null, cljs.core.apply.call(null, c, d, e, k, m)));
         }, e = function(a, b, c, e) {
           var f = null;
           3 < arguments.length && (f = cljs.core.array_seq(Array.prototype.slice.call(arguments, 3), 0));
@@ -7387,8 +7387,8 @@ cljs.core.some_fn = function() {
         e = b.call(null, m);
         return cljs.core.truth_(e) ? e : c.call(null, m);
       }, p = function() {
-        var e = function(e, m, l, n) {
-          e = d.call(null, e, m, l);
+        var e = function(e, m, n, l) {
+          e = d.call(null, e, m, n);
           return cljs.core.truth_(e) ? e : cljs.core.some.call(null, function(d) {
             var e = a.call(null, d);
             if (cljs.core.truth_(e)) {
@@ -7396,7 +7396,7 @@ cljs.core.some_fn = function() {
             }
             e = b.call(null, d);
             return cljs.core.truth_(e) ? e : c.call(null, d);
-          }, n);
+          }, l);
         }, m = function(a, b, c, d) {
           var f = null;
           3 < arguments.length && (f = cljs.core.array_seq(Array.prototype.slice.call(arguments, 3), 0));
@@ -16973,6 +16973,17 @@ reactor.core.OwnerReference = React.createClass(function() {
 reactor.core.raw = function(a) {
   return React.DOM.div(cljs.core.clj__GT_js.call(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "dangerouslySetInnerHTML", "dangerouslySetInnerHTML", 871417640), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "__html", "__html", 3824621309), a], null)], null)));
 };
+reactor.core.get_state_val = function(a, b) {
+  var c = a.state;
+  return cljs.core.truth_(c) ? c[cljs.core.name.call(null, b)] : null;
+};
+reactor.core.get_prop_val = function(a, b) {
+  var c = a.props;
+  return cljs.core.truth_(c) ? c[cljs.core.name.call(null, b)] : null;
+};
+reactor.core.get_children = function(a) {
+  return a.props.children;
+};
 reactor.core.get_ref = function(a, b) {
   return a.refs[cljs.core.name.call(null, b)];
 };
@@ -26078,459 +26089,86 @@ crate.core.html = function() {
   return b;
 }();
 crate.core.h = crate.util.escape_html;
-cmsnew.templates = {};
-cmsnew.templates.delete_button = function() {
-  return new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "button", "button", 3931183780), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "type", "type", 1017479852), "button", new cljs.core.Keyword(null, "class", "class", 1108647146), "btn btn-danger form-delete pull-right"], null), "Delete"], null);
+cmsnew.log_utils = {};
+cmsnew.log_utils.ld = function(a) {
+  return jayq.util.log.call(null, cljs.core.clj__GT_js.call(null, a));
 };
-cmsnew.templates.tooltip_template = function() {
-  return new cljs.core.PersistentVector(null, 5, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "div", "div", 1014003715), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "class", "class", 1108647146), "btn-group"], null), new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "button", "button", 3931183780), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "type", "type", 
-  1017479852), "button", new cljs.core.Keyword(null, "class", "class", 1108647146), "btn btn-default add-heading-item"], null), "Heading"], null), new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "button", "button", 3931183780), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "type", "type", 1017479852), "button", new cljs.core.Keyword(null, "class", "class", 1108647146), "btn btn-default add-text-item"], null), 
-  "Text"], null), new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "button", "button", 3931183780), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "type", "type", 1017479852), "button", new cljs.core.Keyword(null, "class", "class", 1108647146), "btn btn-default add-image-item"], null), "Image"], null)], null);
+cmsnew.log_utils.lp = function(a) {
+  return jayq.util.log.call(null, cljs.core.prn_str.call(null, a));
 };
-cmsnew.templates.item_list = function(a, b, c) {
-  return new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "div", "div", 1014003715), new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null, "id", "id", 1013907597), a, new cljs.core.Keyword(null, "data-pagename", "data-pagename", 2628748239), b, new cljs.core.Keyword(null, "class", "class", 1108647146), "edit-items-list"], null), c], null);
-};
-cmsnew.templates.item_container = function(a, b, c) {
-  return new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "div", "div", 1014003715), new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null, "id", "id", 1013907597), a, new cljs.core.Keyword(null, "data-pageitem", "data-pageitem", 2628617303), "" + cljs.core.str(b), new cljs.core.Keyword(null, "class", "class", 1108647146), "item"], null), c], null);
-};
-cmsnew.templates.render_item = function() {
-  var a = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), b = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), c = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), d = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), e = cljs.core.get.call(null, cljs.core.PersistentArrayMap.EMPTY, new cljs.core.Keyword(null, "hierarchy", "hierarchy", 3129050535), cljs.core.get_global_hierarchy.call(null));
-  return new cljs.core.MultiFn("render-item", function(a) {
-    return(new cljs.core.Keyword(null, "type", "type", 1017479852)).cljs$core$IFn$_invoke$arity$1(a);
-  }, new cljs.core.Keyword(null, "default", "default", 2558708147), e, a, b, c, d);
-}();
-cljs.core._add_method.call(null, cmsnew.templates.render_item, new cljs.core.Keyword(null, "default", "default", 2558708147), function(a) {
-  a = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
-  var b = cljs.core.get.call(null, a, new cljs.core.Keyword(null, "type", "type", 1017479852)), c = cljs.core.get.call(null, a, new cljs.core.Keyword(null, "id", "id", 1013907597));
-  return cmsnew.templates.item_container.call(null, c, b, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "div", "div", 1014003715), cljs.core.prn_str.call(null, a)], null));
-});
-cljs.core._add_method.call(null, cmsnew.templates.render_item, new cljs.core.Keyword(null, "image", "image", 1114217677), function(a) {
-  var b = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
-  a = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "url", "url", 1014020321));
-  var c = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "type", "type", 1017479852)), b = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "id", "id", 1013907597));
-  return cmsnew.templates.item_container.call(null, b, c, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "p", "p", 1013904354), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "img.img-responsive", "img.img-responsive", 1818699515), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "src", "src", 1014018390), a], null)], null)], null));
-});
-cljs.core._add_method.call(null, cmsnew.templates.render_item, new cljs.core.Keyword(null, "heading", "heading", 1809215860), function(a) {
-  var b = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
-  a = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "size", "size", 1017434995));
-  var c = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "type", "type", 1017479852)), d = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "content", "content", 1965434859)), b = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "id", "id", 1013907597));
-  return cmsnew.templates.item_container.call(null, b, c, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [cljs.core.keyword.call(null, [cljs.core.str("h"), cljs.core.str(a)].join("")), d], null));
-});
-cljs.core._add_method.call(null, cmsnew.templates.render_item, new cljs.core.Keyword(null, "markdown", "markdown", 1260843105), function(a) {
-  var b = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
-  a = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "content", "content", 1965434859));
-  var c = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "type", "type", 1017479852)), b = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "id", "id", 1013907597));
-  return cmsnew.templates.item_container.call(null, b, c, crate.core.raw.call(null, cmsnew.markdown.markdown_to_html.call(null, a)));
-});
-cmsnew.templates.editable_item_container = function(a, b, c, d) {
-  return React.DOM.div({onClick:function() {
-    return cljs.core.async.put_BANG_.call(null, d, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "edit-item", "edit-item", 3396360296), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "id", "id", 1013907597), a], null)], null));
-  }, "data-pageitem":"" + cljs.core.str(b), id:a, className:"item"}, sablono.render.render_html.call(null, c));
-};
-cmsnew.templates.render_editable_item = function() {
-  var a = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), b = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), c = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), d = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), e = cljs.core.get.call(null, cljs.core.PersistentArrayMap.EMPTY, new cljs.core.Keyword(null, "hierarchy", "hierarchy", 3129050535), cljs.core.get_global_hierarchy.call(null));
-  return new cljs.core.MultiFn("render-editable-item", function(a) {
-    return(new cljs.core.Keyword(null, "type", "type", 1017479852)).cljs$core$IFn$_invoke$arity$1(a);
-  }, new cljs.core.Keyword(null, "default", "default", 2558708147), e, a, b, c, d);
-}();
-cljs.core._add_method.call(null, cmsnew.templates.render_editable_item, new cljs.core.Keyword(null, "default", "default", 2558708147), function(a, b) {
-  var c = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a, d = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "type", "type", 1017479852)), e = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "id", "id", 1013907597)), f = cljs.core.seq_QMARK_.call(null, b) ? cljs.core.apply.call(null, cljs.core.hash_map, b) : b, f = cljs.core.get.call(null, f, new cljs.core.Keyword(null, "event-chan", "event-chan", 1951581719));
-  return cmsnew.templates.editable_item_container.call(null, e, d, function() {
-    var a = cljs.core.prn_str.call(null, c);
-    return cljs.core.map_QMARK_.call(null, a) ? React.DOM.div(sablono.render.render_attrs.call(null, sablono.util.merge_with_class.call(null, cljs.core.PersistentArrayMap.EMPTY, a)), null) : React.DOM.div({}, sablono.render.render_html.call(null, a));
-  }(), f);
-});
-cljs.core._add_method.call(null, cmsnew.templates.render_editable_item, new cljs.core.Keyword(null, "image", "image", 1114217677), function(a, b) {
-  var c = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a, d = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "url", "url", 1014020321)), e = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "type", "type", 1017479852)), c = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "id", "id", 1013907597)), f = cljs.core.seq_QMARK_.call(null, b) ? cljs.core.apply.call(null, cljs.core.hash_map, b) : b, f = cljs.core.get.call(null, f, new cljs.core.Keyword(null, 
-  "event-chan", "event-chan", 1951581719));
-  return cmsnew.templates.editable_item_container.call(null, c, e, React.DOM.p({}, React.DOM.img({src:d, className:"img-responsive"})), f);
-});
-cljs.core._add_method.call(null, cmsnew.templates.render_editable_item, new cljs.core.Keyword(null, "heading", "heading", 1809215860), function(a, b) {
-  var c = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a, d = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "size", "size", 1017434995)), e = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "type", "type", 1017479852)), f = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "content", "content", 1965434859)), c = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "id", "id", 1013907597)), g = cljs.core.seq_QMARK_.call(null, b) ? 
-  cljs.core.apply.call(null, cljs.core.hash_map, b) : b, g = cljs.core.get.call(null, g, new cljs.core.Keyword(null, "event-chan", "event-chan", 1951581719));
-  return cmsnew.templates.editable_item_container.call(null, c, e, sablono.render.render_element.call(null, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [cljs.core.keyword.call(null, [cljs.core.str("h"), cljs.core.str(d)].join("")), f], null)), g);
-});
-cljs.core._add_method.call(null, cmsnew.templates.render_editable_item, new cljs.core.Keyword(null, "markdown", "markdown", 1260843105), function(a, b) {
-  var c = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a, d = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "content", "content", 1965434859)), e = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "type", "type", 1017479852)), c = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "id", "id", 1013907597)), f = cljs.core.seq_QMARK_.call(null, b) ? cljs.core.apply.call(null, cljs.core.hash_map, b) : b, f = cljs.core.get.call(null, f, 
-  new cljs.core.Keyword(null, "event-chan", "event-chan", 1951581719));
-  return cmsnew.templates.editable_item_container.call(null, c, e, reactor.core.raw.call(null, cmsnew.markdown.markdown_to_html.call(null, d)), f);
-});
-cmsnew.templates.control_group = function() {
-  var a = function(a, b, e) {
-    a = cljs.core.first.call(null, b.call(null, a));
-    return new cljs.core.PersistentVector(null, 4, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "div", "div", 1014003715), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "className", "className", 1004015509), [cljs.core.str("form-group"), cljs.core.str(cljs.core.truth_(a) ? " error" : null)].join("")], null), e, cljs.core.truth_(a) ? new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "span.help-inline", 
-    "span.help-inline", 929088883), a], null) : null], null);
-  }, b = function(b, d, e) {
-    var f = null;
-    2 < arguments.length && (f = cljs.core.array_seq(Array.prototype.slice.call(arguments, 2), 0));
-    return a.call(this, b, d, f);
-  };
-  b.cljs$lang$maxFixedArity = 2;
-  b.cljs$lang$applyTo = function(b) {
-    var d = cljs.core.first(b);
-    b = cljs.core.next(b);
-    var e = cljs.core.first(b);
-    b = cljs.core.rest(b);
-    return a(d, e, b);
-  };
-  b.cljs$core$IFn$_invoke$arity$variadic = a;
-  return b;
-}();
-cmsnew.templates.item_form = function() {
-  var a = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), b = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), c = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), d = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), e = cljs.core.get.call(null, cljs.core.PersistentArrayMap.EMPTY, new cljs.core.Keyword(null, "hierarchy", "hierarchy", 3129050535), cljs.core.get_global_hierarchy.call(null));
-  return new cljs.core.MultiFn("item-form", function(a) {
-    return(new cljs.core.Keyword(null, "type", "type", 1017479852)).cljs$core$IFn$_invoke$arity$1(a);
-  }, new cljs.core.Keyword(null, "default", "default", 2558708147), e, a, b, c, d);
-}();
-cljs.core._add_method.call(null, cmsnew.templates.item_form, new cljs.core.Keyword(null, "heading", "heading", 1809215860), function(a, b, c, d) {
-  return new reactor.core.OwnerReference({value:5}, function(d) {
-    return sablono.render.render_html.call(null, crate.form.form_to.call(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "onSubmit", "onSubmit", 2520779337), reactor.core.form_submit.call(null, d, c, new cljs.core.Keyword(null, "form-submit", "form-submit", 3558108339), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "content", "content", 1965434859), new cljs.core.Keyword(null, "size", "size", 1017434995)], 
-    null))], null), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "post", "post", 1017351186), [cljs.core.str("#heading-item-"), cljs.core.str((new cljs.core.Keyword(null, "id", "id", 1013907597)).cljs$core$IFn$_invoke$arity$1(a))].join("")], null), cmsnew.templates.control_group.call(null, new cljs.core.Keyword(null, "content", "content", 1965434859), b, crate.form.text_field.call(null, new cljs.core.PersistentArrayMap(null, 5, [new cljs.core.Keyword(null, 
-    "className", "className", 1004015509), "heading-input", new cljs.core.Keyword(null, "data-size", "data-size", 604323766), a.call(null, new cljs.core.Keyword(null, "size", "size", 1017434995)), new cljs.core.Keyword(null, "ref", "ref", 1014017029), "content", new cljs.core.Keyword(null, "defaultValue", "defaultValue", 4649746210), a.call(null, new cljs.core.Keyword(null, "content", "content", 1965434859)), new cljs.core.Keyword(null, "placeholder", "placeholder", 1612151013), "New Heading"], null), 
-    new cljs.core.Keyword(null, "content", "content", 1965434859))), crate.form.hidden_field.call(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "ref", "ref", 1014017029), "size"], null), new cljs.core.Keyword(null, "size", "size", 1017434995), a.call(null, new cljs.core.Keyword(null, "size", "size", 1017434995))), cmsnew.templates.control_group.call(null, new cljs.core.Keyword(null, "size", "size", 1017434995), b, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, 
-    [new cljs.core.Keyword(null, "div.btn-group.heading-size", "div.btn-group.heading-size", 2112114811), cljs.core.map.call(null, function(b) {
-      return new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "button", "button", 3931183780), new cljs.core.PersistentArrayMap(null, 4, [new cljs.core.Keyword(null, "type", "type", 1017479852), "button", new cljs.core.Keyword(null, "onClick", "onClick", 3956969051), function() {
-        return cljs.core.async.put_BANG_.call(null, c, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "change-edited-item", "change-edited-item", 4424613644), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "size", "size", 1017434995), b], null)], null));
-      }, new cljs.core.Keyword(null, "className", "className", 1004015509), [cljs.core.str("heading-size-btn btn btn-default h"), cljs.core.str(b), cljs.core.str(cljs.core._EQ_.call(null, "" + cljs.core.str(b), "" + cljs.core.str(a.call(null, new cljs.core.Keyword(null, "size", "size", 1017434995)))) ? " active" : "")].join(""), new cljs.core.Keyword(null, "data-size", "data-size", 604323766), b], null), [cljs.core.str("H"), cljs.core.str(b)].join("")], null);
-    }, cljs.core.range.call(null, 1, 6))], null)), crate.form.submit_button.call(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "className", "className", 1004015509), "btn btn-primary"], null), "Save"), crate.form.reset_button.call(null, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "className", "className", 1004015509), "btn btn-default", new cljs.core.Keyword(null, "onClick", "onClick", 3956969051), function() {
-      return cljs.core.async.put_BANG_.call(null, c, new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "form-cancel", "form-cancel", 3081919253)], null));
-    }], null), "Cancel")));
-  });
-});
-cljs.core._add_method.call(null, cmsnew.templates.item_form, new cljs.core.Keyword(null, "image", "image", 1114217677), function(a, b, c, d) {
-  return new reactor.core.OwnerReference({value:5}, function(d) {
-    return sablono.render.render_html.call(null, crate.form.form_to.call(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "onSubmit", "onSubmit", 2520779337), reactor.core.form_submit.call(null, d, c, new cljs.core.Keyword(null, "form-submit", "form-submit", 3558108339), new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "description", "description", 3584325486)], null))], null), new cljs.core.PersistentVector(null, 
-    2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "post", "post", 1017351186), [cljs.core.str("#image-item-"), cljs.core.str((new cljs.core.Keyword(null, "id", "id", 1013907597)).cljs$core$IFn$_invoke$arity$1(a))].join("")], null), cmsnew.templates.control_group.call(null, new cljs.core.Keyword(null, "description", "description", 3584325486), b, crate.form.text_field.call(null, new cljs.core.PersistentArrayMap(null, 4, [new cljs.core.Keyword(null, "className", "className", 
-    1004015509), "heading-input", new cljs.core.Keyword(null, "ref", "ref", 1014017029), "description", new cljs.core.Keyword(null, "defaultValue", "defaultValue", 4649746210), a.call(null, new cljs.core.Keyword(null, "description", "description", 3584325486)), new cljs.core.Keyword(null, "placeholder", "placeholder", 1612151013), "Description"], null), new cljs.core.Keyword(null, "description", "description", 3584325486))), crate.form.submit_button.call(null, new cljs.core.PersistentArrayMap(null, 
-    1, [new cljs.core.Keyword(null, "className", "className", 1004015509), "btn btn-primary"], null), "Save"), crate.form.reset_button.call(null, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "className", "className", 1004015509), "btn btn-default", new cljs.core.Keyword(null, "onClick", "onClick", 3956969051), function() {
-      return cljs.core.async.put_BANG_.call(null, c, new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "form-cancel", "form-cancel", 3081919253)], null));
-    }], null), "Cancel"), cmsnew.templates.delete_button.call(null)));
-  });
-});
-cljs.core._add_method.call(null, cmsnew.templates.item_form, new cljs.core.Keyword(null, "markdown", "markdown", 1260843105), function(a, b, c, d) {
-  return new reactor.core.OwnerReference({value:5}, function(d) {
-    return sablono.render.render_html.call(null, crate.form.form_to.call(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "onSubmit", "onSubmit", 2520779337), reactor.core.form_submit.call(null, d, c, new cljs.core.Keyword(null, "form-submit", "form-submit", 3558108339), new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "content", "content", 1965434859)], null))], null), new cljs.core.PersistentVector(null, 2, 
-    5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "post", "post", 1017351186), [cljs.core.str("#textblock-item-"), cljs.core.str((new cljs.core.Keyword(null, "id", "id", 1013907597)).cljs$core$IFn$_invoke$arity$1(a))].join("")], null), cmsnew.templates.control_group.call(null, new cljs.core.Keyword(null, "content", "content", 1965434859), b, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "textarea", "textarea", 
-    4305627820), new cljs.core.PersistentArrayMap(null, 4, [new cljs.core.Keyword(null, "className", "className", 1004015509), "big-text-area", new cljs.core.Keyword(null, "defaultValue", "defaultValue", 4649746210), (new cljs.core.Keyword(null, "content", "content", 1965434859)).cljs$core$IFn$_invoke$arity$1(a), new cljs.core.Keyword(null, "name", "name", 1017277949), "content", new cljs.core.Keyword(null, "ref", "ref", 1014017029), "content"], null)], null)), crate.form.submit_button.call(null, 
-    new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "className", "className", 1004015509), "btn btn-primary"], null), "Save"), crate.form.reset_button.call(null, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "className", "className", 1004015509), "btn btn-default", new cljs.core.Keyword(null, "onClick", "onClick", 3956969051), function() {
-      return cljs.core.async.put_BANG_.call(null, c, new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "form-cancel", "form-cancel", 3081919253)], null));
-    }], null), "Cancel")));
-  });
-});
-cmsnew.templates.edit_form_holder = function(a) {
-  return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "div.edit-form-holder", "div.edit-form-holder", 3668946625), a], null);
-};
-cmsnew.templates.item_under_edit = function(a) {
-  a = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
-  return cljs.core.get.call(null, a, new cljs.core.Keyword(null, "editing-item", "editing-item", 3635698074));
-};
-cmsnew.templates.item_being_edited_QMARK_ = function(a, b) {
-  var c = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a, c = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "editing-item", "editing-item", 3635698074));
-  return cljs.core.truth_(c) ? cljs.core._EQ_.call(null, (new cljs.core.Keyword(null, "id", "id", 1013907597)).cljs$core$IFn$_invoke$arity$1(b), (new cljs.core.Keyword(null, "id", "id", 1013907597)).cljs$core$IFn$_invoke$arity$1(c)) : c;
-};
-cmsnew.templates.item_renderer = function(a, b) {
-  return cljs.core.truth_(cmsnew.templates.item_being_edited_QMARK_.call(null, b, a)) ? sablono.render.render_html.call(null, cmsnew.templates.item_container.call(null, (new cljs.core.Keyword(null, "id", "id", 1013907597)).cljs$core$IFn$_invoke$arity$1(a), (new cljs.core.Keyword(null, "type", "type", 1017479852)).cljs$core$IFn$_invoke$arity$1(a), new reactor.core.OwnerReference({value:5}, function(a) {
-    return sablono.render.render_html.call(null, cmsnew.templates.item_form.call(null, cmsnew.templates.item_under_edit.call(null, b), cljs.core.PersistentArrayMap.EMPTY, (new cljs.core.Keyword(null, "event-chan", "event-chan", 1951581719)).cljs$core$IFn$_invoke$arity$1(b), a));
-  }))) : cmsnew.templates.render_editable_item.call(null, a, b);
-};
-cmsnew.templates.render_edn_page = function(a) {
-  a = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
-  var b = cljs.core.get.call(null, a, new cljs.core.Keyword(null, "edn-page", "edn-page", 2694341983));
-  return cmsnew.templates.item_list.call(null, "list-1", "list-1", cljs.core.map.call(null, cmsnew.templates.item_renderer, cljs.core.get_in.call(null, b, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "front-matter", "front-matter", 1516015191), new cljs.core.Keyword(null, "items", "items", 1114430258)], null)), cljs.core.repeat.call(null, a)));
-};
-cmsnew.templates.edit_page = function(a) {
-  var b = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
-  a = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "edn-page", "edn-page", 2694341983));
-  return React.DOM.div({className:"edit-page"}, React.DOM.div({className:"navbar navbar-default"}, React.DOM.a({href:"#", className:"navbar-brand"}, sablono.render.render_html.call(null, (new cljs.core.Keyword(null, "title", "title", 1124275658)).cljs$core$IFn$_invoke$arity$1((new cljs.core.Keyword(null, "front-matter", "front-matter", 1516015191)).cljs$core$IFn$_invoke$arity$1(a))))), function() {
-    var a = cmsnew.templates.render_edn_page.call(null, b);
-    return cljs.core.map_QMARK_.call(null, a) ? React.DOM.div(sablono.render.render_attrs.call(null, sablono.util.merge_with_class.call(null, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "id", "id", 1013907597), "main-area", new cljs.core.Keyword(null, "className", "className", 1004015509), new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, ["container"], null)], null), a)), null) : React.DOM.div({id:"main-area", className:"container"}, sablono.render.render_html.call(null, 
-    a));
-  }(), React.DOM.div({id:"tooltipper", className:"tooltipper"}, "+"), React.DOM.div({id:"image-upload", className:"hidden"}, React.DOM.input({name:"image-upload-file", type:"file", className:"image-upload"})));
-};
-goog.dom.xml = {};
-goog.dom.xml.MAX_XML_SIZE_KB = 2048;
-goog.dom.xml.MAX_ELEMENT_DEPTH = 256;
-goog.dom.xml.createDocument = function(a, b) {
-  if (b && !a) {
-    throw Error("Can't create document with namespace and no root tag");
-  }
-  if (document.implementation && document.implementation.createDocument) {
-    return document.implementation.createDocument(b || "", a || "", null);
-  }
-  if ("undefined" != typeof ActiveXObject) {
-    var c = goog.dom.xml.createMsXmlDocument_();
-    if (c) {
-      return a && c.appendChild(c.createNode(goog.dom.NodeType.ELEMENT, a, b || "")), c;
-    }
-  }
-  throw Error("Your browser does not support creating new documents");
-};
-goog.dom.xml.loadXml = function(a) {
-  if ("undefined" != typeof DOMParser) {
-    return(new DOMParser).parseFromString(a, "application/xml");
-  }
-  if ("undefined" != typeof ActiveXObject) {
-    var b = goog.dom.xml.createMsXmlDocument_();
-    b.loadXML(a);
-    return b;
-  }
-  throw Error("Your browser does not support loading xml documents");
-};
-goog.dom.xml.serialize = function(a) {
-  if ("undefined" != typeof XMLSerializer) {
-    return(new XMLSerializer).serializeToString(a);
-  }
-  if (a = a.xml) {
+cmsnew.log_utils.log_chan = function(a) {
+  return cljs.core.async.map_LT_.call(null, function(a) {
+    cmsnew.log_utils.ld.call(null, a);
     return a;
-  }
-  throw Error("Your browser does not support serializing XML documents");
-};
-goog.dom.xml.selectSingleNode = function(a, b) {
-  if ("undefined" != typeof a.selectSingleNode) {
-    var c = goog.dom.getOwnerDocument(a);
-    "undefined" != typeof c.setProperty && c.setProperty("SelectionLanguage", "XPath");
-    return a.selectSingleNode(b);
-  }
-  if (document.implementation.hasFeature("XPath", "3.0")) {
-    var c = goog.dom.getOwnerDocument(a), d = c.createNSResolver(c.documentElement);
-    return c.evaluate(b, a, d, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-  }
-  return null;
-};
-goog.dom.xml.selectNodes = function(a, b) {
-  if ("undefined" != typeof a.selectNodes) {
-    var c = goog.dom.getOwnerDocument(a);
-    "undefined" != typeof c.setProperty && c.setProperty("SelectionLanguage", "XPath");
-    return a.selectNodes(b);
-  }
-  if (document.implementation.hasFeature("XPath", "3.0")) {
-    for (var c = goog.dom.getOwnerDocument(a), d = c.createNSResolver(c.documentElement), c = c.evaluate(b, a, d, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null), d = [], e = c.snapshotLength, f = 0;f < e;f++) {
-      d.push(c.snapshotItem(f));
-    }
-    return d;
-  }
-  return[];
-};
-goog.dom.xml.setAttributes = function(a, b) {
-  for (var c in b) {
-    b.hasOwnProperty(c) && a.setAttribute(c, b[c]);
-  }
-};
-goog.dom.xml.createMsXmlDocument_ = function() {
-  var a = new ActiveXObject("MSXML2.DOMDocument");
-  if (a) {
-    a.resolveExternals = !1;
-    a.validateOnParse = !1;
-    try {
-      a.setProperty("ProhibitDTD", !0), a.setProperty("MaxXMLSize", goog.dom.xml.MAX_XML_SIZE_KB), a.setProperty("MaxElementDepth", goog.dom.xml.MAX_ELEMENT_DEPTH);
-    } catch (b) {
-    }
-  }
-  return a;
-};
-var cljs_uuid_utils = {uuid_string:function(a) {
-  return "" + cljs.core.str(a.uuid);
-}, make_random_uuid:function() {
-  var a = function() {
-    return cljs.core.rand_int.call(null, 16).toString(16);
-  };
-  return new cljs.core.UUID((new goog.string.StringBuffer).append(a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), "-", a.call(null), a.call(null), a.call(null), a.call(null), "-4", a.call(null), a.call(null), a.call(null), "-", function() {
-    return(8 | 3 & cljs.core.rand_int.call(null, 15)).toString(16);
-  }.call(null), a.call(null), a.call(null), a.call(null), "-", a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), a.call(null)));
-}};
-cljs_uuid_utils.uuid_regex = function() {
-  return cljs.core.re_pattern.call(null, [cljs.core.str("^"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("-"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("-"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), 
-  cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("-"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("-"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), 
-  cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("$")].join(""));
-}();
-cljs_uuid_utils.valid_uuid_QMARK_ = function(a) {
-  a = cljs.core._EQ_.call(null, cljs.core.type.call(null, a), cljs.core.UUID) ? cljs_uuid_utils.uuid_string.call(null, a) : "string" === typeof a ? a : new cljs.core.Keyword(null, "true", "true", 1017473280) ? !1 : null;
-  return cljs.core.truth_(a) ? cljs.core.re_find.call(null, cljs_uuid_utils.uuid_regex, a) : null;
-};
-cljs_uuid_utils.make_uuid_from = function(a) {
-  var b = cljs_uuid_utils.valid_uuid_QMARK_.call(null, a);
-  return cljs.core.truth_(b) ? cljs.core._EQ_.call(null, cljs.core.type.call(null, a), cljs.core.UUID) ? a : new cljs.core.UUID(b) : null;
-};
-cmsnew.datastore = {};
-cmsnew.datastore.s3 = {};
-cmsnew.datastore.s3.random_uuid = cljs.core.comp.call(null, cljs_uuid_utils.uuid_string, cljs_uuid_utils.make_random_uuid);
-cmsnew.datastore.s3.xhr_connection = function() {
-  return new goog.net.XhrIo;
-};
-cmsnew.datastore.s3.signing_service_url = function(a) {
-  return[cljs.core.str(a), cljs.core.str("/signput")].join("");
-};
-cmsnew.datastore.s3.image_signing_service_url = function(a) {
-  return[cljs.core.str(a), cljs.core.str("/sign-image-post")].join("");
-};
-cmsnew.datastore.s3.url_for_name_type = function(a, b, c) {
-  a = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
-  a = cljs.core.get.call(null, a, new cljs.core.Keyword(null, "signing-service", "signing-service", 3972091231));
-  return[cljs.core.str(cmsnew.datastore.s3.signing_service_url.call(null, a)), cljs.core.str("?name\x3d"), cljs.core.str(b), cljs.core.str("\x26mime\x3d"), cljs.core.str(c)].join("");
-};
-cmsnew.datastore.s3.url_for_image_upload = function(a, b, c, d) {
-  a = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
-  a = cljs.core.get.call(null, a, new cljs.core.Keyword(null, "signing-service", "signing-service", 3972091231));
-  return[cljs.core.str(cmsnew.datastore.s3.image_signing_service_url.call(null, a)), cljs.core.str("?filename\x3d"), cljs.core.str(b), cljs.core.str("\x26uuid\x3d"), cljs.core.str(c), cljs.core.str("\x26type\x3d"), cljs.core.str(d)].join("");
-};
-cmsnew.datastore.s3.xhr_request = function() {
-  var a = null, b = function(b, c) {
-    return a.call(null, b, c, null, null, null, null);
-  }, c = function(b, c, d) {
-    return a.call(null, b, c, d, null, null, null);
-  }, d = function(b, c, d, e) {
-    return a.call(null, b, c, d, e, null, null);
-  }, e = function(b, c, d, e, f) {
-    return a.call(null, b, c, d, e, cljs.core.clj__GT_js.call(null, f), null);
-  }, f = function(a, b, c, d, e, f) {
-    return goog.net.XhrIo.send(a, function(a) {
-      return b.call(null, a.target);
-    }, c, d, e, f);
-  }, a = function(a, h, k, l, m, n) {
-    switch(arguments.length) {
-      case 2:
-        return b.call(this, a, h);
-      case 3:
-        return c.call(this, a, h, k);
-      case 4:
-        return d.call(this, a, h, k, l);
-      case 5:
-        return e.call(this, a, h, k, l, m);
-      case 6:
-        return f.call(this, a, h, k, l, m, n);
-    }
-    throw Error("Invalid arity: " + arguments.length);
-  };
-  a.cljs$core$IFn$_invoke$arity$2 = b;
-  a.cljs$core$IFn$_invoke$arity$3 = c;
-  a.cljs$core$IFn$_invoke$arity$4 = d;
-  a.cljs$core$IFn$_invoke$arity$5 = e;
-  a.cljs$core$IFn$_invoke$arity$6 = f;
-  return a;
-}();
-cmsnew.datastore.s3.unquote_etag = function(a) {
-  return cljs.core.get.call(null, clojure.string.split.call(null, a, /\"/), 1);
-};
-cmsnew.datastore.s3.get_text = function(a, b) {
-  return cmsnew.datastore.s3.xhr_request.call(null, a, function(a) {
-    return b.call(null, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "headers", "headers", 1809212152), new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null, "etag", "etag", 1017027719), cmsnew.datastore.s3.unquote_etag.call(null, a.getResponseHeader("ETag")), new cljs.core.Keyword(null, "content-type", "content-type", 1799574400), a.getResponseHeader("Content-Type"), new cljs.core.Keyword(null, "version", "version", 1365512266), a.getResponseHeader("x-amz-version-id")], 
-    null), new cljs.core.Keyword(null, "body", "body", 1016933652), a.getResponseText()], null));
-  });
-};
-cmsnew.datastore.s3.get_version = function(a, b) {
-  return cmsnew.datastore.s3.xhr_request.call(null, a, function(a) {
-    return b.call(null, a.getResponseHeader("x-amz-version-id"));
-  }, "HEAD");
-};
-cmsnew.datastore.s3.get_signed_put = function(a, b, c, d) {
-  return jQuery.ajax(cljs.core.clj__GT_js.call(null, new cljs.core.PersistentArrayMap(null, 5, [new cljs.core.Keyword(null, "type", "type", 1017479852), "GET", new cljs.core.Keyword(null, "crossDomain", "crossDomain", 3408731286), !0, new cljs.core.Keyword(null, "xhrFields", "xhrFields", 4226679885), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "withCredentials", "withCredentials", 1301411272), !0], null), new cljs.core.Keyword(null, "url", "url", 1014020321), cmsnew.datastore.s3.url_for_name_type.call(null, 
-  a, b, c), new cljs.core.Keyword(null, "success", "success", 3441701749), function(a) {
-    return d.call(null, a);
-  }], null)));
-};
-cmsnew.datastore.s3.upload_data = function(a, b, c, d) {
-  return cmsnew.datastore.s3.xhr_request.call(null, a, d, "PUT", b, new cljs.core.PersistentArrayMap(null, 2, ["Content-Type", c, "x-amz-acl", "public-read"], null));
-};
-cmsnew.datastore.s3.save_data_to_file = function(a, b, c, d, e) {
-  return cmsnew.datastore.s3.get_signed_put.call(null, a, b, d, function(a) {
-    return cmsnew.datastore.s3.upload_data.call(null, a.puturl, c, d, e);
-  });
-};
-cmsnew.datastore.s3.get_signed_image_post = function(a, b, c, d, e) {
-  return jQuery.ajax(cljs.core.clj__GT_js.call(null, new cljs.core.PersistentArrayMap(null, 5, [new cljs.core.Keyword(null, "type", "type", 1017479852), "GET", new cljs.core.Keyword(null, "crossDomain", "crossDomain", 3408731286), !0, new cljs.core.Keyword(null, "xhrFields", "xhrFields", 4226679885), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "withCredentials", "withCredentials", 1301411272), !0], null), new cljs.core.Keyword(null, "url", "url", 1014020321), cmsnew.datastore.s3.url_for_image_upload.call(null, 
-  a, c, b, d), new cljs.core.Keyword(null, "success", "success", 3441701749), function(a) {
-    return e.call(null, cljs.core.js__GT_clj.call(null, a, new cljs.core.Keyword(null, "keywordize-keys", "keywordize-keys", 4191781672), !0));
-  }], null)));
-};
-cmsnew.datastore.s3.make_form_data = function(a, b) {
-  var c = new FormData;
-  cljs.core.mapv.call(null, function(a) {
-    var b = cljs.core.nth.call(null, a, 0, null);
-    a = cljs.core.nth.call(null, a, 1, null);
-    return c.append(cljs.core.name.call(null, b), a);
-  }, b);
-  c.append("file", a);
-  return c;
-};
-cmsnew.datastore.s3.upload_form_data = function(a, b, c, d, e) {
-  var f = new XMLHttpRequest;
-  f.upload.addEventListener("progress", function(a) {
-    return e.call(null, Math.floor(a.loaded / a.total * 100));
-  });
-  f.addEventListener("load", function(a) {
-    jayq.util.log.call(null, f);
-    return cljs.core._EQ_.call(null, 204, f.status) ? c.call(null, f) : d.call(null, f);
-  });
-  f.open("POST", a, !0);
-  return f.send(b);
-};
-cmsnew.datastore.s3.upload_image_file = function(a, b, c, d, e, f) {
-  return cmsnew.datastore.s3.get_signed_image_post.call(null, a, b, c.name, c.type, function(a) {
-    var b = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
-    a = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "fields", "fields", 4034163243));
-    var k = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "url", "url", 1014020321));
-    jayq.util.log.call(null, cljs.core.prn_str.call(null, b));
-    var b = cmsnew.datastore.s3.make_form_data.call(null, c, a), l = [cljs.core.str(k), cljs.core.str((new cljs.core.Keyword(null, "key", "key", 1014010321)).cljs$core$IFn$_invoke$arity$1(a))].join("");
-    jayq.util.log.call(null, "uploaded url: ", l);
-    return cmsnew.datastore.s3.upload_form_data.call(null, k, b, function(a) {
-      return d.call(null, c, l);
-    }, function(a) {
-      return e.call(null, c, l);
-    }, f);
-  });
-};
-cmsnew.datastore.s3.extract_key_value = function(a, b) {
-  var c = a.getResponseXml().getElementsByTagName(b);
-  return cljs.core.map.call(null, function(a) {
-    return c[a].childNodes[0].nodeValue;
-  }, cljs.core.range.call(null, c.length));
-};
-cmsnew.datastore.s3.extract_versions = function(a) {
-  return cmsnew.datastore.s3.extract_key_value.call(null, a, "VersionId");
-};
-cmsnew.datastore.s3.extract_paths = function(a) {
-  return cmsnew.datastore.s3.extract_key_value.call(null, a, "Key");
-};
-cmsnew.datastore.s3.node_list_seq = function(a) {
-  return cljs.core.map.call(null, function(b) {
-    return a.item(b);
-  }, cljs.core.range.call(null, a.length));
-};
-cmsnew.datastore.s3.node_value = function(a) {
-  return a[0].textContent;
-};
-cmsnew.datastore.s3.extract_tag_paths = function(a, b, c) {
-  a = a.getResponseXml();
-  b = cmsnew.datastore.s3.node_list_seq.call(null, a.getElementsByTagName(b));
-  return cljs.core.mapv.call(null, function(a) {
-    return cljs.core.into.call(null, cljs.core.PersistentArrayMap.EMPTY, cljs.core.map.call(null, function(b) {
-      return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [b, cmsnew.datastore.s3.node_value.call(null, a.getElementsByTagName(b))], null);
-    }, c));
-  }, b);
-};
-cmsnew.datastore.s3.extract_path_etag = function(a) {
-  return cljs.core.map.call(null, function(a) {
-    return new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "path", "path", 1017337751), cljs.core.get.call(null, a, "Key"), new cljs.core.Keyword(null, "etag", "etag", 1017027719), cmsnew.datastore.s3.unquote_etag.call(null, cljs.core.get.call(null, a, "ETag"))], null);
-  }, cmsnew.datastore.s3.extract_tag_paths.call(null, a, "Contents", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["Key", "ETag"], null)));
-};
-cmsnew.datastore.s3.get_versions_of_file = function(a, b, c) {
-  return cmsnew.datastore.s3.xhr_request.call(null, [cljs.core.str("http://s3.amazonaws.com/"), cljs.core.str(a), cljs.core.str("/?versions\x26prefix\x3d"), cljs.core.str(b)].join(""), function(a) {
-    return c.call(null, cmsnew.datastore.s3.extract_versions.call(null, a));
-  });
-};
-cmsnew.datastore.s3.get_bucket_list = function(a, b, c) {
-  return cmsnew.datastore.s3.xhr_request.call(null, [cljs.core.str("http://s3.amazonaws.com/"), cljs.core.str(a), cljs.core.str("/?\x26prefix\x3d"), cljs.core.str(b)].join(""), function(a) {
-    return c.call(null, cmsnew.datastore.s3.extract_path_etag.call(null, a));
-  });
-};
-cmsnew.datastore.s3.create_s3_store = function(a, b) {
-  return new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "signing-service", "signing-service", 3972091231), a, new cljs.core.Keyword(null, "bucket", "bucket", 3930668380), b], null);
+  }, a);
 };
 cmsnew.async_utils = {};
 cmsnew.async_utils.atom_chan = function(a) {
   var b = cljs.core.async.chan.call(null);
   cljs.core.add_watch.call(null, a, new cljs.core.Keyword(null, "atom-change", "atom-change", 3627658014), function(a, d, e, f) {
     return cljs.core.async.put_BANG_.call(null, b, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [e, f], null));
+  });
+  return b;
+};
+cmsnew.async_utils.dev_null = function(a) {
+  var b = cljs.core.async.chan.call(null, 1);
+  cljs.core.async.impl.dispatch.run.call(null, function() {
+    var c = function() {
+      return function(a) {
+        return function() {
+          var b = null, c = function() {
+            var a = [null, null, null, null, null, null, null, null];
+            a[0] = b;
+            a[1] = 1;
+            return a;
+          }, d = function(b) {
+            for (;;) {
+              var c = function() {
+                try {
+                  for (;;) {
+                    var c = a.call(null, b);
+                    if (!cljs.core.keyword_identical_QMARK_.call(null, c, new cljs.core.Keyword(null, "recur", "recur", 1122293407))) {
+                      return c;
+                    }
+                  }
+                } catch (d) {
+                  if (d instanceof Object) {
+                    return b[5] = d, cljs.core.async.impl.ioc_helpers.process_exception.call(null, b), new cljs.core.Keyword(null, "recur", "recur", 1122293407);
+                  }
+                  if (new cljs.core.Keyword(null, "else", "else", 1017020587)) {
+                    throw d;
+                  }
+                  return null;
+                }
+              }();
+              if (!cljs.core.keyword_identical_QMARK_.call(null, c, new cljs.core.Keyword(null, "recur", "recur", 1122293407))) {
+                return c;
+              }
+            }
+          }, b = function(a) {
+            switch(arguments.length) {
+              case 0:
+                return c.call(this);
+              case 1:
+                return d.call(this, a);
+            }
+            throw Error("Invalid arity: " + arguments.length);
+          };
+          b.cljs$core$IFn$_invoke$arity$0 = c;
+          b.cljs$core$IFn$_invoke$arity$1 = d;
+          return b;
+        }();
+      }(function(b) {
+        var c = b[1];
+        return 8 === c ? (c = b[2], b[7] = c, b[2] = null, b[1] = 3, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 7 === c ? (c = b[2], b[2] = c, b[1] = 4, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 6 === c ? cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, b, 8, a) : 5 === c ? (b[2] = new cljs.core.Keyword(null, "closed", "closed", 3951351006), b[1] = 7, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 4 === c ? (c = b[2], cljs.core.async.impl.ioc_helpers.return_chan.call(null, 
+        b, c)) : 3 === c ? (c = b[7], cljs.core.truth_(null == c) ? b[1] = 5 : b[1] = 6, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 2 === c ? (c = b[2], b[7] = c, b[2] = null, b[1] = 3, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 1 === c ? cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, b, 2, a) : null;
+      });
+    }(), d = function() {
+      var a = c.call(null);
+      a[cljs.core.async.impl.ioc_helpers.USER_START_IDX] = b;
+      return a;
+    }();
+    return cljs.core.async.impl.ioc_helpers.run_state_machine_wrapped.call(null, d);
   });
   return b;
 };
@@ -26860,7 +26498,7 @@ cmsnew.async_utils.partition_chan = function() {
             return h[9] = h[2], h[2] = null, h[1] = 2, new cljs.core.Keyword(null, "recur", "recur", 1122293407);
           }
           if (11 === k) {
-            return k = h[8], l = h[7], h[10] = h[2], cljs.core.async.impl.ioc_helpers.put_BANG_.call(null, h, 12, k, l);
+            return l = h[7], k = h[8], h[10] = h[2], cljs.core.async.impl.ioc_helpers.put_BANG_.call(null, h, 12, k, l);
           }
           if (12 === k) {
             var k = h[8], l = h[2], q = cljs.core.complement.call(null, b), k = cmsnew.async_utils.take_while.call(null, q, c, k);
@@ -26890,6 +26528,678 @@ cmsnew.async_utils.partition_chan = function() {
   a.cljs$core$IFn$_invoke$arity$3 = c;
   return a;
 }();
+cmsnew.tooltipper = {};
+cmsnew.tooltipper.page_top = 62;
+cmsnew.tooltipper.top_bottom_boundary = function(a) {
+  var b = jayq.core.$.call(null, a);
+  a = b.height();
+  b = b.offset().top;
+  return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [b, b + a], null);
+};
+cmsnew.tooltipper.element_boundaries = function(a) {
+  return cljs.core.map.call(null, cmsnew.tooltipper.top_bottom_boundary, jayq.core.$.call(null, a).children());
+};
+cmsnew.tooltipper.hover_boundaries = function(a) {
+  a = cljs.core.flatten.call(null, cmsnew.tooltipper.element_boundaries.call(null, a));
+  a = cljs.core.concat.call(null, new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [cljs.core.first.call(null, a) - 16], null), a, new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [100 + cljs.core.last.call(null, a)], null));
+  return cljs.core.vec.call(null, cljs.core.map.call(null, cljs.core.vector, cljs.core.keep_indexed.call(null, function(a, c) {
+    return cljs.core.even_QMARK_.call(null, a) ? c : null;
+  }, a), cljs.core.keep_indexed.call(null, function(a, c) {
+    return cljs.core.odd_QMARK_.call(null, a) ? c : null;
+  }, a)));
+};
+cmsnew.tooltipper.hover_position = function(a, b) {
+  return cljs.core.first.call(null, cljs.core.keep_indexed.call(null, function(b, d) {
+    var e = cljs.core.nth.call(null, d, 0, null), f = cljs.core.nth.call(null, d, 1, null);
+    return e < a && a < f ? b : null;
+  }, b));
+};
+cmsnew.tooltipper.inset_tooltip_QMARK_ = function() {
+  var a = jayq.core.$.call(null, "body").width(), b = jayq.core.$.call(null, "[data-pagename]").width();
+  return 80 > a - b;
+};
+cmsnew.tooltipper.tooltip_positions = function(a, b) {
+  var c = cljs.core.async.chan.call(null), d = cljs.core.async.chan.call(null, 1);
+  cljs.core.async.impl.dispatch.run.call(null, function() {
+    var e = function() {
+      return function(a) {
+        return function() {
+          var b = null, c = function() {
+            var a = [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null];
+            a[0] = b;
+            a[1] = 1;
+            return a;
+          }, d = function(b) {
+            for (;;) {
+              var c = function() {
+                try {
+                  for (;;) {
+                    var c = a.call(null, b);
+                    if (!cljs.core.keyword_identical_QMARK_.call(null, c, new cljs.core.Keyword(null, "recur", "recur", 1122293407))) {
+                      return c;
+                    }
+                  }
+                } catch (d) {
+                  if (d instanceof Object) {
+                    return b[5] = d, cljs.core.async.impl.ioc_helpers.process_exception.call(null, b), new cljs.core.Keyword(null, "recur", "recur", 1122293407);
+                  }
+                  if (new cljs.core.Keyword(null, "else", "else", 1017020587)) {
+                    throw d;
+                  }
+                  return null;
+                }
+              }();
+              if (!cljs.core.keyword_identical_QMARK_.call(null, c, new cljs.core.Keyword(null, "recur", "recur", 1122293407))) {
+                return c;
+              }
+            }
+          }, b = function(a) {
+            switch(arguments.length) {
+              case 0:
+                return c.call(this);
+              case 1:
+                return d.call(this, a);
+            }
+            throw Error("Invalid arity: " + arguments.length);
+          };
+          b.cljs$core$IFn$_invoke$arity$0 = c;
+          b.cljs$core$IFn$_invoke$arity$1 = d;
+          return b;
+        }();
+      }(function(d) {
+        var e = d[1];
+        if (1 === e) {
+          var f;
+          d[7] = null;
+          d[2] = null;
+          d[1] = 2;
+          return new cljs.core.Keyword(null, "recur", "recur", 1122293407);
+        }
+        if (2 === e) {
+          var l = d[8], l = jayq.core.$.call(null, a), e = 0 < l.length;
+          d[8] = l;
+          cljs.core.truth_(e) ? d[1] = 4 : d[1] = 5;
+          return new cljs.core.Keyword(null, "recur", "recur", 1122293407);
+        }
+        if (3 === e) {
+          return e = d[2], cljs.core.async.impl.ioc_helpers.return_chan.call(null, d, e);
+        }
+        if (4 === e) {
+          return cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, d, 7, b);
+        }
+        if (5 === e) {
+          return d[2] = null, d[1] = 6, new cljs.core.Keyword(null, "recur", "recur", 1122293407);
+        }
+        if (6 === e) {
+          return e = d[2], l = cljs.core.async.timeout.call(null, 50), d[9] = e, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, d, 22, l);
+        }
+        if (7 === e) {
+          return e = d[10], e = d[2], l = cljs.core.seq_QMARK_.call(null, e), d[10] = e, d[1] = l ? 8 : 9, new cljs.core.Keyword(null, "recur", "recur", 1122293407);
+        }
+        if (8 === e) {
+          return e = d[10], e = cljs.core.apply.call(null, cljs.core.hash_map, e), d[2] = e, d[1] = 10, new cljs.core.Keyword(null, "recur", "recur", 1122293407);
+        }
+        if (9 === e) {
+          return e = d[10], d[2] = e, d[1] = 10, new cljs.core.Keyword(null, "recur", "recur", 1122293407);
+        }
+        if (10 === e) {
+          e = d[11];
+          l = d[8];
+          e = d[2];
+          f = cljs.core.get.call(null, e, new cljs.core.Keyword(null, "y", "y", 1013904363));
+          var e = cljs.core.get.call(null, e, new cljs.core.Keyword(null, "x", "x", 1013904362)), m = cmsnew.tooltipper.hover_boundaries.call(null, a);
+          f = cmsnew.tooltipper.hover_position.call(null, f, m);
+          var m = cljs.core.get.call(null, m, f), m = 5 + cljs.core.first.call(null, m), l = l.offset().left, n = cmsnew.tooltipper.inset_tooltip_QMARK_.call(null);
+          d[12] = e;
+          d[11] = f;
+          d[13] = l;
+          d[14] = m;
+          d[1] = n ? 11 : 12;
+          return new cljs.core.Keyword(null, "recur", "recur", 1122293407);
+        }
+        return 11 === e ? (d[2] = 0, d[1] = 13, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 12 === e ? (d[2] = -20, d[1] = 13, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 13 === e ? (e = d[11], f = d[7], l = d[13], l += d[2], e = cljs.core.not_EQ_.call(null, f, e), d[15] = l, d[1] = e ? 14 : 15, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 14 === e ? (e = d[11], cljs.core.truth_(null == e) ? d[1] = 18 : d[1] = 19, new cljs.core.Keyword(null, "recur", 
+        "recur", 1122293407)) : 15 === e ? (d[2] = null, d[1] = 16, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 16 === e ? (e = d[2], l = cljs.core.async.timeout.call(null, 50), d[16] = e, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, d, 21, l)) : 17 === e ? (e = d[2], d[2] = e, d[1] = 16, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 18 === e ? (e = [new cljs.core.Keyword(null, "tooltip-hidden", "tooltip-hidden", 4798525990)], e = new cljs.core.PersistentVector(null, 
+        1, 5, cljs.core.PersistentVector.EMPTY_NODE, e, null), d[2] = e, d[1] = 20, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 19 === e ? (e = d[11], l = d[15], m = d[14], e = new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [l, m, e], null), e = [new cljs.core.Keyword(null, "tooltip-position", "tooltip-position", 2720240421), e], e = new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, e, null), d[2] = e, d[1] = 20, 
+        new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 20 === e ? (e = d[2], cljs.core.async.impl.ioc_helpers.put_BANG_.call(null, d, 17, c, e)) : 21 === e ? (e = d[11], l = d[2], d[7] = e, d[17] = l, d[2] = null, d[1] = 2, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 22 === e ? (f = d[7], e = d[2], d[7] = f, d[18] = e, d[2] = null, d[1] = 2, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : null;
+      });
+    }(), f = function() {
+      var a = e.call(null);
+      a[cljs.core.async.impl.ioc_helpers.USER_START_IDX] = d;
+      return a;
+    }();
+    return cljs.core.async.impl.ioc_helpers.run_state_machine_wrapped.call(null, f);
+  });
+  return c;
+};
+cmsnew.tooltipper.Tooltipper = React.createClass(function() {
+  return{getInitialState:function() {
+    return{"display-popover":!1, hidden:!0, left:0, top:0, mousePositionChan:cljs.core.async.chan.call(null, cljs.core.async.sliding_buffer.call(null, 1))};
+  }, componentDidMount:function() {
+    var a = reactor.core.get_state_val.call(null, this, new cljs.core.Keyword(null, "mousePositionChan", "mousePositionChan", 4570192082));
+    jayq.core.$.call(null, "body").bind("mousemove.tooltip", function(a, c) {
+      return function(c) {
+        return cljs.core.async.put_BANG_.call(null, a, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "x", "x", 1013904362), c.pageX, new cljs.core.Keyword(null, "y", "y", 1013904363), c.pageY], null));
+      };
+    }(a, this));
+    return cmsnew.async_utils.dev_null.call(null, cljs.core.async.map_LT_.call(null, function(a, c) {
+      return function(a) {
+        var b = cljs.core.nth.call(null, a, 0, null);
+        a = cljs.core.nth.call(null, a, 1, null);
+        jayq.util.log.call(null, c);
+        var f = cljs.core._EQ_;
+        if (cljs.core.truth_(f.call(null, new cljs.core.Keyword(null, "tooltip-hidden", "tooltip-hidden", 4798525990), b))) {
+          c.setState({"display-popover":!1, hidden:!0});
+        } else {
+          if (cljs.core.truth_(f.call(null, new cljs.core.Keyword(null, "tooltip-position", "tooltip-position", 2720240421), b))) {
+            b = cljs.core.nth.call(null, a, 0, null);
+            f = cljs.core.nth.call(null, a, 1, null);
+            a = cljs.core.nth.call(null, a, 2, null);
+            var g = reactor.core.get_prop_val.call(null, c, new cljs.core.Keyword(null, "onPositionChange", "onPositionChange", 3973312874));
+            cljs.core.truth_(g) && g.call(null, a);
+            c.setState({left:b, top:f, "display-popover":!1, hidden:!1});
+          } else {
+            throw Error([cljs.core.str("No matching clause: "), cljs.core.str(b)].join(""));
+          }
+        }
+        return!0;
+      };
+    }(a, this), cmsnew.tooltipper.tooltip_positions.call(null, reactor.core.get_prop_val.call(null, this, new cljs.core.Keyword(null, "watching", "watching", 1559060517)), cljs.core.async.filter_LT_.call(null, function(a, c) {
+      return function(a) {
+        a = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
+        a = cljs.core.get.call(null, a, new cljs.core.Keyword(null, "y", "y", 1013904363));
+        var b = reactor.core.get_state_val.call(null, c, new cljs.core.Keyword(null, "display-popover", "display-popover", 4772031500));
+        return cljs.core.truth_(b) ? !(b - 70 < a && a < b + 70) : !0;
+      };
+    }(a, this), a))));
+  }, componentWillUnmount:function() {
+    var a = reactor.core.get_state_val.call(null, this, new cljs.core.Keyword(null, "mousePositionChan", "mousePositionChan", 4570192082));
+    cljs.core.async.close_BANG_.call(null, a);
+    return jayq.core.$.call(null, "body").unbind("mousemove.tooltip");
+  }, render:function() {
+    var a = this;
+    return React.DOM.div({onClick:function(a) {
+      return function() {
+        return a.setState({"display-popover":cljs.core.truth_(reactor.core.get_state_val.call(null, a, new cljs.core.Keyword(null, "display-popover", "display-popover", 4772031500))) ? !1 : reactor.core.get_state_val.call(null, a, new cljs.core.Keyword(null, "top", "top", 1014019271))});
+      };
+    }(a), style:{position:"absolute", opacity:cljs.core.truth_(reactor.core.get_state_val.call(null, a, new cljs.core.Keyword(null, "hidden", "hidden", 4091384092))) ? 0 : 1, top:[cljs.core.str(reactor.core.get_state_val.call(null, a, new cljs.core.Keyword(null, "top", "top", 1014019271))), cljs.core.str("px")].join(""), left:[cljs.core.str(reactor.core.get_state_val.call(null, a, new cljs.core.Keyword(null, "left", "left", 1017222009))), cljs.core.str("px")].join("")}, id:"tooltipper", className:"tooltipper"}, 
+    "+", sablono.render.render_html.call(null, function() {
+      var b = reactor.core.get_children.call(null, a);
+      jayq.util.log.call(null, b);
+      return cljs.core.truth_(cljs.core.truth_(b) ? reactor.core.get_state_val.call(null, a, new cljs.core.Keyword(null, "display-popover", "display-popover", 4772031500)) : b) ? new cljs.core.PersistentVector(null, 4, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "div.popover.fade.right.in", "div.popover.fade.right.in", 1420196789), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "style", "style", 1123684643), new cljs.core.PersistentArrayMap(null, 
+      3, [new cljs.core.Keyword(null, "top", "top", 1014019271), "-24px", new cljs.core.Keyword(null, "left", "left", 1017222009), "24px", new cljs.core.Keyword(null, "display", "display", 2685668404), "block"], null)], null), new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "div.arrow", "div.arrow", 2024826846)], null), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "div.popover-content", 
+      "div.popover-content", 1543574886), b], null)], null) : null;
+    }()));
+  }};
+}());
+cmsnew.templates = {};
+cmsnew.templates.delete_button = function() {
+  return new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "button", "button", 3931183780), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "type", "type", 1017479852), "button", new cljs.core.Keyword(null, "class", "class", 1108647146), "btn btn-danger form-delete pull-right"], null), "Delete"], null);
+};
+cmsnew.templates.tooltip_template = function() {
+  return new cljs.core.PersistentVector(null, 5, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "div", "div", 1014003715), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "class", "class", 1108647146), "btn-group"], null), new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "button", "button", 3931183780), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "type", "type", 
+  1017479852), "button", new cljs.core.Keyword(null, "class", "class", 1108647146), "btn btn-default add-heading-item"], null), "Heading"], null), new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "button", "button", 3931183780), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "type", "type", 1017479852), "button", new cljs.core.Keyword(null, "class", "class", 1108647146), "btn btn-default add-text-item"], null), 
+  "Text"], null), new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "button", "button", 3931183780), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "type", "type", 1017479852), "button", new cljs.core.Keyword(null, "class", "class", 1108647146), "btn btn-default add-image-item"], null), "Image"], null)], null);
+};
+cmsnew.templates.item_list = function(a, b, c) {
+  return new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "div.edit-items-list", "div.edit-items-list", 3185740355), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "id", "id", 1013907597), a, new cljs.core.Keyword(null, "data-pagename", "data-pagename", 2628748239), b], null), c], null);
+};
+cmsnew.templates.item_container = function(a, b, c) {
+  return new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "div", "div", 1014003715), new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null, "id", "id", 1013907597), a, new cljs.core.Keyword(null, "data-pageitem", "data-pageitem", 2628617303), "" + cljs.core.str(b), new cljs.core.Keyword(null, "class", "class", 1108647146), "item"], null), c], null);
+};
+cmsnew.templates.render_item = function() {
+  var a = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), b = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), c = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), d = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), e = cljs.core.get.call(null, cljs.core.PersistentArrayMap.EMPTY, new cljs.core.Keyword(null, "hierarchy", "hierarchy", 3129050535), cljs.core.get_global_hierarchy.call(null));
+  return new cljs.core.MultiFn("render-item", function(a) {
+    return(new cljs.core.Keyword(null, "type", "type", 1017479852)).cljs$core$IFn$_invoke$arity$1(a);
+  }, new cljs.core.Keyword(null, "default", "default", 2558708147), e, a, b, c, d);
+}();
+cljs.core._add_method.call(null, cmsnew.templates.render_item, new cljs.core.Keyword(null, "default", "default", 2558708147), function(a) {
+  a = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
+  var b = cljs.core.get.call(null, a, new cljs.core.Keyword(null, "type", "type", 1017479852)), c = cljs.core.get.call(null, a, new cljs.core.Keyword(null, "id", "id", 1013907597));
+  return cmsnew.templates.item_container.call(null, c, b, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "div", "div", 1014003715), cljs.core.prn_str.call(null, a)], null));
+});
+cljs.core._add_method.call(null, cmsnew.templates.render_item, new cljs.core.Keyword(null, "image", "image", 1114217677), function(a) {
+  var b = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
+  a = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "url", "url", 1014020321));
+  var c = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "type", "type", 1017479852)), b = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "id", "id", 1013907597));
+  return cmsnew.templates.item_container.call(null, b, c, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "p", "p", 1013904354), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "img.img-responsive", "img.img-responsive", 1818699515), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "src", "src", 1014018390), a], null)], null)], null));
+});
+cljs.core._add_method.call(null, cmsnew.templates.render_item, new cljs.core.Keyword(null, "heading", "heading", 1809215860), function(a) {
+  var b = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
+  a = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "size", "size", 1017434995));
+  var c = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "type", "type", 1017479852)), d = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "content", "content", 1965434859)), b = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "id", "id", 1013907597));
+  return cmsnew.templates.item_container.call(null, b, c, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [cljs.core.keyword.call(null, [cljs.core.str("h"), cljs.core.str(a)].join("")), d], null));
+});
+cljs.core._add_method.call(null, cmsnew.templates.render_item, new cljs.core.Keyword(null, "markdown", "markdown", 1260843105), function(a) {
+  var b = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
+  a = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "content", "content", 1965434859));
+  var c = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "type", "type", 1017479852)), b = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "id", "id", 1013907597));
+  return cmsnew.templates.item_container.call(null, b, c, crate.core.raw.call(null, cmsnew.markdown.markdown_to_html.call(null, a)));
+});
+cmsnew.templates.editable_item_container = function(a, b, c, d) {
+  return React.DOM.div({onClick:function() {
+    return cljs.core.async.put_BANG_.call(null, d, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "edit-item", "edit-item", 3396360296), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "id", "id", 1013907597), a], null)], null));
+  }, "data-pageitem":"" + cljs.core.str(b), id:a, className:"item"}, sablono.render.render_html.call(null, c));
+};
+cmsnew.templates.render_editable_item = function() {
+  var a = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), b = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), c = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), d = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), e = cljs.core.get.call(null, cljs.core.PersistentArrayMap.EMPTY, new cljs.core.Keyword(null, "hierarchy", "hierarchy", 3129050535), cljs.core.get_global_hierarchy.call(null));
+  return new cljs.core.MultiFn("render-editable-item", function(a) {
+    return(new cljs.core.Keyword(null, "type", "type", 1017479852)).cljs$core$IFn$_invoke$arity$1(a);
+  }, new cljs.core.Keyword(null, "default", "default", 2558708147), e, a, b, c, d);
+}();
+cljs.core._add_method.call(null, cmsnew.templates.render_editable_item, new cljs.core.Keyword(null, "default", "default", 2558708147), function(a, b) {
+  var c = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a, d = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "type", "type", 1017479852)), e = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "id", "id", 1013907597)), f = cljs.core.seq_QMARK_.call(null, b) ? cljs.core.apply.call(null, cljs.core.hash_map, b) : b, f = cljs.core.get.call(null, f, new cljs.core.Keyword(null, "event-chan", "event-chan", 1951581719));
+  jayq.util.log.call(null, [cljs.core.str("rendering "), cljs.core.str(cljs.core.prn_str.call(null, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [d, e], null)))].join(""));
+  return cmsnew.templates.editable_item_container.call(null, e, d, function() {
+    var a = cljs.core.prn_str.call(null, c);
+    return cljs.core.map_QMARK_.call(null, a) ? React.DOM.div(sablono.render.render_attrs.call(null, sablono.util.merge_with_class.call(null, cljs.core.PersistentArrayMap.EMPTY, a)), null) : React.DOM.div({}, sablono.render.render_html.call(null, a));
+  }(), f);
+});
+cljs.core._add_method.call(null, cmsnew.templates.render_editable_item, new cljs.core.Keyword(null, "image", "image", 1114217677), function(a, b) {
+  var c = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a, d = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "url", "url", 1014020321)), e = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "type", "type", 1017479852)), c = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "id", "id", 1013907597)), f = cljs.core.seq_QMARK_.call(null, b) ? cljs.core.apply.call(null, cljs.core.hash_map, b) : b, f = cljs.core.get.call(null, f, new cljs.core.Keyword(null, 
+  "event-chan", "event-chan", 1951581719));
+  jayq.util.log.call(null, [cljs.core.str("rendering "), cljs.core.str(cljs.core.prn_str.call(null, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [e, c], null)))].join(""));
+  return cmsnew.templates.editable_item_container.call(null, c, e, React.DOM.p({}, React.DOM.img({src:d, className:"img-responsive"})), f);
+});
+cljs.core._add_method.call(null, cmsnew.templates.render_editable_item, new cljs.core.Keyword(null, "heading", "heading", 1809215860), function(a, b) {
+  var c = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a, d = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "size", "size", 1017434995)), e = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "type", "type", 1017479852)), f = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "content", "content", 1965434859)), c = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "id", "id", 1013907597)), g = cljs.core.seq_QMARK_.call(null, b) ? 
+  cljs.core.apply.call(null, cljs.core.hash_map, b) : b, g = cljs.core.get.call(null, g, new cljs.core.Keyword(null, "event-chan", "event-chan", 1951581719));
+  jayq.util.log.call(null, [cljs.core.str("rendering "), cljs.core.str(cljs.core.prn_str.call(null, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [e, c], null)))].join(""));
+  return cmsnew.templates.editable_item_container.call(null, c, e, sablono.render.render_element.call(null, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [cljs.core.keyword.call(null, [cljs.core.str("h"), cljs.core.str(d)].join("")), f], null)), g);
+});
+cljs.core._add_method.call(null, cmsnew.templates.render_editable_item, new cljs.core.Keyword(null, "markdown", "markdown", 1260843105), function(a, b) {
+  var c = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a, d = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "content", "content", 1965434859)), e = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "type", "type", 1017479852)), c = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "id", "id", 1013907597)), f = cljs.core.seq_QMARK_.call(null, b) ? cljs.core.apply.call(null, cljs.core.hash_map, b) : b, f = cljs.core.get.call(null, f, 
+  new cljs.core.Keyword(null, "event-chan", "event-chan", 1951581719));
+  jayq.util.log.call(null, [cljs.core.str("rendering "), cljs.core.str(cljs.core.prn_str.call(null, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [e, c], null)))].join(""));
+  return cmsnew.templates.editable_item_container.call(null, c, e, reactor.core.raw.call(null, cmsnew.markdown.markdown_to_html.call(null, d)), f);
+});
+cmsnew.templates.control_group = function() {
+  var a = function(a, b, e) {
+    a = cljs.core.first.call(null, b.call(null, a));
+    return new cljs.core.PersistentVector(null, 4, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "div", "div", 1014003715), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "className", "className", 1004015509), [cljs.core.str("form-group"), cljs.core.str(cljs.core.truth_(a) ? " error" : null)].join("")], null), e, cljs.core.truth_(a) ? new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "span.help-inline", 
+    "span.help-inline", 929088883), a], null) : null], null);
+  }, b = function(b, d, e) {
+    var f = null;
+    2 < arguments.length && (f = cljs.core.array_seq(Array.prototype.slice.call(arguments, 2), 0));
+    return a.call(this, b, d, f);
+  };
+  b.cljs$lang$maxFixedArity = 2;
+  b.cljs$lang$applyTo = function(b) {
+    var d = cljs.core.first(b);
+    b = cljs.core.next(b);
+    var e = cljs.core.first(b);
+    b = cljs.core.rest(b);
+    return a(d, e, b);
+  };
+  b.cljs$core$IFn$_invoke$arity$variadic = a;
+  return b;
+}();
+cmsnew.templates.item_form = function() {
+  var a = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), b = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), c = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), d = cljs.core.atom.call(null, cljs.core.PersistentArrayMap.EMPTY), e = cljs.core.get.call(null, cljs.core.PersistentArrayMap.EMPTY, new cljs.core.Keyword(null, "hierarchy", "hierarchy", 3129050535), cljs.core.get_global_hierarchy.call(null));
+  return new cljs.core.MultiFn("item-form", function(a) {
+    return(new cljs.core.Keyword(null, "type", "type", 1017479852)).cljs$core$IFn$_invoke$arity$1(a);
+  }, new cljs.core.Keyword(null, "default", "default", 2558708147), e, a, b, c, d);
+}();
+cljs.core._add_method.call(null, cmsnew.templates.item_form, new cljs.core.Keyword(null, "heading", "heading", 1809215860), function(a, b, c, d) {
+  return new reactor.core.OwnerReference({value:5}, function(d) {
+    return sablono.render.render_html.call(null, crate.form.form_to.call(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "onSubmit", "onSubmit", 2520779337), reactor.core.form_submit.call(null, d, c, new cljs.core.Keyword(null, "form-submit", "form-submit", 3558108339), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "content", "content", 1965434859), new cljs.core.Keyword(null, "size", "size", 1017434995)], 
+    null))], null), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "post", "post", 1017351186), [cljs.core.str("#heading-item-"), cljs.core.str((new cljs.core.Keyword(null, "id", "id", 1013907597)).cljs$core$IFn$_invoke$arity$1(a))].join("")], null), cmsnew.templates.control_group.call(null, new cljs.core.Keyword(null, "content", "content", 1965434859), b, crate.form.text_field.call(null, new cljs.core.PersistentArrayMap(null, 5, [new cljs.core.Keyword(null, 
+    "className", "className", 1004015509), "heading-input", new cljs.core.Keyword(null, "data-size", "data-size", 604323766), a.call(null, new cljs.core.Keyword(null, "size", "size", 1017434995)), new cljs.core.Keyword(null, "ref", "ref", 1014017029), "content", new cljs.core.Keyword(null, "defaultValue", "defaultValue", 4649746210), a.call(null, new cljs.core.Keyword(null, "content", "content", 1965434859)), new cljs.core.Keyword(null, "placeholder", "placeholder", 1612151013), "New Heading"], null), 
+    new cljs.core.Keyword(null, "content", "content", 1965434859))), crate.form.hidden_field.call(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "ref", "ref", 1014017029), "size"], null), new cljs.core.Keyword(null, "size", "size", 1017434995), a.call(null, new cljs.core.Keyword(null, "size", "size", 1017434995))), cmsnew.templates.control_group.call(null, new cljs.core.Keyword(null, "size", "size", 1017434995), b, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, 
+    [new cljs.core.Keyword(null, "div.btn-group.heading-size", "div.btn-group.heading-size", 2112114811), cljs.core.map.call(null, function(b) {
+      return new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "button", "button", 3931183780), new cljs.core.PersistentArrayMap(null, 4, [new cljs.core.Keyword(null, "type", "type", 1017479852), "button", new cljs.core.Keyword(null, "onClick", "onClick", 3956969051), function() {
+        return cljs.core.async.put_BANG_.call(null, c, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "change-edited-item", "change-edited-item", 4424613644), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "size", "size", 1017434995), b], null)], null));
+      }, new cljs.core.Keyword(null, "className", "className", 1004015509), [cljs.core.str("heading-size-btn btn btn-default h"), cljs.core.str(b), cljs.core.str(cljs.core._EQ_.call(null, "" + cljs.core.str(b), "" + cljs.core.str(a.call(null, new cljs.core.Keyword(null, "size", "size", 1017434995)))) ? " active" : "")].join(""), new cljs.core.Keyword(null, "data-size", "data-size", 604323766), b], null), [cljs.core.str("H"), cljs.core.str(b)].join("")], null);
+    }, cljs.core.range.call(null, 1, 6))], null)), crate.form.submit_button.call(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "className", "className", 1004015509), "btn btn-primary"], null), "Save"), crate.form.reset_button.call(null, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "className", "className", 1004015509), "btn btn-default", new cljs.core.Keyword(null, "onClick", "onClick", 3956969051), function() {
+      return cljs.core.async.put_BANG_.call(null, c, new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "form-cancel", "form-cancel", 3081919253)], null));
+    }], null), "Cancel")));
+  });
+});
+cljs.core._add_method.call(null, cmsnew.templates.item_form, new cljs.core.Keyword(null, "image", "image", 1114217677), function(a, b, c, d) {
+  return new reactor.core.OwnerReference({value:5}, function(d) {
+    return sablono.render.render_html.call(null, crate.form.form_to.call(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "onSubmit", "onSubmit", 2520779337), reactor.core.form_submit.call(null, d, c, new cljs.core.Keyword(null, "form-submit", "form-submit", 3558108339), new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "description", "description", 3584325486)], null))], null), new cljs.core.PersistentVector(null, 
+    2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "post", "post", 1017351186), [cljs.core.str("#image-item-"), cljs.core.str((new cljs.core.Keyword(null, "id", "id", 1013907597)).cljs$core$IFn$_invoke$arity$1(a))].join("")], null), cmsnew.templates.control_group.call(null, new cljs.core.Keyword(null, "description", "description", 3584325486), b, crate.form.text_field.call(null, new cljs.core.PersistentArrayMap(null, 4, [new cljs.core.Keyword(null, "className", "className", 
+    1004015509), "heading-input", new cljs.core.Keyword(null, "ref", "ref", 1014017029), "description", new cljs.core.Keyword(null, "defaultValue", "defaultValue", 4649746210), a.call(null, new cljs.core.Keyword(null, "description", "description", 3584325486)), new cljs.core.Keyword(null, "placeholder", "placeholder", 1612151013), "Description"], null), new cljs.core.Keyword(null, "description", "description", 3584325486))), crate.form.submit_button.call(null, new cljs.core.PersistentArrayMap(null, 
+    1, [new cljs.core.Keyword(null, "className", "className", 1004015509), "btn btn-primary"], null), "Save"), crate.form.reset_button.call(null, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "className", "className", 1004015509), "btn btn-default", new cljs.core.Keyword(null, "onClick", "onClick", 3956969051), function() {
+      return cljs.core.async.put_BANG_.call(null, c, new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "form-cancel", "form-cancel", 3081919253)], null));
+    }], null), "Cancel"), cmsnew.templates.delete_button.call(null)));
+  });
+});
+cljs.core._add_method.call(null, cmsnew.templates.item_form, new cljs.core.Keyword(null, "markdown", "markdown", 1260843105), function(a, b, c, d) {
+  return new reactor.core.OwnerReference({value:5}, function(d) {
+    return sablono.render.render_html.call(null, crate.form.form_to.call(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "onSubmit", "onSubmit", 2520779337), reactor.core.form_submit.call(null, d, c, new cljs.core.Keyword(null, "form-submit", "form-submit", 3558108339), new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "content", "content", 1965434859)], null))], null), new cljs.core.PersistentVector(null, 2, 
+    5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "post", "post", 1017351186), [cljs.core.str("#textblock-item-"), cljs.core.str((new cljs.core.Keyword(null, "id", "id", 1013907597)).cljs$core$IFn$_invoke$arity$1(a))].join("")], null), cmsnew.templates.control_group.call(null, new cljs.core.Keyword(null, "content", "content", 1965434859), b, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "textarea", "textarea", 
+    4305627820), new cljs.core.PersistentArrayMap(null, 4, [new cljs.core.Keyword(null, "className", "className", 1004015509), "big-text-area", new cljs.core.Keyword(null, "defaultValue", "defaultValue", 4649746210), (new cljs.core.Keyword(null, "content", "content", 1965434859)).cljs$core$IFn$_invoke$arity$1(a), new cljs.core.Keyword(null, "name", "name", 1017277949), "content", new cljs.core.Keyword(null, "ref", "ref", 1014017029), "content"], null)], null)), crate.form.submit_button.call(null, 
+    new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "className", "className", 1004015509), "btn btn-primary"], null), "Save"), crate.form.reset_button.call(null, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "className", "className", 1004015509), "btn btn-default", new cljs.core.Keyword(null, "onClick", "onClick", 3956969051), function() {
+      return cljs.core.async.put_BANG_.call(null, c, new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "form-cancel", "form-cancel", 3081919253)], null));
+    }], null), "Cancel")));
+  });
+});
+cmsnew.templates.counter = function() {
+  return new reactor.core.OwnerReference({value:5}, function(a) {
+    var b = a.state, c = cljs.core.truth_(b) ? b.counter : 0;
+    return React.DOM.div({}, React.DOM.a({onClick:function() {
+      jayq.util.log.call(null, a.state);
+      a.setState(cljs.core.clj__GT_js.call(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "counter", "counter", 1971734894), c + 1], null)));
+      return!1;
+    }, href:"#"}, "Counter: ", sablono.render.render_html.call(null, c)));
+  });
+};
+cmsnew.templates.edit_form_holder = function(a) {
+  return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "div.edit-form-holder", "div.edit-form-holder", 3668946625), a], null);
+};
+cmsnew.templates.item_under_edit = function(a) {
+  a = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
+  return cljs.core.get.call(null, a, new cljs.core.Keyword(null, "editing-item", "editing-item", 3635698074));
+};
+cmsnew.templates.item_being_edited_QMARK_ = function(a, b) {
+  var c = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a, c = cljs.core.get.call(null, c, new cljs.core.Keyword(null, "editing-item", "editing-item", 3635698074));
+  return cljs.core.truth_(c) ? cljs.core._EQ_.call(null, (new cljs.core.Keyword(null, "id", "id", 1013907597)).cljs$core$IFn$_invoke$arity$1(b), (new cljs.core.Keyword(null, "id", "id", 1013907597)).cljs$core$IFn$_invoke$arity$1(c)) : c;
+};
+cmsnew.templates.item_renderer = function(a, b) {
+  return cljs.core.truth_(cmsnew.templates.item_being_edited_QMARK_.call(null, b, a)) ? sablono.render.render_html.call(null, cmsnew.templates.item_container.call(null, (new cljs.core.Keyword(null, "id", "id", 1013907597)).cljs$core$IFn$_invoke$arity$1(a), (new cljs.core.Keyword(null, "type", "type", 1017479852)).cljs$core$IFn$_invoke$arity$1(a), new reactor.core.OwnerReference({value:5}, function(a) {
+    return sablono.render.render_html.call(null, cmsnew.templates.item_form.call(null, cmsnew.templates.item_under_edit.call(null, b), cljs.core.PersistentArrayMap.EMPTY, (new cljs.core.Keyword(null, "event-chan", "event-chan", 1951581719)).cljs$core$IFn$_invoke$arity$1(b), a));
+  }))) : new reactor.core.Pure({value:a}, function() {
+    return cmsnew.templates.render_editable_item.call(null, a, b);
+  });
+};
+cmsnew.templates.render_edn_page = function(a) {
+  a = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
+  var b = cljs.core.get.call(null, a, new cljs.core.Keyword(null, "edn-page", "edn-page", 2694341983));
+  return sablono.render.render_html.call(null, cmsnew.templates.item_list.call(null, "list-1", "list-1", cljs.core.map.call(null, cmsnew.templates.item_renderer, cljs.core.get_in.call(null, b, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "front-matter", "front-matter", 1516015191), new cljs.core.Keyword(null, "items", "items", 1114430258)], null)), cljs.core.repeat.call(null, a))));
+};
+cmsnew.templates.edit_page = function(a) {
+  var b = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
+  a = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "edn-page", "edn-page", 2694341983));
+  jayq.util.log.call(null, "rendering page");
+  return React.DOM.div({className:"edit-page"}, React.DOM.div({className:"navbar navbar-default"}, React.DOM.a({href:"#", className:"navbar-brand"}, sablono.render.render_html.call(null, (new cljs.core.Keyword(null, "title", "title", 1124275658)).cljs$core$IFn$_invoke$arity$1((new cljs.core.Keyword(null, "front-matter", "front-matter", 1516015191)).cljs$core$IFn$_invoke$arity$1(a))))), sablono.render.render_html.call(null, cmsnew.templates.counter.call(null)), function() {
+    var a = cmsnew.templates.render_edn_page.call(null, b);
+    return cljs.core.map_QMARK_.call(null, a) ? React.DOM.div(sablono.render.render_attrs.call(null, sablono.util.merge_with_class.call(null, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "id", "id", 1013907597), "main-area", new cljs.core.Keyword(null, "className", "className", 1004015509), new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, ["container"], null)], null), a)), null) : React.DOM.div({id:"main-area", className:"container"}, sablono.render.render_html.call(null, 
+    a));
+  }(), cljs.core.not.call(null, (new cljs.core.Keyword(null, "editing-item", "editing-item", 3635698074)).cljs$core$IFn$_invoke$arity$1(b)) ? sablono.render.render_html.call(null, new cmsnew.tooltipper.Tooltipper({onPositionChange:function(a) {
+    return jayq.util.log.call(null, [cljs.core.str("Position Changed "), cljs.core.str(a)].join(""));
+  }, watching:".edit-items-list"}, React.DOM.div({style:{width:"200px"}, className:"btn-group"}, React.DOM.button({onClick:function() {
+    return cljs.core.async.put_BANG_.call(null, (new cljs.core.Keyword(null, "event-chan", "event-chan", 1951581719)).cljs$core$IFn$_invoke$arity$1(b), cljs.core.PersistentVector.EMPTY);
+  }, type:"button", className:"btn btn-default add-heading-item"}, "Heading"), React.DOM.button({type:"button", className:"btn btn-default add-text-item"}, "Text"), React.DOM.button({type:"button", className:"btn btn-default add-image-item"}, "Image")))) : React.DOM.span({}), React.DOM.div({id:"image-upload", className:"hidden"}, React.DOM.input({name:"image-upload-file", type:"file", className:"image-upload"})));
+};
+goog.dom.xml = {};
+goog.dom.xml.MAX_XML_SIZE_KB = 2048;
+goog.dom.xml.MAX_ELEMENT_DEPTH = 256;
+goog.dom.xml.createDocument = function(a, b) {
+  if (b && !a) {
+    throw Error("Can't create document with namespace and no root tag");
+  }
+  if (document.implementation && document.implementation.createDocument) {
+    return document.implementation.createDocument(b || "", a || "", null);
+  }
+  if ("undefined" != typeof ActiveXObject) {
+    var c = goog.dom.xml.createMsXmlDocument_();
+    if (c) {
+      return a && c.appendChild(c.createNode(goog.dom.NodeType.ELEMENT, a, b || "")), c;
+    }
+  }
+  throw Error("Your browser does not support creating new documents");
+};
+goog.dom.xml.loadXml = function(a) {
+  if ("undefined" != typeof DOMParser) {
+    return(new DOMParser).parseFromString(a, "application/xml");
+  }
+  if ("undefined" != typeof ActiveXObject) {
+    var b = goog.dom.xml.createMsXmlDocument_();
+    b.loadXML(a);
+    return b;
+  }
+  throw Error("Your browser does not support loading xml documents");
+};
+goog.dom.xml.serialize = function(a) {
+  if ("undefined" != typeof XMLSerializer) {
+    return(new XMLSerializer).serializeToString(a);
+  }
+  if (a = a.xml) {
+    return a;
+  }
+  throw Error("Your browser does not support serializing XML documents");
+};
+goog.dom.xml.selectSingleNode = function(a, b) {
+  if ("undefined" != typeof a.selectSingleNode) {
+    var c = goog.dom.getOwnerDocument(a);
+    "undefined" != typeof c.setProperty && c.setProperty("SelectionLanguage", "XPath");
+    return a.selectSingleNode(b);
+  }
+  if (document.implementation.hasFeature("XPath", "3.0")) {
+    var c = goog.dom.getOwnerDocument(a), d = c.createNSResolver(c.documentElement);
+    return c.evaluate(b, a, d, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+  }
+  return null;
+};
+goog.dom.xml.selectNodes = function(a, b) {
+  if ("undefined" != typeof a.selectNodes) {
+    var c = goog.dom.getOwnerDocument(a);
+    "undefined" != typeof c.setProperty && c.setProperty("SelectionLanguage", "XPath");
+    return a.selectNodes(b);
+  }
+  if (document.implementation.hasFeature("XPath", "3.0")) {
+    for (var c = goog.dom.getOwnerDocument(a), d = c.createNSResolver(c.documentElement), c = c.evaluate(b, a, d, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null), d = [], e = c.snapshotLength, f = 0;f < e;f++) {
+      d.push(c.snapshotItem(f));
+    }
+    return d;
+  }
+  return[];
+};
+goog.dom.xml.setAttributes = function(a, b) {
+  for (var c in b) {
+    b.hasOwnProperty(c) && a.setAttribute(c, b[c]);
+  }
+};
+goog.dom.xml.createMsXmlDocument_ = function() {
+  var a = new ActiveXObject("MSXML2.DOMDocument");
+  if (a) {
+    a.resolveExternals = !1;
+    a.validateOnParse = !1;
+    try {
+      a.setProperty("ProhibitDTD", !0), a.setProperty("MaxXMLSize", goog.dom.xml.MAX_XML_SIZE_KB), a.setProperty("MaxElementDepth", goog.dom.xml.MAX_ELEMENT_DEPTH);
+    } catch (b) {
+    }
+  }
+  return a;
+};
+var cljs_uuid_utils = {uuid_string:function(a) {
+  return "" + cljs.core.str(a.uuid);
+}, make_random_uuid:function() {
+  var a = function() {
+    return cljs.core.rand_int.call(null, 16).toString(16);
+  };
+  return new cljs.core.UUID((new goog.string.StringBuffer).append(a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), "-", a.call(null), a.call(null), a.call(null), a.call(null), "-4", a.call(null), a.call(null), a.call(null), "-", function() {
+    return(8 | 3 & cljs.core.rand_int.call(null, 15)).toString(16);
+  }.call(null), a.call(null), a.call(null), a.call(null), "-", a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), a.call(null), a.call(null)));
+}};
+cljs_uuid_utils.uuid_regex = function() {
+  return cljs.core.re_pattern.call(null, [cljs.core.str("^"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("-"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("-"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), 
+  cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("-"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("-"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), 
+  cljs.core.str("[0-9a-fA-F]"), cljs.core.str("[0-9a-fA-F]"), cljs.core.str("$")].join(""));
+}();
+cljs_uuid_utils.valid_uuid_QMARK_ = function(a) {
+  a = cljs.core._EQ_.call(null, cljs.core.type.call(null, a), cljs.core.UUID) ? cljs_uuid_utils.uuid_string.call(null, a) : "string" === typeof a ? a : new cljs.core.Keyword(null, "true", "true", 1017473280) ? !1 : null;
+  return cljs.core.truth_(a) ? cljs.core.re_find.call(null, cljs_uuid_utils.uuid_regex, a) : null;
+};
+cljs_uuid_utils.make_uuid_from = function(a) {
+  var b = cljs_uuid_utils.valid_uuid_QMARK_.call(null, a);
+  return cljs.core.truth_(b) ? cljs.core._EQ_.call(null, cljs.core.type.call(null, a), cljs.core.UUID) ? a : new cljs.core.UUID(b) : null;
+};
+cmsnew.datastore = {};
+cmsnew.datastore.s3 = {};
+cmsnew.datastore.s3.random_uuid = cljs.core.comp.call(null, cljs_uuid_utils.uuid_string, cljs_uuid_utils.make_random_uuid);
+cmsnew.datastore.s3.xhr_connection = function() {
+  return new goog.net.XhrIo;
+};
+cmsnew.datastore.s3.signing_service_url = function(a) {
+  return[cljs.core.str(a), cljs.core.str("/signput")].join("");
+};
+cmsnew.datastore.s3.image_signing_service_url = function(a) {
+  return[cljs.core.str(a), cljs.core.str("/sign-image-post")].join("");
+};
+cmsnew.datastore.s3.url_for_name_type = function(a, b, c) {
+  a = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
+  a = cljs.core.get.call(null, a, new cljs.core.Keyword(null, "signing-service", "signing-service", 3972091231));
+  return[cljs.core.str(cmsnew.datastore.s3.signing_service_url.call(null, a)), cljs.core.str("?name\x3d"), cljs.core.str(b), cljs.core.str("\x26mime\x3d"), cljs.core.str(c)].join("");
+};
+cmsnew.datastore.s3.url_for_image_upload = function(a, b, c, d) {
+  a = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
+  a = cljs.core.get.call(null, a, new cljs.core.Keyword(null, "signing-service", "signing-service", 3972091231));
+  return[cljs.core.str(cmsnew.datastore.s3.image_signing_service_url.call(null, a)), cljs.core.str("?filename\x3d"), cljs.core.str(b), cljs.core.str("\x26uuid\x3d"), cljs.core.str(c), cljs.core.str("\x26type\x3d"), cljs.core.str(d)].join("");
+};
+cmsnew.datastore.s3.xhr_request = function() {
+  var a = null, b = function(b, c) {
+    return a.call(null, b, c, null, null, null, null);
+  }, c = function(b, c, d) {
+    return a.call(null, b, c, d, null, null, null);
+  }, d = function(b, c, d, e) {
+    return a.call(null, b, c, d, e, null, null);
+  }, e = function(b, c, d, e, f) {
+    return a.call(null, b, c, d, e, cljs.core.clj__GT_js.call(null, f), null);
+  }, f = function(a, b, c, d, e, f) {
+    return goog.net.XhrIo.send(a, function(a) {
+      return b.call(null, a.target);
+    }, c, d, e, f);
+  }, a = function(a, h, k, l, m, n) {
+    switch(arguments.length) {
+      case 2:
+        return b.call(this, a, h);
+      case 3:
+        return c.call(this, a, h, k);
+      case 4:
+        return d.call(this, a, h, k, l);
+      case 5:
+        return e.call(this, a, h, k, l, m);
+      case 6:
+        return f.call(this, a, h, k, l, m, n);
+    }
+    throw Error("Invalid arity: " + arguments.length);
+  };
+  a.cljs$core$IFn$_invoke$arity$2 = b;
+  a.cljs$core$IFn$_invoke$arity$3 = c;
+  a.cljs$core$IFn$_invoke$arity$4 = d;
+  a.cljs$core$IFn$_invoke$arity$5 = e;
+  a.cljs$core$IFn$_invoke$arity$6 = f;
+  return a;
+}();
+cmsnew.datastore.s3.unquote_etag = function(a) {
+  return cljs.core.get.call(null, clojure.string.split.call(null, a, /\"/), 1);
+};
+cmsnew.datastore.s3.get_text = function(a, b) {
+  return cmsnew.datastore.s3.xhr_request.call(null, a, function(a) {
+    return b.call(null, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "headers", "headers", 1809212152), new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null, "etag", "etag", 1017027719), cmsnew.datastore.s3.unquote_etag.call(null, a.getResponseHeader("ETag")), new cljs.core.Keyword(null, "content-type", "content-type", 1799574400), a.getResponseHeader("Content-Type"), new cljs.core.Keyword(null, "version", "version", 1365512266), a.getResponseHeader("x-amz-version-id")], 
+    null), new cljs.core.Keyword(null, "body", "body", 1016933652), a.getResponseText()], null));
+  });
+};
+cmsnew.datastore.s3.get_version = function(a, b) {
+  return cmsnew.datastore.s3.xhr_request.call(null, a, function(a) {
+    return b.call(null, a.getResponseHeader("x-amz-version-id"));
+  }, "HEAD");
+};
+cmsnew.datastore.s3.get_signed_put = function(a, b, c, d) {
+  return jQuery.ajax(cljs.core.clj__GT_js.call(null, new cljs.core.PersistentArrayMap(null, 5, [new cljs.core.Keyword(null, "type", "type", 1017479852), "GET", new cljs.core.Keyword(null, "crossDomain", "crossDomain", 3408731286), !0, new cljs.core.Keyword(null, "xhrFields", "xhrFields", 4226679885), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "withCredentials", "withCredentials", 1301411272), !0], null), new cljs.core.Keyword(null, "url", "url", 1014020321), cmsnew.datastore.s3.url_for_name_type.call(null, 
+  a, b, c), new cljs.core.Keyword(null, "success", "success", 3441701749), function(a) {
+    return d.call(null, a);
+  }], null)));
+};
+cmsnew.datastore.s3.upload_data = function(a, b, c, d) {
+  return cmsnew.datastore.s3.xhr_request.call(null, a, d, "PUT", b, new cljs.core.PersistentArrayMap(null, 2, ["Content-Type", c, "x-amz-acl", "public-read"], null));
+};
+cmsnew.datastore.s3.save_data_to_file = function(a, b, c, d, e) {
+  return cmsnew.datastore.s3.get_signed_put.call(null, a, b, d, function(a) {
+    return cmsnew.datastore.s3.upload_data.call(null, a.puturl, c, d, e);
+  });
+};
+cmsnew.datastore.s3.get_signed_image_post = function(a, b, c, d, e) {
+  return jQuery.ajax(cljs.core.clj__GT_js.call(null, new cljs.core.PersistentArrayMap(null, 5, [new cljs.core.Keyword(null, "type", "type", 1017479852), "GET", new cljs.core.Keyword(null, "crossDomain", "crossDomain", 3408731286), !0, new cljs.core.Keyword(null, "xhrFields", "xhrFields", 4226679885), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "withCredentials", "withCredentials", 1301411272), !0], null), new cljs.core.Keyword(null, "url", "url", 1014020321), cmsnew.datastore.s3.url_for_image_upload.call(null, 
+  a, c, b, d), new cljs.core.Keyword(null, "success", "success", 3441701749), function(a) {
+    return e.call(null, cljs.core.js__GT_clj.call(null, a, new cljs.core.Keyword(null, "keywordize-keys", "keywordize-keys", 4191781672), !0));
+  }], null)));
+};
+cmsnew.datastore.s3.make_form_data = function(a, b) {
+  var c = new FormData;
+  cljs.core.mapv.call(null, function(a) {
+    var b = cljs.core.nth.call(null, a, 0, null);
+    a = cljs.core.nth.call(null, a, 1, null);
+    return c.append(cljs.core.name.call(null, b), a);
+  }, b);
+  c.append("file", a);
+  return c;
+};
+cmsnew.datastore.s3.upload_form_data = function(a, b, c, d, e) {
+  var f = new XMLHttpRequest;
+  f.upload.addEventListener("progress", function(a) {
+    return e.call(null, Math.floor(a.loaded / a.total * 100));
+  });
+  f.addEventListener("load", function(a) {
+    jayq.util.log.call(null, f);
+    return cljs.core._EQ_.call(null, 204, f.status) ? c.call(null, f) : d.call(null, f);
+  });
+  f.open("POST", a, !0);
+  return f.send(b);
+};
+cmsnew.datastore.s3.upload_image_file = function(a, b, c, d, e, f) {
+  return cmsnew.datastore.s3.get_signed_image_post.call(null, a, b, c.name, c.type, function(a) {
+    var b = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
+    a = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "fields", "fields", 4034163243));
+    var k = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "url", "url", 1014020321));
+    jayq.util.log.call(null, cljs.core.prn_str.call(null, b));
+    var b = cmsnew.datastore.s3.make_form_data.call(null, c, a), l = [cljs.core.str(k), cljs.core.str((new cljs.core.Keyword(null, "key", "key", 1014010321)).cljs$core$IFn$_invoke$arity$1(a))].join("");
+    jayq.util.log.call(null, "uploaded url: ", l);
+    return cmsnew.datastore.s3.upload_form_data.call(null, k, b, function(a) {
+      return d.call(null, c, l);
+    }, function(a) {
+      return e.call(null, c, l);
+    }, f);
+  });
+};
+cmsnew.datastore.s3.extract_key_value = function(a, b) {
+  var c = a.getResponseXml().getElementsByTagName(b);
+  return cljs.core.map.call(null, function(a) {
+    return c[a].childNodes[0].nodeValue;
+  }, cljs.core.range.call(null, c.length));
+};
+cmsnew.datastore.s3.extract_versions = function(a) {
+  return cmsnew.datastore.s3.extract_key_value.call(null, a, "VersionId");
+};
+cmsnew.datastore.s3.extract_paths = function(a) {
+  return cmsnew.datastore.s3.extract_key_value.call(null, a, "Key");
+};
+cmsnew.datastore.s3.node_list_seq = function(a) {
+  return cljs.core.map.call(null, function(b) {
+    return a.item(b);
+  }, cljs.core.range.call(null, a.length));
+};
+cmsnew.datastore.s3.node_value = function(a) {
+  return a[0].textContent;
+};
+cmsnew.datastore.s3.extract_tag_paths = function(a, b, c) {
+  a = a.getResponseXml();
+  b = cmsnew.datastore.s3.node_list_seq.call(null, a.getElementsByTagName(b));
+  return cljs.core.mapv.call(null, function(a) {
+    return cljs.core.into.call(null, cljs.core.PersistentArrayMap.EMPTY, cljs.core.map.call(null, function(b) {
+      return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [b, cmsnew.datastore.s3.node_value.call(null, a.getElementsByTagName(b))], null);
+    }, c));
+  }, b);
+};
+cmsnew.datastore.s3.extract_path_etag = function(a) {
+  return cljs.core.map.call(null, function(a) {
+    return new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "path", "path", 1017337751), cljs.core.get.call(null, a, "Key"), new cljs.core.Keyword(null, "etag", "etag", 1017027719), cmsnew.datastore.s3.unquote_etag.call(null, cljs.core.get.call(null, a, "ETag"))], null);
+  }, cmsnew.datastore.s3.extract_tag_paths.call(null, a, "Contents", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["Key", "ETag"], null)));
+};
+cmsnew.datastore.s3.get_versions_of_file = function(a, b, c) {
+  return cmsnew.datastore.s3.xhr_request.call(null, [cljs.core.str("http://s3.amazonaws.com/"), cljs.core.str(a), cljs.core.str("/?versions\x26prefix\x3d"), cljs.core.str(b)].join(""), function(a) {
+    return c.call(null, cmsnew.datastore.s3.extract_versions.call(null, a));
+  });
+};
+cmsnew.datastore.s3.get_bucket_list = function(a, b, c) {
+  return cmsnew.datastore.s3.xhr_request.call(null, [cljs.core.str("http://s3.amazonaws.com/"), cljs.core.str(a), cljs.core.str("/?\x26prefix\x3d"), cljs.core.str(b)].join(""), function(a) {
+    return c.call(null, cmsnew.datastore.s3.extract_path_etag.call(null, a));
+  });
+};
+cmsnew.datastore.s3.create_s3_store = function(a, b) {
+  return new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "signing-service", "signing-service", 3972091231), a, new cljs.core.Keyword(null, "bucket", "bucket", 3930668380), b], null);
+};
 cmsnew.heckle = {};
 cmsnew.heckle.system_defaults = new cljs.core.PersistentArrayMap(null, 6, [new cljs.core.Keyword(null, "bucket", "bucket", 3930668380), "immubucket", new cljs.core.Keyword(null, "store-root", "store-root", 1889599936), "http://s3.amazonaws.com", new cljs.core.Keyword(null, "template-path", "template-path", 787573002), "_layouts", new cljs.core.Keyword(null, "post-path", "post-path", 2970567844), "_posts", new cljs.core.Keyword(null, "page-path", "page-path", 1851480085), "_site_src", new cljs.core.Keyword(null, 
 "data-path", "data-path", 604226522), "_data"], null);
@@ -27575,265 +27885,6 @@ cmsnew.heckle.create_heckle_for_url = function(a) {
     return cljs.core.async.impl.ioc_helpers.run_state_machine_wrapped.call(null, d);
   });
   return b;
-};
-cmsnew.log_utils = {};
-cmsnew.log_utils.ld = function(a) {
-  return jayq.util.log.call(null, cljs.core.clj__GT_js.call(null, a));
-};
-cmsnew.log_utils.lp = function(a) {
-  return jayq.util.log.call(null, cljs.core.prn_str.call(null, a));
-};
-cmsnew.log_utils.log_chan = function(a) {
-  return cljs.core.async.map_LT_.call(null, function(a) {
-    cmsnew.log_utils.ld.call(null, a);
-    return a;
-  }, a);
-};
-cmsnew.tooltipper = {};
-cmsnew.tooltipper.page_top = 62;
-cmsnew.tooltipper.top_bottom_boundary = function(a) {
-  var b = jayq.core.$.call(null, a);
-  a = b.height();
-  b = b.offset().top;
-  return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [b, b + a], null);
-};
-cmsnew.tooltipper.element_boundaries = function(a) {
-  return cljs.core.map.call(null, cmsnew.tooltipper.top_bottom_boundary, jayq.core.$.call(null, a).children());
-};
-cmsnew.tooltipper.hover_boundaries = function(a) {
-  a = cljs.core.flatten.call(null, cmsnew.tooltipper.element_boundaries.call(null, a));
-  a = cljs.core.concat.call(null, new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [cljs.core.first.call(null, a) - 16], null), a, new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [100 + cljs.core.last.call(null, a)], null));
-  return cljs.core.vec.call(null, cljs.core.map.call(null, cljs.core.vector, cljs.core.keep_indexed.call(null, function(a, c) {
-    return cljs.core.even_QMARK_.call(null, a) ? c : null;
-  }, a), cljs.core.keep_indexed.call(null, function(a, c) {
-    return cljs.core.odd_QMARK_.call(null, a) ? c : null;
-  }, a)));
-};
-cmsnew.tooltipper.hover_position = function(a, b) {
-  return cljs.core.first.call(null, cljs.core.keep_indexed.call(null, function(b, d) {
-    var e = cljs.core.nth.call(null, d, 0, null), f = cljs.core.nth.call(null, d, 1, null);
-    return e < a && a < f ? b : null;
-  }, b));
-};
-cmsnew.tooltipper.mouse_position_chan = function(a) {
-  var b = cljs.core.async.chan.call(null, cljs.core.async.sliding_buffer.call(null, 1));
-  jayq.core.bind.call(null, jayq.core.$.call(null, a), new cljs.core.Keyword(null, "mousemove", "mousemove", 1601016168), function(a) {
-    return cljs.core.async.put_BANG_.call(null, b, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "x", "x", 1013904362), a.pageX, new cljs.core.Keyword(null, "y", "y", 1013904363), a.pageY], null));
-  });
-  return b;
-};
-cmsnew.tooltipper.inset_tooltip_QMARK_ = function() {
-  var a = jayq.core.$.call(null, "body").width(), b = jayq.core.$.call(null, "[data-pagename]").width();
-  return 80 > a - b;
-};
-cmsnew.tooltipper.tooltip_positions = function(a, b) {
-  var c = cljs.core.async.chan.call(null), d = cljs.core.async.chan.call(null, 1);
-  cljs.core.async.impl.dispatch.run.call(null, function() {
-    var e = function() {
-      return function(a) {
-        return function() {
-          var b = null, c = function() {
-            var a = [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null];
-            a[0] = b;
-            a[1] = 1;
-            return a;
-          }, d = function(b) {
-            for (;;) {
-              var c = function() {
-                try {
-                  for (;;) {
-                    var c = a.call(null, b);
-                    if (!cljs.core.keyword_identical_QMARK_.call(null, c, new cljs.core.Keyword(null, "recur", "recur", 1122293407))) {
-                      return c;
-                    }
-                  }
-                } catch (d) {
-                  if (d instanceof Object) {
-                    return b[5] = d, cljs.core.async.impl.ioc_helpers.process_exception.call(null, b), new cljs.core.Keyword(null, "recur", "recur", 1122293407);
-                  }
-                  if (new cljs.core.Keyword(null, "else", "else", 1017020587)) {
-                    throw d;
-                  }
-                  return null;
-                }
-              }();
-              if (!cljs.core.keyword_identical_QMARK_.call(null, c, new cljs.core.Keyword(null, "recur", "recur", 1122293407))) {
-                return c;
-              }
-            }
-          }, b = function(a) {
-            switch(arguments.length) {
-              case 0:
-                return c.call(this);
-              case 1:
-                return d.call(this, a);
-            }
-            throw Error("Invalid arity: " + arguments.length);
-          };
-          b.cljs$core$IFn$_invoke$arity$0 = c;
-          b.cljs$core$IFn$_invoke$arity$1 = d;
-          return b;
-        }();
-      }(function(d) {
-        var e = d[1];
-        if (1 === e) {
-          var f;
-          d[7] = null;
-          d[2] = null;
-          d[1] = 2;
-          return new cljs.core.Keyword(null, "recur", "recur", 1122293407);
-        }
-        if (2 === e) {
-          var e = d[8], l = jayq.core.$.call(null, a), e = 0 < l.length;
-          d[8] = l;
-          cljs.core.truth_(e) ? d[1] = 4 : d[1] = 5;
-          return new cljs.core.Keyword(null, "recur", "recur", 1122293407);
-        }
-        if (3 === e) {
-          return e = d[2], cljs.core.async.impl.ioc_helpers.return_chan.call(null, d, e);
-        }
-        if (4 === e) {
-          return cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, d, 7, b);
-        }
-        if (5 === e) {
-          return d[2] = null, d[1] = 6, new cljs.core.Keyword(null, "recur", "recur", 1122293407);
-        }
-        if (6 === e) {
-          return e = d[2], l = cljs.core.async.timeout.call(null, 50), d[9] = e, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, d, 22, l);
-        }
-        if (7 === e) {
-          return e = d[10], e = d[2], l = cljs.core.seq_QMARK_.call(null, e), d[10] = e, d[1] = l ? 8 : 9, new cljs.core.Keyword(null, "recur", "recur", 1122293407);
-        }
-        if (8 === e) {
-          return e = d[10], e = cljs.core.apply.call(null, cljs.core.hash_map, e), d[2] = e, d[1] = 10, new cljs.core.Keyword(null, "recur", "recur", 1122293407);
-        }
-        if (9 === e) {
-          return e = d[10], d[2] = e, d[1] = 10, new cljs.core.Keyword(null, "recur", "recur", 1122293407);
-        }
-        if (10 === e) {
-          e = d[8];
-          l = d[11];
-          l = d[2];
-          f = cljs.core.get.call(null, l, new cljs.core.Keyword(null, "y", "y", 1013904363));
-          var l = cljs.core.get.call(null, l, new cljs.core.Keyword(null, "x", "x", 1013904362)), m = cmsnew.tooltipper.hover_boundaries.call(null, a);
-          f = cmsnew.tooltipper.hover_position.call(null, f, m);
-          var m = cljs.core.get.call(null, m, f), m = 5 + cljs.core.first.call(null, m), e = e.offset().left, n = cmsnew.tooltipper.inset_tooltip_QMARK_.call(null);
-          d[11] = f;
-          d[12] = e;
-          d[13] = m;
-          d[14] = l;
-          d[1] = n ? 11 : 12;
-          return new cljs.core.Keyword(null, "recur", "recur", 1122293407);
-        }
-        return 11 === e ? (d[2] = 0, d[1] = 13, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 12 === e ? (d[2] = -20, d[1] = 13, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 13 === e ? (l = d[11], e = d[12], f = d[7], e += d[2], l = cljs.core.not_EQ_.call(null, f, l), d[15] = e, d[1] = l ? 14 : 15, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 14 === e ? (l = d[11], cljs.core.truth_(null == l) ? d[1] = 18 : d[1] = 19, new cljs.core.Keyword(null, "recur", 
-        "recur", 1122293407)) : 15 === e ? (d[2] = null, d[1] = 16, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 16 === e ? (e = d[2], l = cljs.core.async.timeout.call(null, 50), d[16] = e, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, d, 21, l)) : 17 === e ? (e = d[2], d[2] = e, d[1] = 16, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 18 === e ? (e = [new cljs.core.Keyword(null, "tooltip-hidden", "tooltip-hidden", 4798525990)], e = new cljs.core.PersistentVector(null, 
-        1, 5, cljs.core.PersistentVector.EMPTY_NODE, e, null), d[2] = e, d[1] = 20, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 19 === e ? (e = d[15], l = d[11], m = d[13], e = new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [e, m, l], null), e = [new cljs.core.Keyword(null, "tooltip-position", "tooltip-position", 2720240421), e], e = new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, e, null), d[2] = e, d[1] = 20, 
-        new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 20 === e ? (e = d[2], cljs.core.async.impl.ioc_helpers.put_BANG_.call(null, d, 17, c, e)) : 21 === e ? (l = d[11], e = d[2], d[17] = e, d[7] = l, d[2] = null, d[1] = 2, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 22 === e ? (e = f = d[7], d[18] = d[2], d[7] = e, d[2] = null, d[1] = 2, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : null;
-      });
-    }(), f = function() {
-      var a = e.call(null);
-      a[cljs.core.async.impl.ioc_helpers.USER_START_IDX] = d;
-      return a;
-    }();
-    return cljs.core.async.impl.ioc_helpers.run_state_machine_wrapped.call(null, f);
-  });
-  return c;
-};
-cmsnew.tooltipper.tooltip_hide = function() {
-  return jayq.core.remove_class.call(null, jayq.core.$.call(null, "#tooltipper"), "tooltipper-active");
-};
-cmsnew.tooltipper.tooltip_render = function(a) {
-  var b = cljs.core.nth.call(null, a, 0, null), c = cljs.core.nth.call(null, a, 1, null);
-  a = cljs.core.nth.call(null, c, 0, null);
-  var c = cljs.core.nth.call(null, c, 1, null), d = cljs.core._EQ_;
-  if (cljs.core.truth_(d.call(null, new cljs.core.Keyword(null, "tooltip-position", "tooltip-position", 2720240421), b))) {
-    return jayq.core.add_class.call(null, jayq.core.$.call(null, "#tooltipper"), "tooltipper-active"), jayq.core.css.call(null, jayq.core.$.call(null, "#tooltipper"), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "top", "top", 1014019271), [cljs.core.str(c), cljs.core.str("px")].join(""), new cljs.core.Keyword(null, "left", "left", 1017222009), [cljs.core.str(a), cljs.core.str("px")].join("")], null));
-  }
-  if (cljs.core.truth_(d.call(null, new cljs.core.Keyword(null, "tooltip-hidden", "tooltip-hidden", 4798525990), b))) {
-    return cmsnew.tooltipper.tooltip_hide.call(null);
-  }
-  throw Error([cljs.core.str("No matching clause: "), cljs.core.str(b)].join(""));
-};
-cmsnew.tooltipper.tooltip_renderer = function(a) {
-  cljs.core.async.chan.call(null);
-  var b = cljs.core.async.chan.call(null, 1);
-  cljs.core.async.impl.dispatch.run.call(null, function() {
-    var c = function() {
-      return function(a) {
-        return function() {
-          var b = null, c = function() {
-            var a = [null, null, null, null, null, null, null, null];
-            a[0] = b;
-            a[1] = 1;
-            return a;
-          }, d = function(b) {
-            for (;;) {
-              var c = function() {
-                try {
-                  for (;;) {
-                    var c = a.call(null, b);
-                    if (!cljs.core.keyword_identical_QMARK_.call(null, c, new cljs.core.Keyword(null, "recur", "recur", 1122293407))) {
-                      return c;
-                    }
-                  }
-                } catch (d) {
-                  if (d instanceof Object) {
-                    return b[5] = d, cljs.core.async.impl.ioc_helpers.process_exception.call(null, b), new cljs.core.Keyword(null, "recur", "recur", 1122293407);
-                  }
-                  if (new cljs.core.Keyword(null, "else", "else", 1017020587)) {
-                    throw d;
-                  }
-                  return null;
-                }
-              }();
-              if (!cljs.core.keyword_identical_QMARK_.call(null, c, new cljs.core.Keyword(null, "recur", "recur", 1122293407))) {
-                return c;
-              }
-            }
-          }, b = function(a) {
-            switch(arguments.length) {
-              case 0:
-                return c.call(this);
-              case 1:
-                return d.call(this, a);
-            }
-            throw Error("Invalid arity: " + arguments.length);
-          };
-          b.cljs$core$IFn$_invoke$arity$0 = c;
-          b.cljs$core$IFn$_invoke$arity$1 = d;
-          return b;
-        }();
-      }(function(b) {
-        var c = b[1];
-        return 4 === c ? (c = cmsnew.tooltipper.tooltip_render.call(null, b[2]), b[7] = c, b[2] = null, b[1] = 2, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 3 === c ? (c = b[2], cljs.core.async.impl.ioc_helpers.return_chan.call(null, b, c)) : 2 === c ? cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, b, 4, a) : 1 === c ? (b[2] = null, b[1] = 2, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : null;
-      });
-    }(), d = function() {
-      var a = c.call(null);
-      a[cljs.core.async.impl.ioc_helpers.USER_START_IDX] = b;
-      return a;
-    }();
-    return cljs.core.async.impl.ioc_helpers.run_state_machine_wrapped.call(null, d);
-  });
-  return b;
-};
-cmsnew.tooltipper.render_tooltip_content = function() {
-  return crate.core.html.call(null, cmsnew.templates.tooltip_template.call(null));
-};
-cmsnew.tooltipper.add_popover_to_tooltip = function() {
-  return jayq.core.$.call(null, "#tooltipper").popover(cljs.core.clj__GT_js.call(null, new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null, "html", "html", 1017117469), !0, new cljs.core.Keyword(null, "content", "content", 1965434859), cmsnew.tooltipper.render_tooltip_content, new cljs.core.Keyword(null, "trigger", "trigger", 4248979754), "manual"], null)));
-};
-cmsnew.tooltipper.popover_show = function() {
-  return jayq.core.$.call(null, "#tooltipper").popover("show");
-};
-cmsnew.tooltipper.popover_hide = function() {
-  return jayq.core.$.call(null, "#tooltipper").popover("hide");
-};
-cmsnew.tooltipper.tooltip_position_chan = function(a) {
-  return cmsnew.tooltipper.tooltip_positions.call(null, a, cmsnew.tooltipper.mouse_position_chan.call(null, "body"));
-};
-cmsnew.tooltipper.tooltip_chain = function(a) {
-  cmsnew.tooltipper.add_popover_to_tooltip.call(null);
-  return cljs.core.async.into.call(null, cljs.core.PersistentVector.EMPTY, cljs.core.async.map_LT_.call(null, cmsnew.tooltipper.tooltip_render, cmsnew.tooltipper.tooltip_positions.call(null, a, cmsnew.tooltipper.mouse_position_chan.call(null, "body"))));
 };
 cmsnew.edn_page_editor = {};
 cmsnew.edn_page_editor.render_to = function(a, b, c) {
