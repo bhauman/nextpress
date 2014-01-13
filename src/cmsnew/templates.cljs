@@ -8,6 +8,7 @@
             [reactor.core :as react]
             [sablono.core :as sab :include-macros true]
             [cmsnew.markdown :refer [markdown-to-html]]
+            [jayq.core :as jq :refer [$]]
             [jayq.util :refer [log]])
   (:require-macros [reactor.macros :as reactm] ))
 
@@ -211,9 +212,13 @@
                              [:button {:type "button"
                                        :onClick #(put! (:event-chan state) [:add-item {:type :markdown}])
                                        :className "btn btn-default add-text-item"} "Text"]
-                             [:button {:type "button" :className "btn btn-default add-image-item"} "Image"]]))
+                             [:button {:type "button"
+                                       :onClick (fn [_] (.click ($ "input.image-upload")))
+                                       :className "btn btn-default add-image-item"} "Image"]]))
       [:span])          
     [:div.hidden {:id "image-upload"}
-     [:input.image-upload {:type "file" :name "image-upload-file" }]]
+     [:input.image-upload {:type "file"
+                           :onChange #(put! (:event-chan state) [:image-selected %])
+                           :name "image-upload-file" }]]
     ]))
 
