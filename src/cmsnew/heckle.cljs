@@ -300,6 +300,10 @@
        (map #(assoc % :page-type :page))               
        (map #(self-assoc % :target-path make-page-target-path))))
 
+(defn get-edn-pages [system]
+  (->> (get-pages system @(:source-files system))
+       (filter edn-page?)))
+
 (defn get-data [system files]
   (->> (filter-for-prefix files (:data-path system))
        (map (partial parse-data-file system))))

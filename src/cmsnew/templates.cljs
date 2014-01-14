@@ -13,16 +13,21 @@
   (:require-macros [reactor.macros :as reactm] ))
 
 ;; helpers
-(defn delete-button []
-  [:button {:type "button" :class "btn btn-danger form-delete pull-right"} "Delete"])
+(defn delete-button [event-chan]
+  [:button {:type "button"
+            :onClick #(put! event-chan [:form-delete])
+            :className "btn btn-danger form-delete pull-right"} "Delete"])
+
+(defn loading [percent-complete]
+  [:div.progress.progress-striped.active
+   [:div.progress-bar {:role "progressbar"
+                       :aria-valuenow percent-complete
+                       :aria-valuemin 0
+                       :aria-valuemax 100
+                       :style { :width (str percent-complete "%")}}
+    [:span.sr-only (str percent-complete "% Complete") ]]])
 
 ;; rendering items
-
-(defn tooltip-template []
-  [:div {:class "btn-group"}
-   [:button {:type "button" :class "btn btn-default add-heading-item"} "Heading"]
-   [:button {:type "button" :class "btn btn-default add-text-item"} "Text"]
-   [:button {:type "button" :class "btn btn-default add-image-item"} "Image"]])
 
 (defn item-list [id name items]
   [:div.edit-items-list {:id id :data-pagename name } items])
@@ -44,13 +49,24 @@
 (defmethod render-item :markdown [{:keys [id type content]}]
   (item-container id type (crate/raw (markdown-to-html content))))
 
+(defn item-modify-control [id event-chan]
+  [:div.item-modify-control.btn-group
+   [:button.btn.btn-default {:type "button"
+                             :onClick #(put! event-chan [:move-item-up {:id id}])
+                             } [:span.glyphicon.glyphicon-chevron-up]]
+   [:button.btn.btn-default {:type "button"
+                             :onClick #(put! event-chan [:move-item-down {:id id}])
+                             } [:span.glyphicon.glyphicon-chevron-down]]])
+
 ;; moving to react
 
 (defn editable-item-container [id type content event-chan]
   (sab/html [:div {:id id
                    :data-pageitem (str type)
-                   :onClick #(put! event-chan [:edit-item {:id id}])
-                   :className "item"} content]))
+                   :onDoubleClick #(put! event-chan [:edit-item {:id id}])
+                   :className "item"}
+             #_(item-modify-control id event-chan)
+             content]))
 
 (defmulti render-editable-item #(:type %))
 
@@ -121,6 +137,7 @@
    (sab/html
     (form-to {:onSubmit (react/form-submit owner event-chan :form-submit [:description])}
              [:post (str "#image-item-" (:id item))]
+             [:p [:img.img-responsive {:src (:url item)}]]
              (control-group :description errors
                             (text-field {:className "heading-input"
                                          :ref "description"
@@ -130,7 +147,7 @@
              (submit-button {:className "btn btn-primary"} "Save")
              (reset-button {:className "btn btn-default"
                             :onClick #(put! event-chan [:form-cancel])} "Cancel")
-             (delete-button)))))
+             (delete-button event-chan)))))
 
 (defmethod item-form :markdown [item errors event-chan owner]
   (reactm/owner-as
@@ -148,23 +165,6 @@
      (reset-button {:className "btn btn-default"
                     :onClick #(put! event-chan [:form-cancel])} "Cancel"))
     )))
-
-(defn counter []
-  (reactm/owner-as
-   owner
-   (do
-     (let [state (-> owner .-state)
-           count (if state (.-counter state) 0)]
-       (sab/html [:div
-                  [:a {:href "#" :onClick #(do
-                                             (log (-> owner .-state))
-                                             (.setState owner (clj->js {:counter (inc count)}))
-                                             false)}
-                   "Counter: " count]])))))
-
-(defn edit-form-holder [contents]
-  [:div.edit-form-holder
-   contents])
 
 (defn item-under-edit [{:keys [editing-item]}] editing-item)
 
@@ -184,6 +184,7 @@
 
 (defn render-edn-page [{:keys [edn-page] :as state}]
   (let [page-data (get-in edn-page [:front-matter :items])
+        ;; this feels hacky
         page-data-inserted (if-let [insp (get-in state [:editing-item :insert-position])]
                              (insert-at page-data insp (:editing-item state))
                              page-data)]
@@ -193,12 +194,10 @@
                                        (repeat state))))))
 
 (defn edit-page [{:keys [edn-page] :as state}]
-  (log "rendering page")
   (sab/html
    [:div.edit-page
     [:div.navbar.navbar-default
      [:a.navbar-brand { :href "#"} (-> edn-page :front-matter :title)]]
-    (counter)          
     [:div#main-area.container
      (render-edn-page state)]
     (if (not (:editing-item state))
@@ -218,7 +217,11 @@
       [:span])          
     [:div.hidden {:id "image-upload"}
      [:input.image-upload {:type "file"
-                           :onChange #(put! (:event-chan state) [:image-selected %])
+                           ;; this isn't working, need to ask why
+                           :onChange (fn [x]
+                                       (let [event (.-nativeEvent x)]
+                                         (put! (:event-chan state) [:image-selected event])))
                            :name "image-upload-file" }]]
     ]))
+
 

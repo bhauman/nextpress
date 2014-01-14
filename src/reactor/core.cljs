@@ -1,7 +1,8 @@
 (ns reactor.core
   (:require
    [cljs.core.async :as async
-    :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]))
+    :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]])
+  (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]))
 
 (def Pure
   (.createClass js/React
@@ -21,6 +22,23 @@
                  "render"
                  (fn []
                    (this-as this ((.. this -props -children) this))))))
+
+(defn render-to [react-dom html-node callback]
+  (.renderComponent js/React react-dom html-node callback))
+
+(defn react-render [html-node react-dom]
+  "A blocking render call"
+  (let [out (chan)]
+    (render-to react-dom html-node (fn [] (put! out :rendered) (close! out)))
+    out))
+
+(defn react-render-loop [html-node react-dom-chan]
+  (go-loop []
+           (let [react-dom (<! react-dom-chan)]
+             (if (nil? react-dom)
+               :finished
+               (do (<! (react-render html-node react-dom))
+                   (recur))))))
 
 (defn raw [raw-html-str]
   (.div (.-DOM js/React)

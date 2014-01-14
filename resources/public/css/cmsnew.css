@@ -131,3 +131,40 @@ h1, h2, h3, h4, h5, h6 {
   background: transparent url('./spinner1.gif') no-repeat 0 0;
   display:  inline-block;
 }
+
+[data-pageitem] {
+   position:relative;
+}
+
+.item-modify-control {
+   position: absolute;
+   right: 0px;
+   display: none;
+}
+
+[data-pageitem]:hover .item-modify-control {
+   display: block;
+}
+
+/* select site */
+
+body.select-site {
+  background-color: #eee;
+}
+
+.signin-area {
+   margin-top: 40px;
+   margin-bottom: 40px;
+}
+
+.form-signin {
+  max-width: 330px;
+  padding: 15px;
+  margin: 0 auto;
+}
+
+.form-signin .form-signin-heading,
+.form-signin .checkbox {
+  margin-bottom: 10px;
+}
+

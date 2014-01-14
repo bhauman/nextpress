@@ -10,7 +10,9 @@
    [cmsnew.tooltipper :as tip]
    [cmsnew.log-utils :refer [ld lp log-chan]]
    [cmsnew.edn-page-editor :as page-edit]
-   [cmsnew.heckle-publisher :as publisher]   
+   [cmsnew.heckle-publisher :as publisher]
+   [cmsnew.site-selector :refer [select-site-loop]]
+   [cmsnew.page-selector :refer [select-page-loop]]   
    [cljs-uuid-utils :refer [make-random-uuid uuid-string]]
    [clojure.string :as string]
    [cljs.reader :refer [push-back-reader read-string]]
@@ -19,20 +21,15 @@
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]))
 
 (go
- (let [heckle-site (<! (heckle/create-heckle-for-url
-                        "http://immubucket.s3-website-us-east-1.amazonaws.com"))
-       user-email (<! (session/init (:signing-service heckle-site)))
-       user-email (<! (session/get-login (:signing-service heckle-site)))
-       source-files @(:source-files heckle-site) 
-       pages (heckle/get-pages heckle-site source-files)
-       orig-edn-page (first (filter heckle/edn-page? pages))
-       page-items (get-in orig-edn-page [:front-matter :items])
-       start-edn-page (assoc-in orig-edn-page [:front-matter :items] page-items)]
-   (ld start-edn-page)
-
-   (page-edit/edit-page heckle-site start-edn-page)
-
-   #_(publisher/init heckle-site)
-   #_(heckle/publish heckle-site)
-   ))
-
+ (let [url-config (<! (select-site-loop))
+       signing-service (get-in url-config [:config :signing-service])
+       site-url (:site-url url-config)
+       user-email (<! (session/init signing-service))
+       user-email (<! (session/get-login signing-service))]
+   (when user-email
+     (let [site (<! (heckle/create-heckle-for-url site-url))]
+       (loop []
+         (let [edn-page (<! (select-page-loop site))]
+           (log edn-page)
+           (<! (page-edit/edit-page site edn-page)))
+         (recur))))))
