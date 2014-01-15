@@ -19,7 +19,6 @@
    [jayq.util :refer [log]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]))
 
-
 ;; page helpers
 
 (def items-key [:front-matter :items])
@@ -71,6 +70,9 @@
                 (vec (concat (take position items)
                              [data-item]
                              (drop position items)))))))
+
+(defn merge-front-matter-into-page [page new-front-matter]
+  (update-in page [:front-matter] merge (dissoc new-front-matter :errors)))
 
 (defn initial-item-to-empty-page [page]
   (if (empty-page? page)
@@ -177,6 +179,45 @@
                              (new-item :markdown) position)
     (go (:edn-page page-state))))
 
+(defn add-error [subject key msg]
+  (update-in subject [:errors key]
+             conj msg))
+
+(defn cant-be-blank [key subject]
+  (let [value (key subject)]
+    (if (or (nil? value)
+            (string/blank? value))
+      (add-error subject key "Can't be blank")
+      subject)))
+
+(defn validate-front-matter [front-matter]
+  (->> front-matter
+       (cant-be-blank :title)
+       (cant-be-blank :layout)))
+
+(defn valid? [data]
+  (zero? (count (:errors data))))
+
+(defn handle-edit-settings [page-state]
+  (let [{:keys [edn-page event-chan]} @page-state]
+    (swap! page-state assoc :editing-front-matter (get-in @page-state [:edn-page :front-matter]))
+    (go-loop []
+             (let [[msg data] (<! event-chan)]
+               (log (prn-str [msg data]))
+               (condp = msg
+                 :form-submit
+                 (let [validated (validate-front-matter data)]
+                   (if (valid? validated)
+                     (let [new-page (merge-front-matter-into-page edn-page validated)]
+                       (heckle/store-source-file (:heckle-site @page-state) new-page)
+                       (go (<! (timeout 1000))
+                           (heckle/publish (:heckle-site @page-state)))
+                       new-page)
+                     (recur)))
+                 :form-cancel edn-page
+                 nil edn-page
+                 (recur))))))
+
 (defn edit-edn-page-loop-new [page-state]
   (let [start-edn-page (initial-item-to-empty-page (:edn-page @page-state))]
     (swap! page-state assoc :edn-page start-edn-page)
@@ -186,6 +227,10 @@
                (log (prn-str [msg data]))
                (log insert-position)
                (condp = msg
+                 :edit-settings
+                 (let [new-page (<! (handle-edit-settings page-state))]
+                   (swap! page-state assoc :edn-page new-page :editing-front-matter false)
+                   (recur new-page insert-position))
                  :edit-item
                  (let [res-page (<! (handle-edit-page-item-new page-state (:id data)))
                        new-page (initial-item-to-empty-page res-page)]
@@ -200,12 +245,15 @@
                    (swap! page-state assoc :edn-page new-page)
                    (recur new-page insert-position))                 
                  :insert-position (recur edn-page data)
+                 nil true
                  (recur edn-page insert-position))))))
 
 (defn edit-page [heckle-site start-edn-page]
   (let [event-chan (chan)
+        close-chan (chan)
         page-state (atom { :heckle-site heckle-site
-                           :event-chan event-chan})
+                          :event-chan event-chan
+                          :close-chan close-chan})
         target-node (.getElementById js/document "cmsnew")
         state-change-chan (async-util/atom-chan page-state)
         ]
@@ -214,6 +262,8 @@
          (react-render-loop target-node))
     (swap! page-state assoc :edn-page start-edn-page ) ;; initial render
     (go
-       (<! (edit-edn-page-loop-new page-state)))
-
-    ))
+     (let [[val ch] (alts! [close-chan (edit-edn-page-loop-new page-state)])]
+           (close! event-chan)
+           (close! state-change-chan)
+           (close! close-chan)
+           true))))

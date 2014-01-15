@@ -193,14 +193,56 @@
                                        page-data-inserted
                                        (repeat state))))))
 
+(defn edit-front-matter-form [{:keys [edn-page event-chan editing-front-matter] :as state}]
+  (reactm/owner-as
+   owner
+   (sab/html
+    (form-to {:onSubmit (react/form-submit owner event-chan :form-submit [:title :layout])}
+             [:post (str "#pasting-front-matter")]
+             [:div.form-group
+              [:label "Title"]
+              (control-group
+               :title (or (:errors editing-front-matter) {})
+               (text-field {:ref "title"
+                            :className "form-control"
+                            :defaultValue (editing-front-matter :title)
+                            :placeholder "Enter a page title"}
+                           :title))]
+             [:div.form-group
+              [:label "Layout"]
+              (control-group
+               :layout (or (:errors editing-front-matter) {})
+               (sab/drop-down {:ref "layout"
+                               :className "form-control"                            
+                               :defaultValue (editing-front-matter :layout)}
+                              :layout
+                              (heckle/get-templates (:heckle-site state) @(get-in state [:heckle-site :source-files])) 
+                              ))]
+             (submit-button {:className "btn btn-primary"} "Save")
+             (reset-button {:className "btn btn-default"
+                            :onClick #(put! event-chan [:form-cancel])} "Cancel")))))
+
 (defn edit-page [{:keys [edn-page] :as state}]
   (sab/html
    [:div.edit-page
     [:div.navbar.navbar-default
-     [:a.navbar-brand { :href "#"} (-> edn-page :front-matter :title)]]
+     [:div.container
+      [:a.pull-left.navbar-icon.navbar-icon-left
+       {:href "#"
+        :onClick #(do (put! (:event-chan state) [:edit-settings]) false)}
+       [:span.glyphicon.glyphicon-cog]]
+      [:a.navbar-brand { :href "#"} (-> edn-page :front-matter :title)]
+      [:a.pull-right.navbar-icon
+       {:href "#"
+        :onClick #(do (put! (:close-chan state) [:close]) false)}
+       [:span.glyphicon.glyphicon-remove-sign]]
+      ]
+     ]
     [:div#main-area.container
-     (render-edn-page state)]
-    (if (not (:editing-item state))
+     (if (:editing-front-matter state)
+       (edit-front-matter-form state)
+       (render-edn-page state))]
+    (if (and (not (:editing-item state)) (not (:editing-front-matter state)))
       (tooltip/Tooltipper. #js{ :watching ".edit-items-list"
                                 :onPositionChange (fn [pos] (put! (:event-chan state) [:insert-position pos])) }
                            (sab/html
@@ -214,7 +256,7 @@
                              [:button {:type "button"
                                        :onClick (fn [_] (.click ($ "input.image-upload")))
                                        :className "btn btn-default add-image-item"} "Image"]]))
-      [:span])          
+      [:span])
     [:div.hidden {:id "image-upload"}
      [:input.image-upload {:type "file"
                            ;; this isn't working, need to ask why
@@ -223,5 +265,6 @@
                                          (put! (:event-chan state) [:image-selected event])))
                            :name "image-upload-file" }]]
     ]))
+
 
 
