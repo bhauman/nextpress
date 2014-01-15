@@ -384,6 +384,12 @@
                                  (path-etag-map new-file-list)]))
        (map< changed-map-keys)
        (map< (fn [file-list] (filter good-file-path? file-list)))
+
+       (map< #(do
+                (when (zero? (count %))
+                  (swap! (:finished-publishing system) inc)) 
+                %))
+       
        (filter< #(pos? (count %)))
        (log-it system (fn [x] {:msg (str "Source files have changed: ") :list-data x :type :source-files-changed}))
        
@@ -396,15 +402,25 @@
                @(:source-files system)))
        (log-it system (fn [x] {:msg (str "Rendering site ...") :type :processing}))
        (map< (partial process system))
+
+              
        (async-util/map-to-atom (:rendered-files system))
+
        ;; this atom contains the rendered files
-       async-util/atom-chan 
-       (map< (fn [[ov nv]] (->> (changed-map-keys [ov nv])
+       async-util/atom-chan
+       (map< (fn [[ov nv]] (let [res (->> (changed-map-keys [ov nv])
                                (select-keys nv)
-                               vals)))
+                               vals)]
+                            (or res []))))
        (log-it system (fn [x] (if (pos? (count x))
                                {:msg (str "Rendered pages have changed") :type :changes-detected}
                                {:msg "No rendered pages have changed" :type :published})))
+
+       (map< #(do
+                (when (zero? (count %))
+                  (swap! (:finished-publishing system) inc)) 
+                %))
+       
        (filter< #(pos? (count %)))
        (log-it system (fn [x] {:msg (str "Uploading rendered pages to site: ")
                               :list-data (map :target-path x)
@@ -413,7 +429,9 @@
                (->> (to-chan files-to-store)
                     (store-files system)
                     (async/into []))))
-       (log-it system (fn [x] {:msg (str "Site changes published") :type :published}))
+       (log-it system (fn [x]
+                        {:msg (str "Site changes published") :type :published}))
+       (map< #(do (swap! (:finished-publishing system) inc)  %))
        (async/into [])))
 
 (defn localstorage-source-files-key [heckle-site]
@@ -433,6 +451,18 @@
 (defn publish [{:keys [touch-chan]}]
   (put! touch-chan 1))
 
+(defn publish-it [{:keys [touch-chan finished-publishing]} callback]
+  (let [key (keyword (gensym "site-published"))]
+    (add-watch finished-publishing key (fn [_ _ _ _]
+                                         (callback)
+                                         (remove-watch finished-publishing key)))
+    (put! touch-chan 1)))
+
+(defn blocking-publish [heckle-site]
+  (let [out (chan)]
+    (publish-it heckle-site #(do (put! out 1) (close! out)))
+    out))
+
 (defn clear-cache [heckle-site]
   (local-storage-remove (localstorage-source-files-key heckle-site))
   (reset! (:source-files heckle-site) {}))
@@ -451,6 +481,7 @@
                        :s3-store (store/create-s3-store (:signing-service config) (:bucket config))
                        :touch-chan (chan)
                        :log-chan (chan)
+                       :finished-publishing (atom 0)
                        :source-files (obtain-source-files config)
                        :rendered-files (obtain-rendered-files config))]
      (add-watch (:source-files heckle-site) :files-changed

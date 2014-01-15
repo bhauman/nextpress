@@ -28,8 +28,10 @@
        user-email (<! (session/get-login signing-service))]
    (when user-email
      (let [site (<! (heckle/create-heckle-for-url site-url))]
+       (<! (heckle/blocking-publish site))
        (loop []
          (let [edn-page (<! (select-page-loop site))]
            (log edn-page)
            (<! (page-edit/edit-page site edn-page)))
          (recur))))))
+

@@ -216,7 +216,7 @@
                                :className "form-control"                            
                                :defaultValue (editing-front-matter :layout)}
                               :layout
-                              (heckle/get-templates (:heckle-site state) @(get-in state [:heckle-site :source-files])) 
+                              [["default" "default"] ["post" "post"]]
                               ))]
              (submit-button {:className "btn btn-primary"} "Save")
              (reset-button {:className "btn btn-default"
