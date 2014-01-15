@@ -21648,9 +21648,11 @@ cmsnew.authorization.persona.setup_persona_watchers = function(a, b) {
 cmsnew.authorization.persona.show_login_dialog = function() {
   return navigator.id.request();
 };
+goog.exportSymbol("cmsnew.authorization.persona.show_login_dialog", cmsnew.authorization.persona.show_login_dialog);
 cmsnew.authorization.persona.logout = function() {
   return navigator.id.logout();
 };
+goog.exportSymbol("cmsnew.authorization.persona.logout", cmsnew.authorization.persona.logout);
 cmsnew.authorization.persona.check_logged_in_status = function(a) {
   var b = cljs.core.async.chan.call(null);
   jQuery.ajax(cljs.core.clj__GT_js.call(null, new cljs.core.PersistentArrayMap(null, 5, [new cljs.core.Keyword(null, "type", "type", 1017479852), "GET", new cljs.core.Keyword(null, "crossDomain", "crossDomain", 3408731286), !0, new cljs.core.Keyword(null, "xhrFields", "xhrFields", 4226679885), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "withCredentials", "withCredentials", 1301411272), !0], null), new cljs.core.Keyword(null, "url", "url", 1014020321), [cljs.core.str(a), 
@@ -29235,18 +29237,18 @@ cmsnew.heckle_publisher.start_logger_loop = function(a) {
           return a[7] = a[2], a[2] = null, a[1] = 2, new cljs.core.Keyword(null, "recur", "recur", 1122293407);
         }
         if (4 === c) {
-          var d = a[2], f = cljs.core.swap_BANG_.call(null, e, cmsnew.heckle_publisher.add_new_publish), g = function() {
+          var d = a[2], f = cljs.core.swap_BANG_.call(null, e, cmsnew.heckle_publisher.add_new_publish), h = function() {
             return function(a, b, c, d) {
               return function(a) {
                 cljs.core.swap_BANG_.call(null, e, cmsnew.heckle_publisher.add_publish_message, a);
                 return a;
               };
             }(d, d, f, c);
-          }(), g = cljs.core.async.map_LT_.call(null, g, d), g = cljs.core.async.into.call(null, cljs.core.PersistentVector.EMPTY, g);
+          }(), h = cljs.core.async.map_LT_.call(null, h, d), h = cljs.core.async.into.call(null, cljs.core.PersistentVector.EMPTY, h);
           a[8] = f;
-          return cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, a, 5, g);
+          return cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, a, 5, h);
         }
-        return 3 === c ? (g = a[2], cljs.core.async.impl.ioc_helpers.return_chan.call(null, a, g)) : 2 === c ? (g = cljs.core.prn_str.call(null, e), g = jayq.util.log.call(null, g), a[9] = g, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, a, 4, b)) : 1 === c ? (a[2] = null, a[1] = 2, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : null;
+        return 3 === c ? (h = a[2], cljs.core.async.impl.ioc_helpers.return_chan.call(null, a, h)) : 2 === c ? (h = cljs.core.prn_str.call(null, e), h = jayq.util.log.call(null, h), a[9] = h, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, a, 4, b)) : 1 === c ? (a[2] = null, a[1] = 2, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : null;
       });
     }(), c = function() {
       var b = a.call(null);
@@ -29314,10 +29316,10 @@ cmsnew.heckle_publisher.start_logger_loop = function(a) {
           return e = b[2], cljs.core.async.impl.ioc_helpers.return_chan.call(null, b, e);
         }
         if (4 === e) {
-          var e = b[7], f = b[2], e = cljs.core.nth.call(null, f, 0, null), f = cljs.core.nth.call(null, f, 1, null), f = new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [e, f], null), f = cljs.core.prn_str.call(null, f), f = jayq.util.log.call(null, f), g = cljs.core._EQ_.call(null, new cljs.core.Keyword(null, "watch-files-click", "watch-files-click", 2803935782), e);
+          var e = b[7], f = b[2], e = cljs.core.nth.call(null, f, 0, null), f = cljs.core.nth.call(null, f, 1, null), f = new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [e, f], null), f = cljs.core.prn_str.call(null, f), f = jayq.util.log.call(null, f), h = cljs.core._EQ_.call(null, new cljs.core.Keyword(null, "watch-files-click", "watch-files-click", 2803935782), e);
           b[7] = e;
           b[8] = f;
-          b[1] = g ? 5 : 6;
+          b[1] = h ? 5 : 6;
           return new cljs.core.Keyword(null, "recur", "recur", 1122293407);
         }
         return 5 === e ? (e = cljs.core.async.put_BANG_.call(null, d, 1), b[2] = e, b[1] = 7, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 6 === e ? (e = b[7], e = cljs.core._EQ_.call(null, new cljs.core.Keyword(null, "force-publish", "force-publish", 4638237599), e), b[1] = e ? 8 : 9, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 7 === e ? (b[9] = b[2], b[2] = null, b[1] = 2, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 8 === e ? (e = cmsnew.heckle.publish.call(null, 
@@ -29520,6 +29522,103 @@ cmsnew.page_selector.select_page_loop = function(a) {
   });
   return d;
 };
+cmsnew.ui = {};
+cmsnew.ui.login = {};
+cmsnew.ui.login.login_button = function(a) {
+  return React.DOM.div({className:"container signin-area"}, React.DOM.div({className:"form-signin"}, React.DOM.h2({className:"form-signin-heading center"}, "please log in"), React.DOM.button({onClick:function() {
+    cmsnew.authorization.persona.add_login_watch.call(null, function(b) {
+      return cljs.core.async.put_BANG_.call(null, a, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "login-successful", "login-successful", 1591971568), b], null));
+    });
+    cljs.core.async.put_BANG_.call(null, a, new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "login-start", "login-start", 1239992432)], null));
+    return cmsnew.authorization.persona.show_login_dialog.call(null);
+  }, className:"btn btn-primary btn-block btn-lg"}, "Sign In")));
+};
+cmsnew.ui.login.loading_view = function(a) {
+  return React.DOM.div({className:"container signin-area"}, cljs.core.map_QMARK_.call(null, a) ? React.DOM.h2(sablono.render.render_attrs.call(null, sablono.util.merge_with_class.call(null, cljs.core.PersistentArrayMap.EMPTY, a)), null) : React.DOM.h2({}, sablono.render.render_html.call(null, a)), sablono.render.render_html.call(null, cmsnew.templates.loading.call(null, 85)));
+};
+cmsnew.ui.login.login_loop = function() {
+  var a = cljs.core.async.chan.call(null), b = document.getElementById("cmsnew"), c = cljs.core.async.chan.call(null, 1);
+  cljs.core.async.impl.dispatch.run.call(null, function() {
+    var d = function() {
+      return function(a) {
+        return function() {
+          var b = null, c = function() {
+            var a = [null, null, null, null, null, null, null, null, null, null, null, null];
+            a[0] = b;
+            a[1] = 1;
+            return a;
+          }, d = function(b) {
+            for (;;) {
+              var c = function() {
+                try {
+                  for (;;) {
+                    var c = a.call(null, b);
+                    if (!cljs.core.keyword_identical_QMARK_.call(null, c, new cljs.core.Keyword(null, "recur", "recur", 1122293407))) {
+                      return c;
+                    }
+                  }
+                } catch (d) {
+                  if (d instanceof Object) {
+                    return b[5] = d, cljs.core.async.impl.ioc_helpers.process_exception.call(null, b), new cljs.core.Keyword(null, "recur", "recur", 1122293407);
+                  }
+                  if (new cljs.core.Keyword(null, "else", "else", 1017020587)) {
+                    throw d;
+                  }
+                  return null;
+                }
+              }();
+              if (!cljs.core.keyword_identical_QMARK_.call(null, c, new cljs.core.Keyword(null, "recur", "recur", 1122293407))) {
+                return c;
+              }
+            }
+          }, b = function(a) {
+            switch(arguments.length) {
+              case 0:
+                return c.call(this);
+              case 1:
+                return d.call(this, a);
+            }
+            throw Error("Invalid arity: " + arguments.length);
+          };
+          b.cljs$core$IFn$_invoke$arity$0 = c;
+          b.cljs$core$IFn$_invoke$arity$1 = d;
+          return b;
+        }();
+      }(function(c) {
+        var d = c[1];
+        if (1 === d) {
+          return d = cmsnew.ui.login.login_button.call(null, a), d = reactor.core.react_render.call(null, b, d), cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, c, 2, d);
+        }
+        if (2 === d) {
+          return c[7] = c[2], c[2] = null, c[1] = 3, new cljs.core.Keyword(null, "recur", "recur", 1122293407);
+        }
+        if (3 === d) {
+          return cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, c, 5, a);
+        }
+        if (4 === d) {
+          return d = c[2], cljs.core.async.impl.ioc_helpers.return_chan.call(null, c, d);
+        }
+        if (5 === d) {
+          var d = c[8], d = c[9], e = c[2], d = cljs.core.nth.call(null, e, 0, null), e = cljs.core.nth.call(null, e, 1, null), k = new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [d, e], null), k = cmsnew.log_utils.ld.call(null, k), l = cljs.core._EQ_.call(null, new cljs.core.Keyword(null, "login-start", "login-start", 1239992432), d);
+          c[10] = k;
+          c[8] = e;
+          c[9] = d;
+          c[1] = l ? 6 : 7;
+          return new cljs.core.Keyword(null, "recur", "recur", 1122293407);
+        }
+        return 6 === d ? (d = cmsnew.ui.login.loading_view.call(null, "signing you in"), d = reactor.core.react_render.call(null, b, d), cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, c, 9, d)) : 7 === d ? (d = c[9], d = cljs.core._EQ_.call(null, new cljs.core.Keyword(null, "login-successful", "login-successful", 1591971568), d), c[1] = d ? 10 : 11, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 8 === d ? (d = c[2], c[2] = d, c[1] = 4, new cljs.core.Keyword(null, "recur", "recur", 
+        1122293407)) : 9 === d ? (c[11] = c[2], c[2] = null, c[1] = 3, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 10 === d ? (d = c[8], c[2] = d, c[1] = 12, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 11 === d ? (d = c[9], d = cljs.core._EQ_.call(null, null, d), c[1] = d ? 13 : 14, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 12 === d ? (d = c[2], c[2] = d, c[1] = 8, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 13 === d ? (c[2] = 
+        !1, c[1] = 15, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 14 === d ? (c[2] = null, c[1] = 3, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 15 === d ? (d = c[2], c[2] = d, c[1] = 12, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : null;
+      });
+    }(), e = function() {
+      var a = d.call(null);
+      a[cljs.core.async.impl.ioc_helpers.USER_START_IDX] = c;
+      return a;
+    }();
+    return cljs.core.async.impl.ioc_helpers.run_state_machine_wrapped.call(null, e);
+  });
+  return c;
+};
 cmsnew.site_selector = {};
 cmsnew.site_selector.select_site_form = function(a, b, c) {
   return new reactor.core.OwnerReference({value:5}, function(a) {
@@ -29674,8 +29773,8 @@ cmsnew.site_selector.select_site_loop = function() {
         }
         if (5 === d) {
           var k = c[10], e = c[2], d = cljs.core.nth.call(null, e, 0, null), e = cljs.core.nth.call(null, e, 1, null), k = new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [d, e], null), k = cmsnew.log_utils.ld.call(null, k), d = cljs.core._EQ_.call(null, d, new cljs.core.Keyword(null, "site-selected", "site-selected", 3100625363));
-          c[11] = k;
           c[10] = e;
+          c[11] = k;
           c[1] = d ? 6 : 7;
           return new cljs.core.Keyword(null, "recur", "recur", 1122293407);
         }
@@ -29694,8 +29793,8 @@ cmsnew.site_selector.select_site_loop = function() {
           cljs.core.truth_(d) ? c[1] = 10 : c[1] = 11;
           return new cljs.core.Keyword(null, "recur", "recur", 1122293407);
         }
-        return 10 === d ? (l = c[12], d = cmsnew.log_utils.ld.call(null, l), e = jayq.core.$.call(null, "body"), e = jayq.core.remove_class.call(null, e, "select-site"), k = cmsnew.site_selector.loading_view.call(null), k = reactor.core.react_render.call(null, b, k), c[13] = d, c[14] = e, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, c, 13, k)) : 11 === d ? (d = c[7], e = [new cljs.core.Keyword(null, "site-url", "site-url", 1687949659)], k = [new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, 
-        ["Not a valid site url"], null)], e = cljs.core.PersistentHashMap.fromArrays.call(null, e, k), c[7] = d, c[8] = e, c[2] = null, c[1] = 2, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 12 === d ? (d = c[2], c[2] = d, c[1] = 8, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 13 === d ? (k = c[10], l = c[12], d = c[2], e = [new cljs.core.Keyword(null, "site-url", "site-url", 1687949659), new cljs.core.Keyword(null, "config", "config", 3954079412)], k = [cmsnew.site_selector.correct_input_url.call(null, 
+        return 10 === d ? (l = c[12], d = cmsnew.log_utils.ld.call(null, l), e = jayq.core.$.call(null, "body"), e = jayq.core.remove_class.call(null, e, "select-site"), k = cmsnew.site_selector.loading_view.call(null), k = reactor.core.react_render.call(null, b, k), c[13] = e, c[14] = d, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, c, 13, k)) : 11 === d ? (d = c[7], e = [new cljs.core.Keyword(null, "site-url", "site-url", 1687949659)], k = [new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, 
+        ["Not a valid site url"], null)], e = cljs.core.PersistentHashMap.fromArrays.call(null, e, k), c[7] = d, c[8] = e, c[2] = null, c[1] = 2, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 12 === d ? (d = c[2], c[2] = d, c[1] = 8, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 13 === d ? (l = c[12], k = c[10], d = c[2], e = [new cljs.core.Keyword(null, "site-url", "site-url", 1687949659), new cljs.core.Keyword(null, "config", "config", 3954079412)], k = [cmsnew.site_selector.correct_input_url.call(null, 
         k), l], e = cljs.core.PersistentHashMap.fromArrays.call(null, e, k), c[15] = d, c[2] = e, c[1] = 12, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : null;
       });
     }(), e = function() {
@@ -29708,13 +29807,13 @@ cmsnew.site_selector.select_site_loop = function() {
   return c;
 };
 cmsnew.core = {};
-var c__5968__auto___110165 = cljs.core.async.chan.call(null, 1);
+var c__5968__auto___698518 = cljs.core.async.chan.call(null, 1);
 cljs.core.async.impl.dispatch.run.call(null, function() {
   var a = function() {
     return function(a) {
       return function() {
         var b = null, e = function() {
-          var a = [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null];
+          var a = [null, null, null, null, null, null, null, null, null, null, null, null, null];
           a[0] = b;
           a[1] = 1;
           return a;
@@ -29761,18 +29860,56 @@ cljs.core.async.impl.dispatch.run.call(null, function() {
         return b = cmsnew.site_selector.select_site_loop.call(null), cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, a, 2, b);
       }
       if (2 === b) {
-        var e = a[7], b = a[2], e = [new cljs.core.Keyword(null, "config", "config", 3954079412), new cljs.core.Keyword(null, "signing-service", "signing-service", 3972091231)], e = new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, e, null), e = cljs.core.get_in.call(null, b, e), b = (new cljs.core.Keyword(null, "site-url", "site-url", 1687949659)).cljs$core$IFn$_invoke$arity$1(b), f = cmsnew.authorization.persona.init.call(null, e);
-        a[7] = e;
-        a[8] = b;
-        return cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, a, 3, f);
+        var b = a[2], e = [new cljs.core.Keyword(null, "config", "config", 3954079412), new cljs.core.Keyword(null, "signing-service", "signing-service", 3972091231)], e = new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, e, null), e = cljs.core.get_in.call(null, b, e), b = (new cljs.core.Keyword(null, "site-url", "site-url", 1687949659)).cljs$core$IFn$_invoke$arity$1(b), e = cmsnew.authorization.persona.init.call(null, e);
+        a[7] = b;
+        return cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, a, 3, e);
       }
-      return 3 === b ? (e = a[7], b = a[2], e = cmsnew.authorization.persona.get_login.call(null, e), a[9] = b, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, a, 4, e)) : 4 === b ? (e = a[7], b = a[2], e = jayq.util.log.call(null, e), a[10] = e, cljs.core.truth_(b) ? a[1] = 5 : a[1] = 6, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 5 === b ? (b = a[8], b = cmsnew.heckle.create_heckle_for_url.call(null, b), cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, a, 8, b)) : 
-      6 === b ? (a[2] = null, a[1] = 7, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 7 === b ? (b = a[2], cljs.core.async.impl.ioc_helpers.return_chan.call(null, a, b)) : 8 === b ? (e = a[11], b = a[2], e = cmsnew.heckle.blocking_publish.call(null, b), a[11] = b, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, a, 9, e)) : 9 === b ? (a[12] = a[2], a[2] = null, a[1] = 10, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 10 === b ? (e = a[11], b = cmsnew.page_selector.select_page_loop.call(null, 
-      e), cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, a, 12, b)) : 11 === b ? (b = a[2], a[2] = b, a[1] = 7, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : 12 === b ? (e = a[11], f = a[2], b = jayq.util.log.call(null, f), e = cmsnew.edn_page_editor.edit_page.call(null, e, f), a[13] = b, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, a, 13, e)) : 13 === b ? (a[14] = a[2], a[2] = null, a[1] = 10, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : null;
+      if (3 === b) {
+        return b = a[8], b = a[2], a[8] = b, cljs.core.truth_(b) ? a[1] = 4 : a[1] = 5, new cljs.core.Keyword(null, "recur", "recur", 1122293407);
+      }
+      if (4 === b) {
+        return b = a[8], a[2] = b, a[1] = 6, new cljs.core.Keyword(null, "recur", "recur", 1122293407);
+      }
+      if (5 === b) {
+        return b = cmsnew.ui.login.login_loop.call(null), cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, a, 7, b);
+      }
+      if (6 === b) {
+        return b = a[2], cljs.core.truth_(b) ? a[1] = 8 : a[1] = 9, new cljs.core.Keyword(null, "recur", "recur", 1122293407);
+      }
+      if (7 === b) {
+        return b = a[2], a[2] = b, a[1] = 6, new cljs.core.Keyword(null, "recur", "recur", 1122293407);
+      }
+      if (8 === b) {
+        return b = a[7], b = cmsnew.heckle.create_heckle_for_url.call(null, b), cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, a, 11, b);
+      }
+      if (9 === b) {
+        return a[2] = null, a[1] = 10, new cljs.core.Keyword(null, "recur", "recur", 1122293407);
+      }
+      if (10 === b) {
+        return b = a[2], cljs.core.async.impl.ioc_helpers.return_chan.call(null, a, b);
+      }
+      if (11 === b) {
+        return e = a[9], b = a[2], e = cmsnew.heckle.blocking_publish.call(null, b), a[9] = b, cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, a, 12, e);
+      }
+      if (12 === b) {
+        return a[10] = a[2], a[2] = null, a[1] = 13, new cljs.core.Keyword(null, "recur", "recur", 1122293407);
+      }
+      if (13 === b) {
+        return e = a[9], b = cmsnew.page_selector.select_page_loop.call(null, e), cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, a, 15, b);
+      }
+      if (14 === b) {
+        return b = a[2], a[2] = b, a[1] = 10, new cljs.core.Keyword(null, "recur", "recur", 1122293407);
+      }
+      if (15 === b) {
+        var e = a[9], f = a[2], b = jayq.util.log.call(null, f), e = cmsnew.edn_page_editor.edit_page.call(null, e, f);
+        a[11] = b;
+        return cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, a, 16, e);
+      }
+      return 16 === b ? (a[12] = a[2], a[2] = null, a[1] = 13, new cljs.core.Keyword(null, "recur", "recur", 1122293407)) : null;
     });
   }(), b = function() {
     var b = a.call(null);
-    b[cljs.core.async.impl.ioc_helpers.USER_START_IDX] = c__5968__auto___110165;
+    b[cljs.core.async.impl.ioc_helpers.USER_START_IDX] = c__5968__auto___698518;
     return b;
   }();
   return cljs.core.async.impl.ioc_helpers.run_state_machine_wrapped.call(null, b);

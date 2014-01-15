@@ -12,7 +12,8 @@
    [cmsnew.edn-page-editor :as page-edit]
    [cmsnew.heckle-publisher :as publisher]
    [cmsnew.site-selector :refer [select-site-loop]]
-   [cmsnew.page-selector :refer [select-page-loop]]   
+   [cmsnew.page-selector :refer [select-page-loop]]
+   [cmsnew.ui.login :refer [login-loop]]      
    [cljs-uuid-utils :refer [make-random-uuid uuid-string]]
    [clojure.string :as string]
    [cljs.reader :refer [push-back-reader read-string]]
@@ -25,7 +26,7 @@
        signing-service (get-in url-config [:config :signing-service])
        site-url (:site-url url-config)
        user-email (<! (session/init signing-service))
-       user-email (<! (session/get-login signing-service))]
+       user-email (or user-email (<! (login-loop)))]
    (when user-email
      (let [site (<! (heckle/create-heckle-for-url site-url))]
        (<! (heckle/blocking-publish site))

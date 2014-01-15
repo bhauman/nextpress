@@ -37,10 +37,10 @@
           :onlogin (partial on-login signing-server-host)
           :onlogout (partial on-logout signing-server-host)})))
 
-(defn show-login-dialog []
+(defn ^:export show-login-dialog []
   (-> js/navigator .-id .request))
 
-(defn logout []
+(defn ^:export  logout []
   (-> js/navigator .-id .logout))
 
 (defn check-logged-in-status [signing-server-host]
