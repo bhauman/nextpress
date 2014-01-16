@@ -1,11 +1,11 @@
-(ns cmsnew.site-selector
+(ns cmsnew.ui.site-selector
   (:require
    [cljs.core.async :as async
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
    [sablono.core :as sab :include-macros true]   
-   [cmsnew.templates :as templ]
+   [cmsnew.ui.templates :as templ]
    [reactor.core :refer [input-value react-render] :as rct]
-   [cmsnew.log-utils :refer [ld lp log-chan]]
+   [cmsnew.util.log-utils :refer [ld lp log-chan]]
    [clojure.string :as string]
    [cmsnew.heckle :as heckle]
    [jayq.core :refer [$] :as jq]

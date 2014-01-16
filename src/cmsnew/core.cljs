@@ -2,18 +2,18 @@
   (:require
    [cljs.core.async :as async
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
-   [crate.core :as crate]
    [cmsnew.authorization.persona :as session]
    [cmsnew.datastore.s3 :as store]
    [cmsnew.heckle :as heckle]
-   [cmsnew.templates :as templ]
-   [cmsnew.tooltipper :as tip]
-   [cmsnew.log-utils :refer [ld lp log-chan]]
-   [cmsnew.edn-page-editor :as page-edit]
+
+   [cmsnew.util.log-utils :refer [ld lp log-chan]]
    [cmsnew.heckle-publisher :as publisher]
-   [cmsnew.site-selector :refer [select-site-loop]]
-   [cmsnew.page-selector :refer [select-page-loop]]
-   [cmsnew.ui.login :refer [login-loop]]      
+   
+   [cmsnew.ui.edn-page-editor :as page-edit]
+   [cmsnew.ui.site-selector :refer [select-site-loop]]
+   [cmsnew.ui.page-selector :refer [select-page-loop]]
+   [cmsnew.ui.login :refer [login-loop]]
+   
    [cljs-uuid-utils :refer [make-random-uuid uuid-string]]
    [clojure.string :as string]
    [cljs.reader :refer [push-back-reader read-string]]

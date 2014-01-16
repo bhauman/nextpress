@@ -1,4 +1,4 @@
-(ns cmsnew.async-utils
+(ns cmsnew.util.async-utils
   (:refer-clojure :exclude [take-while])
   (:require
    [cljs.core.async :as async

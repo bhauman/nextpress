@@ -3,12 +3,10 @@
    [cljs.core.async :as async
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
    [sablono.core :as sab :include-macros true]   
-   [cmsnew.templates :as templ]
+   [cmsnew.ui.templates :as templ]
    [cmsnew.authorization.persona :as session]
    [reactor.core :refer [input-value react-render] :as rct]
-   [cmsnew.log-utils :refer [ld lp log-chan]]
-   [clojure.string :as string]
-   [cmsnew.heckle :as heckle]
+   [cmsnew.util.log-utils :refer [ld lp log-chan]]
    [jayq.core :refer [$] :as jq]
    [jayq.util :refer [log]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]

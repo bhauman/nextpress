@@ -1,11 +1,11 @@
-(ns cmsnew.tooltipper
+(ns cmsnew.ui.tooltipper
   (:require
    [cljs.core.async :as async
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
    [crate.core :as crate]
    [sablono.core :as sab :include-macros true]
-   [cmsnew.log-utils :refer [ld lp log-chan]]
-   [cmsnew.async-utils :as async-util]
+   [cmsnew.util.log-utils :refer [ld lp log-chan]]
+   [cmsnew.util.async-utils :as async-util]
    [reactor.core :as rct]
    [clojure.string :as string]
    [jayq.core :refer [$] :as jq]

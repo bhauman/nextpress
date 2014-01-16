@@ -1,13 +1,14 @@
-(ns cmsnew.templates
+(ns cmsnew.ui.templates
   (:require [crate.form :refer [form-to text-field text-area hidden-field
                                 submit-button reset-button drop-down label]]
-            [cmsnew.tooltipper :as tooltip]
+            [cmsnew.ui.tooltipper :as tooltip]
             [cljs.core.async :as async
              :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
             [crate.core :as crate]
             [reactor.core :as react]
             [sablono.core :as sab :include-macros true]
             [cmsnew.markdown :refer [markdown-to-html]]
+            [cmsnew.publisher.item-templates :refer [item-list item-container]]
             [jayq.core :as jq :refer [$]]
             [jayq.util :refer [log]])
   (:require-macros [reactor.macros :as reactm] ))
@@ -28,26 +29,6 @@
     [:span.sr-only (str percent-complete "% Complete") ]]])
 
 ;; rendering items
-
-(defn item-list [id name items]
-  [:div.edit-items-list {:id id :data-pagename name } items])
-
-(defn item-container [id type content]
-  [:div {:id id :data-pageitem (str type) :class "item"} content])
-
-(defmulti render-item #(:type %))
-
-(defmethod render-item :default [{:keys [id type] :as item}]
-  (item-container id type [:div (prn-str item)]))
-
-(defmethod render-item :image [{:keys [id type url] :as item}]
-  (item-container id type [:p [:img.img-responsive {:src url}]]))
-
-(defmethod render-item :heading [{:keys [id content type size]}]
-  (item-container id type [(keyword (str "h" size)) content]))
-
-(defmethod render-item :markdown [{:keys [id type content]}]
-  (item-container id type (crate/raw (markdown-to-html content))))
 
 (defn item-modify-control [id event-chan]
   [:div.item-modify-control.btn-group

@@ -2,20 +2,10 @@
   (:require
    [cljs.core.async :as async
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
-   [crate.core :as crate]
    [sablono.core :as sab :include-macros true]
-   [cmsnew.authorization.persona :as session]
-   [cmsnew.datastore.s3 :as store]
    [cmsnew.heckle :as heckle]
-   [cmsnew.templates :as templ]
-   [cmsnew.tooltipper :as tip]
-   [cmsnew.log-utils :refer [ld lp log-chan]]
-   [cmsnew.edn-page-editor :as page-edit]
-   [cmsnew.async-utils :as async-util]
-
-   [cljs-uuid-utils :refer [make-random-uuid uuid-string]]
-   [clojure.string :as string]
-   [cljs.reader :refer [push-back-reader read-string]]
+   [cmsnew.util.log-utils :refer [ld lp log-chan]]
+   [cmsnew.util.async-utils :as async-util]
    [jayq.core :refer [$] :as jq]
    [jayq.util :refer [log]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]))
