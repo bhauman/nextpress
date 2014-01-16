@@ -28,7 +28,7 @@
        user-email (<! (session/init signing-service))
        user-email (or user-email (<! (login-loop)))]
    (when user-email
-     (let [site (<! (pub/create-heckle-for-url site-url))]
+     (let [site (<! (pub/create-site-for-url site-url))]
        (<! (pub/blocking-publish site))
        (loop []
          (let [edn-page (<! (select-page-loop site))]

@@ -1,4 +1,4 @@
-(ns cmsnew.heckle-publisher
+(ns cmsnew.ui.heckle-publisher
   (:require
    [cljs.core.async :as async
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
@@ -111,11 +111,11 @@
 
 ;; application
 
-(defn start-logger-loop [heckle-site]
+(defn start-logger-loop [site]
   (let [publish-chan (async-util/partition-chan
                       #(= (:type %) :source-files-changed)
                       #(= (:type %) :published)                      
-                      (:log-chan heckle-site))
+                      (:log-chan site))
         event-chan (chan)
         watching-chan (chan)
         state (atom { :publishings (list)
@@ -141,7 +141,7 @@
                (log (prn-str [msg data]))
                (condp = msg
                  :watch-files-click (put! watching-chan 1)
-                 :force-publish (pub/publish heckle-site)          
+                 :force-publish (pub/publish site)          
                  true)
                (recur))
              )
@@ -150,7 +150,7 @@
              (<! watching-chan)
              (swap! state set-watching-files true)
              (loop []
-               (pub/publish heckle-site)
+               (pub/publish site)
                (let [[v ch] (alts! [(timeout 8000) watching-chan])]
                  (if (= ch watching-chan)
                    (swap! state set-watching-files false)
@@ -158,5 +158,5 @@
              (recur))
     ))
 
-(defn init [heckle-site]
-  (start-logger-loop heckle-site))
+(defn init [site]
+  (start-logger-loop site))

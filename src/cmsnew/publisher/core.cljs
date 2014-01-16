@@ -50,9 +50,9 @@
                                 (.-message e))})
       false)))
 
-(defn parse-front-matter [heckle-site file-map]
+(defn parse-front-matter [site file-map]
   (let [r (push-back-reader (:body file-map))]
-    (if-let [front-matter (get-front-matter (:log-chan heckle-site)
+    (if-let [front-matter (get-front-matter (:log-chan site)
                                             (:path file-map) r)]
       (assoc file-map
         :front-matter front-matter
@@ -434,18 +434,18 @@
        (map< #(do (swap! (:finished-publishing system) inc)  %))
        (async/into [])))
 
-(defn localstorage-source-files-key [heckle-site]
-  (keyword (str (:bucket heckle-site) "-next-press-source-files")))
+(defn localstorage-source-files-key [site]
+  (keyword (str (:bucket site) "-next-press-source-files")))
 
-(defn localstorage-rendered-files-key [heckle-site]
-  (keyword (str (:bucket heckle-site) "-next-press-rendered-files")))
+(defn localstorage-rendered-files-key [site]
+  (keyword (str (:bucket site) "-next-press-rendered-files")))
 
-(defn- obtain-source-files [heckle-site]
-  (atom (or (local-storage-get (localstorage-source-files-key heckle-site))
+(defn- obtain-source-files [site]
+  (atom (or (local-storage-get (localstorage-source-files-key site))
             {})))
 
-(defn- obtain-rendered-files [heckle-site]
-  (atom (or (local-storage-get (localstorage-rendered-files-key heckle-site))
+(defn- obtain-rendered-files [site]
+  (atom (or (local-storage-get (localstorage-rendered-files-key site))
             {})))
 
 (defn publish [{:keys [touch-chan]}]
@@ -458,25 +458,25 @@
                                          (remove-watch finished-publishing key)))
     (put! touch-chan 1)))
 
-(defn blocking-publish [heckle-site]
+(defn blocking-publish [site]
   (let [out (chan)]
-    (publish-it heckle-site #(do (put! out 1) (close! out)))
+    (publish-it site #(do (put! out 1) (close! out)))
     out))
 
-(defn clear-cache [heckle-site]
-  (local-storage-remove (localstorage-source-files-key heckle-site))
-  (reset! (:source-files heckle-site) {}))
+(defn clear-cache [site]
+  (local-storage-remove (localstorage-source-files-key site))
+  (reset! (:source-files site) {}))
 
-(defn force-publish [heckle-site]
+(defn force-publish [site]
   (go
-   (clear-cache heckle-site)
+   (clear-cache site)
    (<! (timeout 500))
-   (publish heckle-site)))
+   (publish site)))
 
-(defn create-heckle-for-url [url]
+(defn create-site-for-url [url]
   (go
    (let [config (<! (get-config url))
-         heckle-site (assoc config
+         site (assoc config
                        :site-url url
                        :s3-store (store/create-s3-store (:signing-service config) (:bucket config))
                        :touch-chan (chan)
@@ -484,19 +484,19 @@
                        :finished-publishing (atom 0)
                        :source-files (obtain-source-files config)
                        :rendered-files (obtain-rendered-files config))]
-     (add-watch (:source-files heckle-site) :files-changed
-                (fn [_ _ o n] (local-storage-set (localstorage-source-files-key heckle-site) n)))
-     (add-watch (:rendered-files heckle-site) :fields-changed
-                (fn [_ _ o n] (local-storage-set (localstorage-rendered-files-key heckle-site)  n)))
-     (system-flow heckle-site)
+     (add-watch (:source-files site) :files-changed
+                (fn [_ _ o n] (local-storage-set (localstorage-source-files-key site) n)))
+     (add-watch (:rendered-files site) :fields-changed
+                (fn [_ _ o n] (local-storage-set (localstorage-rendered-files-key site)  n)))
+     (system-flow site)
      #_(go-loop []
-                (let [msg (<! (:log-chan heckle-site))]
+                (let [msg (<! (:log-chan site))]
                   (log (:msg msg))
                   (recur)))
-     heckle-site)))
+     site)))
 
 #_(go
- (let [site (<! (create-heckle-for-url
+ (let [site (<! (create-site-for-url
                  "http://immubucket.s3-website-us-east-1.amazonaws.com"))]
    (log site)
    (force-publish site)))

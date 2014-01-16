@@ -78,9 +78,9 @@
 
 ;; interaction controllers
 
-(defn upload-image-file [heckle-site uuid file]
+(defn upload-image-file [site uuid file]
   (let [out (chan)]
-    (store/upload-image-file (:s3-store heckle-site)
+    (store/upload-image-file (:s3-store site)
                              uuid file
                              (fn [file url]
                                (put! out [:success {:uuid uuid :url url :file file}])
@@ -101,11 +101,11 @@
 
 (defn handle-add-image [state data position]
   (log data)
-  (let [heckle-site (:heckle-site @state)
+  (let [site (:site @state)
         edn-page (:edn-page @state)
         file (aget (.-files (.-target data)) 0)
         file-upload-uuid (random-uuid)
-        upload-chan (upload-image-file heckle-site file-upload-uuid file)]
+        upload-chan (upload-image-file site file-upload-uuid file)]
     (log data)
     (log file)
     (go-loop []
@@ -115,9 +115,9 @@
                  :success
                  (let [new-page (insert-data-item-into-page edn-page position
                                                             (new-image-item file-upload-uuid (:url _data) file))]
-                   (pub/store-source-file heckle-site new-page)
+                   (pub/store-source-file site new-page)
                    (go (<! (timeout 1000))
-                       (pub/publish heckle-site))                   
+                       (pub/publish site))                   
                    new-page)
                  :progress (do (log _data) (recur))
                  (recur))))))
@@ -146,9 +146,9 @@
          new-data-item (<! (edit-item-new state item-data))]
      (if new-data-item
        (let [new-page (merge-data-item-into-page (:edn-page @state) new-data-item)]
-         (pub/store-source-file (:heckle-site @state) new-page)
+         (pub/store-source-file (:site @state) new-page)
          (go (<! (timeout 1000))
-             (pub/publish (:heckle-site @state)))
+             (pub/publish (:site @state)))
          new-page)
        (:edn-page @state)))))
 
@@ -159,9 +159,9 @@
      (if new-data-item
        (let [fixed-data-item (dissoc new-data-item :insert-position)
              new-page (insert-data-item-into-page (:edn-page @state) position fixed-data-item)]
-         (pub/store-source-file (:heckle-site @state) new-page)
+         (pub/store-source-file (:site @state) new-page)
          (go (<! (timeout 1000))
-             (pub/publish (:heckle-site @state)))
+             (pub/publish (:site @state)))
          new-page)
        (:edn-page @state)))))
 
@@ -205,9 +205,9 @@
                  (let [validated (validate-front-matter data)]
                    (if (valid? validated)
                      (let [new-page (merge-front-matter-into-page edn-page validated)]
-                       (pub/store-source-file (:heckle-site @page-state) new-page)
+                       (pub/store-source-file (:site @page-state) new-page)
                        (go (<! (timeout 1000))
-                           (pub/publish (:heckle-site @page-state)))
+                           (pub/publish (:site @page-state)))
                        new-page)
                      (recur)))
                  :form-cancel edn-page
@@ -244,12 +244,12 @@
                  nil true
                  (recur edn-page insert-position))))))
 
-(defn edit-page [heckle-site start-edn-page]
+(defn edit-page [site start-edn-page]
   (let [event-chan (chan)
         close-chan (chan)
-        page-state (atom { :heckle-site heckle-site
-                          :event-chan event-chan
-                          :close-chan close-chan})
+        page-state (atom { :site site
+                           :event-chan event-chan
+                           :close-chan close-chan})
         target-node (.getElementById js/document "cmsnew")
         state-change-chan (async-util/atom-chan page-state)
         ]
