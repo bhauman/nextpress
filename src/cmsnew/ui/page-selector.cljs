@@ -6,15 +6,15 @@
    [reactor.core :refer [input-value react-render] :as rct]
    [cmsnew.util.log-utils :refer [ld lp log-chan]]
    [clojure.string :as string]
-   [cmsnew.heckle :as heckle]
+   [cmsnew.publisher.core :as pub]
    [jayq.core :refer [$] :as jq]
    [jayq.util :refer [log]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]
                    [reactor.macros :refer [owner-as]]))
 
 (defn get-page-name [page]
-  (-> (heckle/make-target-path page)
-      (heckle/replace-extention "")))
+  (-> (pub/make-target-path page)
+      (pub/replace-extention "")))
 
 (defn navbar [site]
   [:div.navbar.navbar-default
@@ -32,7 +32,7 @@
     (navbar site)
     [:div.container
      [:ul.list-group
-      (let [pages (heckle/get-edn-pages site)]
+      (let [pages (pub/get-edn-pages site)]
         (log pages)
         (map render-page
              pages

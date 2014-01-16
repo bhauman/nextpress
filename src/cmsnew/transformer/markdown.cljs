@@ -1,4 +1,4 @@
-(ns cmsnew.markdown)
+(ns cmsnew.transformer.markdown)
 ;; markdown parsing
 ;; this requires showdown.js to be available
 

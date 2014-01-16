@@ -4,10 +4,9 @@
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
    [cmsnew.authorization.persona :as session]
    [cmsnew.datastore.s3 :as store]
-   [cmsnew.heckle :as heckle]
+   [cmsnew.publisher.core :as pub]
 
    [cmsnew.util.log-utils :refer [ld lp log-chan]]
-   [cmsnew.heckle-publisher :as publisher]
    
    [cmsnew.ui.edn-page-editor :as page-edit]
    [cmsnew.ui.site-selector :refer [select-site-loop]]
@@ -21,6 +20,7 @@
    [jayq.util :refer [log]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]))
 
+
 (go
  (let [url-config (<! (select-site-loop))
        signing-service (get-in url-config [:config :signing-service])
@@ -28,8 +28,8 @@
        user-email (<! (session/init signing-service))
        user-email (or user-email (<! (login-loop)))]
    (when user-email
-     (let [site (<! (heckle/create-heckle-for-url site-url))]
-       (<! (heckle/blocking-publish site))
+     (let [site (<! (pub/create-heckle-for-url site-url))]
+       (<! (pub/blocking-publish site))
        (loop []
          (let [edn-page (<! (select-page-loop site))]
            (log edn-page)

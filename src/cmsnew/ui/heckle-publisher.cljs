@@ -3,7 +3,7 @@
    [cljs.core.async :as async
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
    [sablono.core :as sab :include-macros true]
-   [cmsnew.heckle :as heckle]
+   [cmsnew.publisher.core :as pub]
    [cmsnew.util.log-utils :refer [ld lp log-chan]]
    [cmsnew.util.async-utils :as async-util]
    [jayq.core :refer [$] :as jq]
@@ -141,7 +141,7 @@
                (log (prn-str [msg data]))
                (condp = msg
                  :watch-files-click (put! watching-chan 1)
-                 :force-publish (heckle/publish heckle-site)          
+                 :force-publish (pub/publish heckle-site)          
                  true)
                (recur))
              )
@@ -150,7 +150,7 @@
              (<! watching-chan)
              (swap! state set-watching-files true)
              (loop []
-               (heckle/publish heckle-site)
+               (pub/publish heckle-site)
                (let [[v ch] (alts! [(timeout 8000) watching-chan])]
                  (if (= ch watching-chan)
                    (swap! state set-watching-files false)

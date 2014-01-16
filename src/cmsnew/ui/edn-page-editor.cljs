@@ -4,7 +4,7 @@
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
    [sablono.core :as sab :include-macros true]   
    [cmsnew.datastore.s3 :as store]
-   [cmsnew.heckle :as heckle]
+   [cmsnew.publisher.core :as pub]
    [cmsnew.ui.templates :as templ]
    [cmsnew.util.log-utils :refer [ld lp log-chan]]
    [cmsnew.util.async-utils :as async-util]
@@ -115,9 +115,9 @@
                  :success
                  (let [new-page (insert-data-item-into-page edn-page position
                                                             (new-image-item file-upload-uuid (:url _data) file))]
-                   (heckle/store-source-file heckle-site new-page)
+                   (pub/store-source-file heckle-site new-page)
                    (go (<! (timeout 1000))
-                       (heckle/publish heckle-site))                   
+                       (pub/publish heckle-site))                   
                    new-page)
                  :progress (do (log _data) (recur))
                  (recur))))))
@@ -146,9 +146,9 @@
          new-data-item (<! (edit-item-new state item-data))]
      (if new-data-item
        (let [new-page (merge-data-item-into-page (:edn-page @state) new-data-item)]
-         (heckle/store-source-file (:heckle-site @state) new-page)
+         (pub/store-source-file (:heckle-site @state) new-page)
          (go (<! (timeout 1000))
-             (heckle/publish (:heckle-site @state)))
+             (pub/publish (:heckle-site @state)))
          new-page)
        (:edn-page @state)))))
 
@@ -159,9 +159,9 @@
      (if new-data-item
        (let [fixed-data-item (dissoc new-data-item :insert-position)
              new-page (insert-data-item-into-page (:edn-page @state) position fixed-data-item)]
-         (heckle/store-source-file (:heckle-site @state) new-page)
+         (pub/store-source-file (:heckle-site @state) new-page)
          (go (<! (timeout 1000))
-             (heckle/publish (:heckle-site @state)))
+             (pub/publish (:heckle-site @state)))
          new-page)
        (:edn-page @state)))))
 
@@ -205,9 +205,9 @@
                  (let [validated (validate-front-matter data)]
                    (if (valid? validated)
                      (let [new-page (merge-front-matter-into-page edn-page validated)]
-                       (heckle/store-source-file (:heckle-site @page-state) new-page)
+                       (pub/store-source-file (:heckle-site @page-state) new-page)
                        (go (<! (timeout 1000))
-                           (heckle/publish (:heckle-site @page-state)))
+                           (pub/publish (:heckle-site @page-state)))
                        new-page)
                      (recur)))
                  :form-cancel edn-page

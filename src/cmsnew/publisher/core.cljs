@@ -1,9 +1,9 @@
-(ns cmsnew.heckle
+(ns cmsnew.publisher.core
   (:require
    [cljs.core.async :as async
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
    [cmsnew.datastore.s3 :as store]
-   [cmsnew.markdown :refer [markdown-to-html]]
+   [cmsnew.transformer.markdown :refer [markdown-to-html]]
    [cmsnew.publisher.item-templates :as templ]
    [cmsnew.util.async-utils :as async-util]
    [crate.core :as crate]

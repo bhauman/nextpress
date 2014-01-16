@@ -7,7 +7,7 @@
    [reactor.core :refer [input-value react-render] :as rct]
    [cmsnew.util.log-utils :refer [ld lp log-chan]]
    [clojure.string :as string]
-   [cmsnew.heckle :as heckle]
+   [cmsnew.publisher.core :as pub]
    [jayq.core :refer [$] :as jq]
    [jayq.util :refer [log]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]
@@ -47,7 +47,7 @@
 
 (defn validate-site [input-url]
   (go (if (valid-url? input-url)
-        (let [config (<! (heckle/get-config (correct-input-url input-url)))]
+        (let [config (<! (pub/get-config (correct-input-url input-url)))]
           (if (and config (map? config) (:bucket config))
             config
             false))

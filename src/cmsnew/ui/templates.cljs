@@ -7,11 +7,12 @@
             [crate.core :as crate]
             [reactor.core :as react]
             [sablono.core :as sab :include-macros true]
-            [cmsnew.markdown :refer [markdown-to-html]]
+            [cmsnew.transformer.markdown :refer [markdown-to-html]]
             [cmsnew.publisher.item-templates :refer [item-list item-container]]
             [jayq.core :as jq :refer [$]]
             [jayq.util :refer [log]])
   (:require-macros [reactor.macros :as reactm] ))
+
 
 ;; helpers
 (defn delete-button [event-chan]
