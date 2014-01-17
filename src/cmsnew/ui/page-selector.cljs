@@ -7,24 +7,25 @@
    [cmsnew.util.log-utils :refer [ld lp log-chan]]
    [clojure.string :as string]
    [cmsnew.publisher.core :as pub]
+   [cmsnew.publisher.site :as st]
+   [cmsnew.publisher.paths :as pth]
+   [cmsnew.publisher.source-file :as sf]   
    [jayq.core :refer [$] :as jq]
    [jayq.util :refer [log]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]
                    [reactor.macros :refer [owner-as]]))
 
-(defn get-page-name [page]
-  (-> (pub/make-target-path page)
-      (pub/replace-extention "")))
-
 (defn navbar [site]
   [:div.navbar.navbar-default
-   [:a.navbar-brand { :href "#"} "Site pages"]])
+   [:div.container
+    [:a.navbar-brand { :href "#"} "Site pages"]
+    ]])
 
 (defn render-page [page event-chan]
   [:li.list-group-item
    [:a {:href "#"
         :onClick #(do (put! event-chan [:page-selected page]) false)}
-    (get-page-name page)]])
+    (sf/display-name page)]])
 
 (defn select-page-view [site event-chan]
   (sab/html
@@ -32,7 +33,7 @@
     (navbar site)
     [:div.container
      [:ul.list-group
-      (let [pages (pub/get-edn-pages site)]
+      (let [pages (st/edn-pages site)]
         (log pages)
         (map render-page
              pages

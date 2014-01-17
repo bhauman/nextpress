@@ -9,6 +9,7 @@
             [sablono.core :as sab :include-macros true]
             [cmsnew.transformer.markdown :refer [markdown-to-html]]
             [cmsnew.publisher.item-templates :refer [item-list item-container]]
+            [cmsnew.publisher.site :as st]
             [jayq.core :as jq :refer [$]]
             [jayq.util :refer [log]])
   (:require-macros [reactor.macros :as reactm] ))
@@ -175,7 +176,7 @@
                                        page-data-inserted
                                        (repeat state))))))
 
-(defn edit-front-matter-form [{:keys [edn-page event-chan editing-front-matter] :as state}]
+(defn edit-front-matter-form [{:keys [edn-page event-chan editing-front-matter site] :as state}]
   (reactm/owner-as
    owner
    (sab/html
@@ -198,7 +199,7 @@
                                :className "form-control"                            
                                :defaultValue (editing-front-matter :layout)}
                               :layout
-                              [["default" "default"] ["post" "post"]]
+                              (map (juxt identity identity) (st/template-names site))
                               ))]
              (submit-button {:className "btn btn-primary"} "Save")
              (reset-button {:className "btn btn-default"

@@ -1,4 +1,4 @@
-(ns cmsnew.ui.heckle-publisher
+(ns cmsnew.ui.publisher-page
   (:require
    [cljs.core.async :as async
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]

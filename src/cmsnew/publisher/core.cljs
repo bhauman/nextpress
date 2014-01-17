@@ -2,13 +2,17 @@
   (:require
    [cljs.core.async :as async
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
+   [cmsnew.util.core :refer [self-assoc map-to-key find-first]]
    [cmsnew.datastore.s3 :as store]
    [cmsnew.transformer.markdown :refer [markdown-to-html]]
    [cmsnew.publisher.item-templates :as templ]
    [cmsnew.util.async-utils :as async-util]
+   [cmsnew.publisher.site :as st]   
+   [cmsnew.publisher.paths :as paths]
+   [cmsnew.publisher.source-file :as sf]   
    [crate.core :as crate]
    [clojure.string :as string]
-   [cljs.reader :refer [push-back-reader read-string]]
+   [cljs.reader :refer [push-back-reader read-string]]   
    [jayq.util :refer [log]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]))
 
@@ -38,115 +42,7 @@
 (defn render-template [template-string data]
   (.template js/_ template-string (clj->js data)))
 
-;; getting front matter
-
-(defn get-front-matter [log-chan path reader]
-  (try
-    (let [front-matter-map (cljs.reader/read reader true nil false)]
-      (if (map? front-matter-map) front-matter-map false))
-    (catch js/Object e
-      (put! log-chan {:msg (str "Error parsing file "
-                                path ": "
-                                (.-message e))})
-      false)))
-
-(defn parse-front-matter [site file-map]
-  (let [r (push-back-reader (:body file-map))]
-    (if-let [front-matter (get-front-matter (:log-chan site)
-                                            (:path file-map) r)]
-      (assoc file-map
-        :front-matter front-matter
-        :body (.substr (:body file-map) (inc (.-idx r))))
-      file-map)))
-
-;; date parsing
-
-(def filename-parts #(string/split % #"-"))
-
-(defn parse-date [filename]
-  (if (.test #"^\d{4}-\d{2}-\d{2}-" filename)
-    (zipmap [:year :month :day]
-            (map js/parseInt (take 3 (filename-parts filename))))
-    {}))
-
-(defn date-to-int [{:keys [year month day]}]
-  (+ (* 10000 year) (* 100 month) day))
-
-(defn has-date? [fm] (and (:date fm) (-> fm :date :month)))
-
-(def path-parts #(string/split % #"/"))
-
-(defn parse-file-date [{:keys [path]}]
-  (parse-date (last (path-parts path))))
-
-;; handle path rewriting
-
-(def filename-from-path (comp last path-parts))
-
-(defn extention-from-path [path]
-  (-> path
-      (string/split #"\.")
-      last))
-
-(defn dated-post-target-filename [path]
-  (->> path
-       filename-from-path
-       filename-parts
-       (drop 3)
-       (string/join "-" )))
-
-(defn str-join [coll sep] (string/join sep coll))
-
-(defn replace-extention [path new-ext]
-  (-> path
-      (string/split #"\.")
-      butlast
-      (str-join ".") 
-      (str new-ext)))
-
-(defn make-post-target-path [{:keys [date path] :as fm}]
-  (replace-extention
-   (if (has-date? fm)
-     (string/join "/"
-                  [(:year date) (:month date) (:day date)
-                   (dated-post-target-filename path)])
-     (filename-from-path path))
-   ".html"))
-
-(defn make-page-target-path [{:keys [path] :as fm}]
-  (replace-extention
-   (->> path
-        path-parts
-        rest
-        (string/join "/"))   
-   ".html"))
-
-(defn make-target-path [fm]
-  (condp = (fm :page-type)
-    :post (make-post-target-path fm)
-    (make-page-target-path fm)
-    ))
-
-;; parse data file
-
-(defn parse-data-file [system file-map]
-  (try
-    (assoc file-map
-      :data (read-string (:body file-map))
-      :name (-> (:path file-map)
-                filename-from-path
-                (replace-extention "")))
-    (catch js/Object e
-      (put! (:log-chan system)
-            {:msg (str "Error parsing file "
-                       (:path file-map) ": "
-                       (.-message e))})
-      file-map)))
-
 ;; fetching pipeline helpers
-
-(defn self-assoc [x key f]
-  (assoc x key (f x)))
 
 (defn file-list [bucket path-prefix]
   (let [out (chan)
@@ -205,14 +101,6 @@
     (go (async/pipe (async/merge (<! (async/into [] store-chans))) out))
     out))
 
-(defn filename-without-ext [{:keys [path]}]
-  (-> path
-      filename-from-path
-      (replace-extention "")))
-
-(defn edn-page? [fpm]
-  (= "edn" (last (string/split (:path fpm) #"\."))))
-
 (defn get-config [site-url]
   (let [out (chan)]
     (store/get-text (str site-url "/_config.edn" )
@@ -224,28 +112,6 @@
 
 ;; rendering pages
 
-(defn map-to-key [key x]
-  (zipmap (map key x) x))
-
-(defn file-to-page-data [{:keys [body front-matter date] :as fm}]
-  (let [{:keys [title]} front-matter]
-    (merge { :content body
-             :url (str "/" (make-target-path fm))
-             :date date
-             :id   (str "/" (-> fm make-target-path (replace-extention "")) )}
-           front-matter)))
-
-(defn template-data [system-data]
-  (let [data-files (system-data :data)]
-    (merge
-       (zipmap (keys data-files) (map :data (vals data-files))) 
-       { :site { :posts (->> (:posts system-data)
-                             (map file-to-page-data)
-                             (sort-by #(date-to-int (:date %)))
-                             reverse)
-                 :pages (map file-to-page-data (:pages system-data))
-                }} )))
-
 (defn render-edn-page [page-file-map]
   (.-outerHTML
    (crate/html
@@ -254,12 +120,46 @@
                                                     [:front-matter :items]))))))
 
 (defn render-raw-page [page-file-map data-for-page]
-  (condp = (-> page-file-map :path extention-from-path)
+  (condp = (-> page-file-map :path paths/extention-from-path)
     "md"    (markdown-to-html (:body page-file-map))
     "html"  (render-template (:body page-file-map)
                              data-for-page)
     "edn"   (render-edn-page page-file-map)
     (:body page-file-map)))
+
+(defn render-raw-page-without-context [page-file-map]
+  (condp = (-> page-file-map :path paths/extention-from-path)
+    "md"    (render-raw-page page-file-map {})
+    "edn"   (render-raw-page page-file-map {})
+    (:body page-file-map)))
+
+(defn file-to-page-data [{:keys [body front-matter date] :as fm}]
+  (let [{:keys [title]} front-matter]
+    (merge { :content (render-raw-page-without-context fm)
+             :body (:body fm)
+             :url (str "/" (sf/make-target-path fm))
+             :path (:path fm)
+             :date date
+             :id   (str "/" (-> fm sf/make-target-path (paths/replace-extention "")) )}
+           front-matter)))
+
+(defn template-data [system-data]
+  (let [data-files (system-data :data)
+        posts (->> (:posts system-data)
+                   (map file-to-page-data)
+                   (sort-by #(paths/date-to-int (:date %)))
+                   reverse)
+        pages (map file-to-page-data (:pages system-data))
+        data-file-map (zipmap (keys data-files) (map :data (vals data-files))) 
+        ]
+    (merge
+       data-file-map
+       { :site { :posts posts
+                 :pages pages }
+        :include_page (fn [page-path] (->> pages
+                                          (find-first #(= (:path %) page-path))
+                                          :content))
+        } )))
 
 (defn render-page-with-templates [system-data data-for-templates page-file-map]
   (let [start-template (get-in page-file-map [:front-matter :layout])
@@ -276,51 +176,30 @@
                             (assoc data-for-page :content content)))
           )))))
 
+;; data for environment
+
+
+
+
+
 ;; processing system
-
-(defn filter-for-prefix [files prefix]
-  (let [rx (js/RegExp. (str "^" prefix))] 
-    (filter #(.test rx (:path %)) (vals files))))
-
-(defn get-templates [system files]
-  (->> (filter-for-prefix files (:template-path system))
-       (map (partial parse-front-matter system))
-       (map #(self-assoc % :name filename-without-ext))))
-
-(defn get-posts [system files]
-  (->> (filter-for-prefix files (:post-path system))
-       (map (partial parse-front-matter system))
-       (map #(assoc % :page-type :post))
-       (map #(self-assoc % :date parse-file-date))
-       (map #(self-assoc % :target-path make-post-target-path))))
-
-(defn get-pages [system files]
-  (->> (filter-for-prefix files (:page-path system))
-       (map (partial parse-front-matter system))
-       (map #(assoc % :page-type :page))               
-       (map #(self-assoc % :target-path make-page-target-path))))
-
-(defn get-edn-pages [system]
-  (->> (get-pages system @(:source-files system))
-       (filter edn-page?)))
-
-(defn get-data [system files]
-  (->> (filter-for-prefix files (:data-path system))
-       (map (partial parse-data-file system))))
 
 (defn process [system files]
   (let [system-data
-         { :templates  (map-to-key :name (get-templates system files))
-           :data       (map-to-key :name (get-data system files))
-           :posts      (get-posts system files)
-           :pages      (get-pages system files)
-           :system     system }
-         data-for-templates (template-data system-data)]
-     (->> (concat (:posts system-data) (:pages system-data))
+        { :templates  (map-to-key :name (st/templates system))
+         :data       (map-to-key :name (st/data-files system))
+         :posts      (st/posts system)
+         :pages      (st/pages system)
+         :system     system }
+        data-for-templates (template-data system-data)
+        files-to-publish (filter sf/publish?
+                                 (concat (:posts system-data)
+                                         (:pages system-data)))]
+     (->> files-to-publish
           (map #(self-assoc % :rendered-body
-                            (partial render-page-with-templates
-                                     system-data
-                                     data-for-templates)))
+                           (partial render-page-with-templates
+                                    system-data
+                                    data-for-templates)))
           (map (juxt :path identity))
           (into {}))))
 
@@ -506,3 +385,4 @@
          (publish)
          (<! (timeout 5000))
          (recur))
+

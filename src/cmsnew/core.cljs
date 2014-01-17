@@ -7,7 +7,8 @@
    [cmsnew.publisher.core :as pub]
 
    [cmsnew.util.log-utils :refer [ld lp log-chan]]
-   
+
+   [cmsnew.ui.publisher-page :as publisher-page]
    [cmsnew.ui.edn-page-editor :as page-edit]
    [cmsnew.ui.site-selector :refer [select-site-loop]]
    [cmsnew.ui.page-selector :refer [select-page-loop]]
@@ -20,7 +21,6 @@
    [jayq.util :refer [log]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]))
 
-
 (go
  (let [url-config (<! (select-site-loop))
        signing-service (get-in url-config [:config :signing-service])
@@ -29,10 +29,13 @@
        user-email (or user-email (<! (login-loop)))]
    (when user-email
      (let [site (<! (pub/create-site-for-url site-url))]
+       #_(pub/clear-cache site)
+       #_(publisher-page/init site)
        (<! (pub/blocking-publish site))
        (loop []
          (let [edn-page (<! (select-page-loop site))]
            (log edn-page)
            (<! (page-edit/edit-page site edn-page)))
          (recur))))))
+
 

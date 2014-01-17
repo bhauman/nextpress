@@ -1,58 +1,72 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title><%= page.title %></title>
-        <meta name="viewport" content="width=device-width">
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="assets/ico/favicon.png">
 
-        <!-- syntax highlighting CSS -->
-        <link rel="stylesheet" href="/css/syntax.css">
+    <title>SPOT - Free Bootstrap 3 Theme</title>
 
-        <!-- Custom CSS -->
-        <!-- <link rel="stylesheet" href="/css/main.css"> -->
-        <script src="/assets/js/jquery.min.js"></script>
-        <script src="/assets/js/jquery.browser.js"></script>
-        <script src="/assets/js/highlight/highlight.pack.js"></script>
-        <link rel="stylesheet" href="/assets/js/highlight/styles/default.css">
-        
-        <link href="http://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic" rel="stylesheet" type="text/css">
-        <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.css">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link href="/assets/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">        
-        <link rel="alternate" type="application/rss+xml" title="Rig Some Light Feed" href="http://rigsomelight.com/feed.xml">
-        <link rel="stylesheet" href="/assets/css/fonts.css">
-        <link rel="stylesheet" href="/assets/css/style.css">
-    </head>
-    <body>
+    <!-- Bootstrap core CSS -->
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/css/font-awesome.min.css" rel="stylesheet">
 
-        <div class="container">
-           <div class="site">
-            
-            <ul class="breadcrumb">
-              <li class="active"><a href="/">Bruce Hauman</a></li>
-            </ul>
+    <!-- Custom styles for this template -->
+    <link href="assets/css/main.css" rel="stylesheet">
 
-                <%= content %> 
 
-            <div class="footer">
-              <div class="contact">
-                <p>
-                  Bruce Hauman<br />
-                  Programmer<br />
-                  bhauman@gmail.com
-                </p>
-              </div>
-              <div class="contact">
-                <p>
-                  <a href="http://github.com/bhauman/">github.com/bhauman</a><br />
-                  <a href="http://twitter.com/bhauman/">twitter.com/bhauman</a><br />
-                  <a href="/feed.xml">blog feed</a>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div> <!-- /container -->
-        <script>hljs.initHighlightingOnLoad();</script>
-    </body>
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">NEXPRESS DEMO</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li class="active"><a href="index.html">HOME</a></li>
+            <li><a href="about.html">ABOUT</a></li>
+            <li><a href="services.html">SERVICES</a></li>
+            <li><a href="works.html">WORKS</a></li>
+            <li><a data-toggle="modal" data-target="#myModal" href="#myModal"><i class="fa fa-envelope-o"></i></a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+    <%= content %>
+	
+	<!-- FOOTER -->
+	<div id="f">
+		<div class="container">
+			<div class="row centered">
+				<a href="#"><i class="fa fa-twitter"></i></a><a href="#"><i class="fa fa-facebook"></i></a><a href="#"><i class="fa fa-dribbble"></i></a>
+		
+			</div><!-- row -->
+		</div><!-- container -->
+	</div><!-- Footer -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+  </body>
 </html>

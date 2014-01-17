@@ -28,7 +28,7 @@
        (sab/text-field
         {:ref "site-url"
          ;; this is for testing
-         :value "immubucket.s3-website-us-east-1.amazonaws.com"
+         :value "nextpress-demo.s3-website-us-east-1.amazonaws.com"
          :placeholder "www.my-nextpress-site.com"
          :className "form-control" } "site-url"))
       (sab/submit-button {:className "btn btn-primary btn-block btn-lg"} "Go")]])))
