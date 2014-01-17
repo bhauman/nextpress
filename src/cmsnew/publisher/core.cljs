@@ -119,6 +119,12 @@
                      (map templ/render-item (get-in page-file-map
                                                     [:front-matter :items]))))))
 
+(defn render-edn-section [items]
+  (.-outerHTML
+   (crate/html
+    [:div
+     (map templ/render-item items)])))
+
 (defn render-raw-page [page-file-map data-for-page]
   (condp = (-> page-file-map :path paths/extention-from-path)
     "md"    (markdown-to-html (:body page-file-map))
@@ -133,9 +139,29 @@
     "edn"   (render-raw-page page-file-map {})
     (:body page-file-map)))
 
+(defn sections-from-items [items]
+  (let [temp-items (drop-while #(not= (:type %) :section) items)
+        section-header (first temp-items)
+        section-items (take-while #(not= (:type %) :section) (rest temp-items))]
+    (if section-header
+      (cons { :name    (:content section-header)
+              :content (render-edn-section section-items) }
+            (sections-from-items (rest temp-items)))
+      nil)))
+
+(defn get-sections [source-file]
+  (if (sf/edn-page? source-file)
+    (sections-from-items (sf/items source-file))
+    (list)))
+
 (defn file-to-page-data [{:keys [body front-matter date] :as fm}]
-  (let [{:keys [title]} front-matter]
+  (let [{:keys [title]} front-matter
+        sections (get-sections fm)
+        sections-map (into {} (map (juxt :name :content) sections))]
     (merge { :content (render-raw-page-without-context fm)
+             :sections sections
+             :sectionsMap sections-map
+             :getSection (fn [name] (get sections-map name))
              :body (:body fm)
              :url (str "/" (sf/make-target-path fm))
              :path (:path fm)
@@ -150,16 +176,17 @@
                    (sort-by #(paths/date-to-int (:date %)))
                    reverse)
         pages (map file-to-page-data (:pages system-data))
-        data-file-map (zipmap (keys data-files) (map :data (vals data-files))) 
-        ]
+        data-file-map (zipmap (keys data-files) (map :data (vals data-files)))]
     (merge
        data-file-map
        { :site { :posts posts
                  :pages pages }
-        :include_page (fn [page-path] (->> pages
+         :includePage (fn [page-path] (->> pages
                                           (find-first #(= (:path %) page-path))
                                           :content))
-        } )))
+         :getPage (fn [page-path] (clj->js (->> pages
+                                               (find-first #(= (:path %) page-path)))))
+        })))
 
 (defn render-page-with-templates [system-data data-for-templates page-file-map]
   (let [start-template (get-in page-file-map [:front-matter :layout])

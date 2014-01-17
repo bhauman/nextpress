@@ -72,6 +72,13 @@
                             [(keyword (str "h" size)) content])
                            event-chan))
 
+(defmethod render-editable-item :section [{:keys [id content]} {:keys [event-chan]}]
+  (log (str "rendering " (prn-str [type id])))
+  (editable-item-container id type
+                           (sab/html
+                            [:div [:pre "Section: " "\"" content "\""]])
+                           event-chan))
+
 (defmethod render-editable-item :markdown [{:keys [id type content]} {:keys [event-chan]}]
   (log (str "rendering " (prn-str [type id])))
   (editable-item-container id type
@@ -110,6 +117,22 @@
                                                               (if (= (str x) (str (item :size))) " active" ""))
                                               :data-size x} (str "H" x)]
                                     ) (range 1 6))])
+             (submit-button {:className "btn btn-primary"} "Save")
+             (reset-button {:className "btn btn-default"
+                            :onClick #(put! event-chan [:form-cancel])} "Cancel")))))
+
+(defmethod item-form :section [item errors event-chan _]
+  (reactm/owner-as
+   owner
+   (sab/html
+    (form-to {:onSubmit (react/form-submit owner event-chan :form-submit [:content])}
+             [:post (str "#section-item-" (:id item))]
+             (control-group :content errors
+                            (text-field {:className "form-control"
+                                         :ref "content"
+                                         :defaultValue (item :content)
+                                         :placeholder "Section name"}
+                                        :content))
              (submit-button {:className "btn btn-primary"} "Save")
              (reset-button {:className "btn btn-default"
                             :onClick #(put! event-chan [:form-cancel])} "Cancel")))))
@@ -177,10 +200,11 @@
                                        (repeat state))))))
 
 (defn edit-front-matter-form [{:keys [edn-page event-chan editing-front-matter site] :as state}]
+  (log editing-front-matter)
   (reactm/owner-as
    owner
    (sab/html
-    (form-to {:onSubmit (react/form-submit owner event-chan :form-submit [:title :layout])}
+    (form-to {:onSubmit (react/form-submit owner event-chan :form-submit [:title :layout :published])}
              [:post (str "#pasting-front-matter")]
              [:div.form-group
               [:label "Title"]
@@ -201,9 +225,17 @@
                               :layout
                               (map (juxt identity identity) (st/template-names site))
                               ))]
+             [:div.checkbox
+              [:label
+               (sab/check-box {:ref "published"
+                               :className "checkbox"
+                               :defaultChecked (editing-front-matter :published)}
+                              :published)
+               "Published"]]
              (submit-button {:className "btn btn-primary"} "Save")
              (reset-button {:className "btn btn-default"
                             :onClick #(put! event-chan [:form-cancel])} "Cancel")))))
+
 
 (defn edit-page [{:keys [edn-page] :as state}]
   (sab/html
@@ -229,13 +261,16 @@
       (tooltip/Tooltipper. #js{ :watching ".edit-items-list"
                                 :onPositionChange (fn [pos] (put! (:event-chan state) [:insert-position pos])) }
                            (sab/html
-                            [:div.btn-group {:style {:width "200px" }}
+                            [:div.btn-group {:style {:width "271px" }}
                              [:button {:type "button"
                                        :onClick #(put! (:event-chan state) [:add-item {:type :heading}])
                                        :className "btn btn-default add-heading-item"} "Heading"]
                              [:button {:type "button"
                                        :onClick #(put! (:event-chan state) [:add-item {:type :markdown}])
                                        :className "btn btn-default add-text-item"} "Text"]
+                             [:button {:type "button"
+                                       :onClick #(put! (:event-chan state) [:add-item {:type :section}])
+                                       :className "btn btn-default add-section-item"} "Section"]
                              [:button {:type "button"
                                        :onClick (fn [_] (.click ($ "input.image-upload")))
                                        :className "btn btn-default add-image-item"} "Image"]]))

@@ -64,7 +64,10 @@
   (.getDOMNode (get-ref owner ref-name)))
 
 (defn input-value [owner ref-name]
-  (.-value (get-node owner ref-name)))
+  (let [node (get-node owner ref-name)]
+    (condp = (.-type node)
+      "checkbox" (.-checked node)
+      (.-value node))))
 
 (defn form-values [owner refs]
   (into {} (map (juxt identity (partial input-value owner)) refs)))
@@ -73,5 +76,10 @@
   (fn [x] (.preventDefault x) (f x)))
 
 (defn form-submit [owner chan msg fields]
-  (prevent-default-wrap #(put! chan [msg (form-values owner fields)])))
+  (prevent-default-wrap #(put! chan
+                               (let [form-vals (form-values owner fields)]
+                                 (.log js/console "form submit")
+                                 (.log js/console form-vals)
+                                 [msg form-vals]))))
+
 

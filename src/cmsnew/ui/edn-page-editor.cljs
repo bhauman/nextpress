@@ -49,6 +49,9 @@
 (defmethod deleted? :markdown [{:keys [content deleted]}]
   (or deleted (blank? content)))
 
+(defmethod deleted? :section [{:keys [content deleted]}]
+  (or deleted (blank? content)))
+
 (defn merge-data-item-into-page [page data-item]
   (let [items (get-page-items page)]
     (assoc-in page items-key
@@ -172,8 +175,12 @@
                              (add-id? {:type :heading :size 2}) position)
     :markdown
     (handle-add-item-new page-state
-                             (new-item :markdown) position)
-    (go (:edn-page page-state))))
+                         (new-item :markdown) position)
+    nil (go (:edn-page page-state))
+    (if (keyword? item-type) ; handle all types genericly
+      (handle-add-item-new page-state
+                           (new-item item-type) position)
+      (go (:edn-page page-state)))))
 
 (defn add-error [subject key msg]
   (update-in subject [:errors key]

@@ -10,6 +10,8 @@
 
 (def title #(get-in % [:front-matter :title]))
 
+(def items #(get-in % [:front-matter :items]))
+
 (defn has-date? [fm] (and (:date fm) (-> fm :date :month)))
 
 (defn edn-page? [source-file]
