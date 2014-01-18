@@ -1,3 +1,3 @@
 # here are some tasks
 - [ ] task 1
-- [ ] task 2
+- [X] task 1
