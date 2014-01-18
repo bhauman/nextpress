@@ -179,8 +179,9 @@
         data-file-map (zipmap (keys data-files) (map :data (vals data-files)))]
     (merge
        data-file-map
-       { :site { :posts posts
-                 :pages pages }
+       { :site (assoc (get-in system-data [:site :config-file-data])
+                 :posts posts
+                 :pages pages)
          :includePage (fn [page-path] (->> pages
                                           (find-first #(= (:path %) page-path))
                                           :content))
@@ -205,19 +206,15 @@
 
 ;; data for environment
 
-
-
-
-
 ;; processing system
 
-(defn process [system files]
+(defn process [site files]
   (let [system-data
-        { :templates  (map-to-key :name (st/templates system))
-         :data       (map-to-key :name (st/data-files system))
-         :posts      (st/posts system)
-         :pages      (st/pages system)
-         :system     system }
+        { :templates  (map-to-key :name (st/templates site))
+          :data       (map-to-key :name (st/data-files site))
+          :posts      (st/posts site)
+          :pages      (st/pages site)
+          :site     site }
         data-for-templates (template-data system-data)
         files-to-publish (filter sf/publish?
                                  (concat (:posts system-data)
@@ -383,6 +380,7 @@
   (go
    (let [config (<! (get-config url))
          site (assoc config
+                       :config-file-data config
                        :site-url url
                        :s3-store (store/create-s3-store (:signing-service config) (:bucket config))
                        :touch-chan (chan)

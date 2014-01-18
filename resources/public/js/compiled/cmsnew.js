@@ -27747,9 +27747,10 @@ cmsnew.publisher.core.template_data = function(a) {
     return function(a) {
       return cmsnew.publisher.paths.date_to_int.call(null, (new cljs.core.Keyword(null, "date", "date", 1016980256)).cljs$core$IFn$_invoke$arity$1(a));
     };
-  }(b), cljs.core.map.call(null, cmsnew.publisher.core.file_to_page_data, (new cljs.core.Keyword(null, "posts", "posts", 1120759621)).cljs$core$IFn$_invoke$arity$1(a)))), d = cljs.core.map.call(null, cmsnew.publisher.core.file_to_page_data, (new cljs.core.Keyword(null, "pages", "pages", 1120330550)).cljs$core$IFn$_invoke$arity$1(a));
-  a = cljs.core.zipmap.call(null, cljs.core.keys.call(null, b), cljs.core.map.call(null, new cljs.core.Keyword(null, "data", "data", 1016980252), cljs.core.vals.call(null, b)));
-  return cljs.core.merge.call(null, a, new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null, "site", "site", 1017434809), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "posts", "posts", 1120759621), c, new cljs.core.Keyword(null, "pages", "pages", 1120330550), d], null), new cljs.core.Keyword(null, "includePage", "includePage", 1288932041), function(a) {
+  }(b), cljs.core.map.call(null, cmsnew.publisher.core.file_to_page_data, (new cljs.core.Keyword(null, "posts", "posts", 1120759621)).cljs$core$IFn$_invoke$arity$1(a)))), d = cljs.core.map.call(null, cmsnew.publisher.core.file_to_page_data, (new cljs.core.Keyword(null, "pages", "pages", 1120330550)).cljs$core$IFn$_invoke$arity$1(a)), b = cljs.core.zipmap.call(null, cljs.core.keys.call(null, b), cljs.core.map.call(null, new cljs.core.Keyword(null, "data", "data", 1016980252), cljs.core.vals.call(null, 
+  b)));
+  return cljs.core.merge.call(null, b, new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null, "site", "site", 1017434809), cljs.core.assoc.call(null, cljs.core.get_in.call(null, a, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "site", "site", 1017434809), new cljs.core.Keyword(null, "config-file-data", "config-file-data", 856217602)], null)), new cljs.core.Keyword(null, "posts", "posts", 1120759621), c, new cljs.core.Keyword(null, 
+  "pages", "pages", 1120330550), d), new cljs.core.Keyword(null, "includePage", "includePage", 1288932041), function(a) {
     return(new cljs.core.Keyword(null, "content", "content", 1965434859)).cljs$core$IFn$_invoke$arity$1(cmsnew.util.core.find_first.call(null, function(b) {
       return cljs.core._EQ_.call(null, (new cljs.core.Keyword(null, "path", "path", 1017337751)).cljs$core$IFn$_invoke$arity$1(b), a);
     }, d));
@@ -27773,17 +27774,17 @@ cmsnew.publisher.core.render_page_with_templates = function(a, b, c) {
 };
 cmsnew.publisher.core.process = function(a, b) {
   var c = new cljs.core.PersistentArrayMap(null, 5, [new cljs.core.Keyword(null, "templates", "templates", 2995631787), cmsnew.util.core.map_to_key.call(null, new cljs.core.Keyword(null, "name", "name", 1017277949), cmsnew.publisher.site.templates.call(null, a)), new cljs.core.Keyword(null, "data", "data", 1016980252), cmsnew.util.core.map_to_key.call(null, new cljs.core.Keyword(null, "name", "name", 1017277949), cmsnew.publisher.site.data_files.call(null, a)), new cljs.core.Keyword(null, "posts", 
-  "posts", 1120759621), cmsnew.publisher.site.posts.call(null, a), new cljs.core.Keyword(null, "pages", "pages", 1120330550), cmsnew.publisher.site.pages.call(null, a), new cljs.core.Keyword(null, "system", "system", 4421543329), a], null), d = cmsnew.publisher.core.template_data.call(null, c), e = cljs.core.filter.call(null, cmsnew.publisher.source_file.publish_QMARK_, cljs.core.concat.call(null, (new cljs.core.Keyword(null, "posts", "posts", 1120759621)).cljs$core$IFn$_invoke$arity$1(c), (new cljs.core.Keyword(null, 
+  "posts", 1120759621), cmsnew.publisher.site.posts.call(null, a), new cljs.core.Keyword(null, "pages", "pages", 1120330550), cmsnew.publisher.site.pages.call(null, a), new cljs.core.Keyword(null, "site", "site", 1017434809), a], null), d = cmsnew.publisher.core.template_data.call(null, c), e = cljs.core.filter.call(null, cmsnew.publisher.source_file.publish_QMARK_, cljs.core.concat.call(null, (new cljs.core.Keyword(null, "posts", "posts", 1120759621)).cljs$core$IFn$_invoke$arity$1(c), (new cljs.core.Keyword(null, 
   "pages", "pages", 1120330550)).cljs$core$IFn$_invoke$arity$1(c)));
   return cljs.core.into.call(null, cljs.core.PersistentArrayMap.EMPTY, cljs.core.map.call(null, cljs.core.juxt.call(null, new cljs.core.Keyword(null, "path", "path", 1017337751), cljs.core.identity), cljs.core.map.call(null, function(a) {
     return cmsnew.util.core.self_assoc.call(null, a, new cljs.core.Keyword(null, "rendered-body", "rendered-body", 809187116), cljs.core.partial.call(null, cmsnew.publisher.core.render_page_with_templates, c, d));
   }, e)));
 };
-var dir_path_rx_1718688 = /\/$/, hash_rx_1718689 = /\#$/;
+var dir_path_rx_1777168 = /\/$/, hash_rx_1777169 = /\#$/;
 cmsnew.publisher.core.good_file_path_QMARK_ = function(a) {
   return cljs.core.not.call(null, function() {
-    var b = dir_path_rx_1718688.test(a);
-    return cljs.core.truth_(b) ? b : hash_rx_1718689.test(a);
+    var b = dir_path_rx_1777168.test(a);
+    return cljs.core.truth_(b) ? b : hash_rx_1777169.test(a);
   }());
 };
 cmsnew.publisher.core.fetch_file_list = function(a, b) {
@@ -28102,8 +28103,8 @@ cmsnew.publisher.core.create_site_for_url = function(a) {
         var c = b[1];
         if (2 === c) {
           var d = b[2], g = (new cljs.core.Keyword(null, "signing-service", "signing-service", 3972091231)).cljs$core$IFn$_invoke$arity$1(d), k = (new cljs.core.Keyword(null, "bucket", "bucket", 3930668380)).cljs$core$IFn$_invoke$arity$1(d), l = cmsnew.datastore.s3.create_s3_store.call(null, g, k), m = cljs.core.async.chan.call(null), n = cljs.core.async.chan.call(null), p = cljs.core.atom.call(null, 0), q = cmsnew.publisher.core.obtain_source_files.call(null, d), s = cmsnew.publisher.core.obtain_rendered_files.call(null, 
-          d), r = cljs.core.assoc.call(null, d, new cljs.core.Keyword(null, "site-url", "site-url", 1687949659), a, new cljs.core.Keyword(null, "s3-store", "s3-store", 3284727398), l, new cljs.core.Keyword(null, "touch-chan", "touch-chan", 3665131666), m, new cljs.core.Keyword(null, "log-chan", "log-chan", 2980933549), n, new cljs.core.Keyword(null, "finished-publishing", "finished-publishing", 3579572256), p, new cljs.core.Keyword(null, "source-files", "source-files", 1240623543), q, new cljs.core.Keyword(null, 
-          "rendered-files", "rendered-files", 3261130449), s), t = (new cljs.core.Keyword(null, "source-files", "source-files", 1240623543)).cljs$core$IFn$_invoke$arity$1(r), u = function() {
+          d), r = cljs.core.assoc.call(null, d, new cljs.core.Keyword(null, "config-file-data", "config-file-data", 856217602), d, new cljs.core.Keyword(null, "site-url", "site-url", 1687949659), a, new cljs.core.Keyword(null, "s3-store", "s3-store", 3284727398), l, new cljs.core.Keyword(null, "touch-chan", "touch-chan", 3665131666), m, new cljs.core.Keyword(null, "log-chan", "log-chan", 2980933549), n, new cljs.core.Keyword(null, "finished-publishing", "finished-publishing", 3579572256), p, new cljs.core.Keyword(null, 
+          "source-files", "source-files", 1240623543), q, new cljs.core.Keyword(null, "rendered-files", "rendered-files", 3261130449), s), t = (new cljs.core.Keyword(null, "source-files", "source-files", 1240623543)).cljs$core$IFn$_invoke$arity$1(r), u = function() {
             return function(a, b, c, d, e, f, h, g, k, l, m, n, p, q) {
               return function(b, c, d, e) {
                 return cmsnew.publisher.core.local_storage_set.call(null, cmsnew.publisher.core.localstorage_source_files_key.call(null, a), e);

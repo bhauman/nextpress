@@ -1,3 +1,14 @@
-# here are some tasks
-- [ ] task 1
-- [X] task 1
+# Tasks for nextpress
+- [ ] Finish demo site
+- [ ] Save demo site
+- [ ] Add link from demo site to editor
+- [ ] Sort page list alphabetically
+- [ ] Allow for the creation of pages
+- [ ] factor out items
+- [ ] Test for null problems in templates helpers
+- [ ] Implement partials
+- [ ] have item partials
+- [ ] Fix first position for plus sign
+- [ ] Item chooser modal
+- [ ] pretty printing edn data
+- [ ] get working in Safari
