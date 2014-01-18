@@ -4,6 +4,7 @@
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
    [sablono.core :as sab :include-macros true]   
    [cmsnew.ui.templates :as templ]
+   [cmsnew.ui.form-templates :as form :refer [control-group]]   
    [reactor.core :refer [input-value react-render] :as rct]
    [cmsnew.util.log-utils :refer [ld lp log-chan]]
    [clojure.string :as string]
@@ -23,7 +24,7 @@
        :onSubmit #(do (put! event-chan [:site-selected (input-value owner :site-url)])
                       (.preventDefault %))}
       [:h2.form-signin-heading "Enter site url" ]
-      (templ/control-group
+      (control-group
        :site-url errors
        (sab/text-field
         {:ref "site-url"
@@ -56,20 +57,33 @@
 (defn select-site-loop []
   (let [event-chan (chan)
         html-node (.getElementById js/document "cmsnew")]
-    (jq/add-class ($ "body" ) "select-site")
-    (go-loop [url ""
-              errors {}]
-             (<! (react-render html-node (select-site-form url errors event-chan)))
-             (let [[msg data] (<! event-chan)]
-               (ld [msg data])
-               (if (= msg :site-selected)
-                 (if-let [validated-config (<! (validate-site data))]
-                   (do
-                     (ld validated-config)
-                     (jq/remove-class ($ "body" ) "select-site")
-                     (<! (react-render html-node (loading-view)))
-                     { :site-url (correct-input-url data)
-                       :config  validated-config })
-                   (recur url {:site-url ["Not a valid site url"]}))
-                 (recur url errors))))))
+
+    (go
+     (let [referrer (js/URL. (.-referrer js/document))]
+       (log referrer)
+       ;; not happy with this at all! should move to a routing/history scheme
+       (if (= "?editme=true" (.-search (js/URL. (.-href js/location))))
+         (if-let [validated-config (<! (validate-site (.-hostname referrer)))] 
+           { :site-url (correct-input-url (.-hostname referrer))
+             :config  validated-config }
+           (set! (.-href js/location) "http://localhost:9292/cmsnew"))
+         (loop [url ""
+                errors {}]
+           (jq/add-class ($ "body" ) "select-site")
+           (<! (react-render html-node (select-site-form url errors event-chan)))
+           (let [[msg data] (<! event-chan)]
+             (ld [msg data])
+             (if (= msg :site-selected)
+               (if-let [validated-config (<! (validate-site data))]
+                 (do
+                   (ld validated-config)
+                   (jq/remove-class ($ "body" ) "select-site")
+                   (<! (react-render html-node (loading-view)))
+                   { :site-url (correct-input-url data)
+                    :config  validated-config })
+                 (recur url {:site-url ["Not a valid site url"]}))
+               (recur url errors))))
+         )
+       )
+     )))
 

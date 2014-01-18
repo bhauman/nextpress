@@ -1,25 +1,31 @@
 (ns cmsnew.ui.templates
-  (:require [crate.form :refer [form-to text-field text-area hidden-field
-                                submit-button reset-button drop-down label]]
-            [cmsnew.ui.tooltipper :as tooltip]
-            [cljs.core.async :as async
-             :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
-            [crate.core :as crate]
-            [reactor.core :as react]
-            [sablono.core :as sab :include-macros true]
-            [cmsnew.transformer.markdown :refer [markdown-to-html]]
-            [cmsnew.publisher.item-templates :refer [item-list item-container]]
-            [cmsnew.publisher.site :as st]
-            [jayq.core :as jq :refer [$]]
-            [jayq.util :refer [log]])
+  (:require
+   [crate.form :refer [form-to text-field text-area hidden-field
+                       submit-button reset-button drop-down label]]
+   [cmsnew.ui.tooltipper :as tooltip]
+   [cljs.core.async :as async
+    :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
+   [crate.core :as crate]
+   [reactor.core :as react]
+   [sablono.core :as sab :include-macros true]
+   [cmsnew.transformer.markdown :refer [markdown-to-html]]
+   [cmsnew.publisher.item-templates :refer [item-list item-container]]
+   [cmsnew.ui.form-templates :as form :refer [control-group]]
+   
+   [cmsnew.publisher.site :as st]
+
+   ;; impobting edn-items
+   [cmsnew.edn-page.item :refer [render-editable-item item-form]]
+   [cmsnew.edn-page.items.heading]
+   [cmsnew.edn-page.items.markdown]
+   [cmsnew.edn-page.items.section]
+   [cmsnew.edn-page.items.image]   
+   
+   [jayq.core :as jq :refer [$]]
+   [jayq.util :refer [log]])
   (:require-macros [reactor.macros :as reactm] ))
 
-
 ;; helpers
-(defn delete-button [event-chan]
-  [:button {:type "button"
-            :onClick #(put! event-chan [:form-delete])
-            :className "btn btn-danger form-delete pull-right"} "Delete"])
 
 (defn loading [percent-complete]
   [:div.progress.progress-striped.active
@@ -41,136 +47,6 @@
                              :onClick #(put! event-chan [:move-item-down {:id id}])
                              } [:span.glyphicon.glyphicon-chevron-down]]])
 
-;; moving to react
-
-(defn editable-item-container [id type content event-chan]
-  (sab/html [:div {:id id
-                   :data-pageitem (str type)
-                   :onDoubleClick #(put! event-chan [:edit-item {:id id}])
-                   :className "item"}
-             #_(item-modify-control id event-chan)
-             content]))
-
-(defmulti render-editable-item #(:type %))
-
-(defmethod render-editable-item :default [{:keys [id type] :as item} {:keys [event-chan]}]
-  (log (str "rendering " (prn-str [type id])))
-  (editable-item-container id type
-                           (sab/html [:div (prn-str item)])
-                           event-chan))
-
-(defmethod render-editable-item :image [{:keys [id type url] :as item} {:keys [event-chan]}]
-  (log (str "rendering " (prn-str [type id])))
-  (editable-item-container id type
-                           (sab/html [:p [:img.img-responsive {:src url}]])
-                           event-chan))
-
-(defmethod render-editable-item :heading [{:keys [id content type size]} {:keys [event-chan]}]
-  (log (str "rendering " (prn-str [type id])))
-  (editable-item-container id type
-                           (sab/html
-                            [(keyword (str "h" size)) content])
-                           event-chan))
-
-(defmethod render-editable-item :section [{:keys [id content]} {:keys [event-chan]}]
-  (log (str "rendering " (prn-str [type id])))
-  (editable-item-container id type
-                           (sab/html
-                            [:div [:pre "Section: " "\"" content "\""]])
-                           event-chan))
-
-(defmethod render-editable-item :markdown [{:keys [id type content]} {:keys [event-chan]}]
-  (log (str "rendering " (prn-str [type id])))
-  (editable-item-container id type
-                           (react/raw (markdown-to-html content))
-                           event-chan))
-
-;; forms
-
-(defn control-group [field errors & content]
-    (let [error-msg (first (errors field))]
-      [:div {:className (str "form-group" (if error-msg " error"))}
-       content
-       (if error-msg [:span.help-inline error-msg])]))
-
-(defmulti item-form #(:type %))
-
-(defmethod item-form :heading [item errors event-chan _]
-  (reactm/owner-as
-   owner
-   (sab/html
-    (form-to {:onSubmit (react/form-submit owner event-chan :form-submit [:content :size])}
-             [:post (str "#heading-item-" (:id item))]
-             (control-group :content errors
-                            (text-field {:className "heading-input" :data-size (item :size)
-                                         :ref "content"
-                                         :defaultValue (item :content)
-                                         :placeholder "New Heading"}
-                                        :content))
-             (hidden-field {:ref "size"} :size (item :size))
-             (control-group :size errors
-                            [:div.btn-group.heading-size 
-                             (map (fn [x]
-                                    [:button {:type "button"
-                                              :onClick #(put! event-chan [:change-edited-item {:size x}])
-                                              :className (str "heading-size-btn btn btn-default h" x
-                                                              (if (= (str x) (str (item :size))) " active" ""))
-                                              :data-size x} (str "H" x)]
-                                    ) (range 1 6))])
-             (submit-button {:className "btn btn-primary"} "Save")
-             (reset-button {:className "btn btn-default"
-                            :onClick #(put! event-chan [:form-cancel])} "Cancel")))))
-
-(defmethod item-form :section [item errors event-chan _]
-  (reactm/owner-as
-   owner
-   (sab/html
-    (form-to {:onSubmit (react/form-submit owner event-chan :form-submit [:content])}
-             [:post (str "#section-item-" (:id item))]
-             (control-group :content errors
-                            (text-field {:className "form-control"
-                                         :ref "content"
-                                         :defaultValue (item :content)
-                                         :placeholder "Section name"}
-                                        :content))
-             (submit-button {:className "btn btn-primary"} "Save")
-             (reset-button {:className "btn btn-default"
-                            :onClick #(put! event-chan [:form-cancel])} "Cancel")))))
-
-(defmethod item-form :image [item errors event-chan owner]
-  (reactm/owner-as
-   owner
-   (sab/html
-    (form-to {:onSubmit (react/form-submit owner event-chan :form-submit [:description])}
-             [:post (str "#image-item-" (:id item))]
-             [:p [:img.img-responsive {:src (:url item)}]]
-             (control-group :description errors
-                            (text-field {:className "heading-input"
-                                         :ref "description"
-                                         :defaultValue (item :description)
-                                         :placeholder "Description"}
-                                        :description))
-             (submit-button {:className "btn btn-primary"} "Save")
-             (reset-button {:className "btn btn-default"
-                            :onClick #(put! event-chan [:form-cancel])} "Cancel")
-             (delete-button event-chan)))))
-
-(defmethod item-form :markdown [item errors event-chan owner]
-  (reactm/owner-as
-   owner
-   (sab/html
-    (form-to
-     {:onSubmit (react/form-submit owner event-chan :form-submit [:content])}
-     [:post (str "#textblock-item-" (:id item))]
-     (control-group :content errors
-                    [:textarea {:className "big-text-area"
-                                :defaultValue (:content item)
-                                :name "content"
-                                :ref "content"}])
-     (submit-button {:className "btn btn-primary"} "Save")
-     (reset-button {:className "btn btn-default"
-                    :onClick #(put! event-chan [:form-cancel])} "Cancel"))
-    )))
 
 (defn item-under-edit [{:keys [editing-item]}] editing-item)
 

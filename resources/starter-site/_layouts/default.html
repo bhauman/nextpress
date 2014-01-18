@@ -17,6 +17,7 @@
     <!-- Custom styles for this template -->
     <link href="assets/css/main.css" rel="stylesheet">
 
+<script src="assets/js/Chart.js"></script>
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -40,11 +41,10 @@
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li class="active"><a href="index.html">HOME</a></li>
-            <li><a href="about.html">ABOUT</a></li>
-            <li><a href="services.html">SERVICES</a></li>
-            <li><a href="works.html">WORKS</a></li>
-            <li><a data-toggle="modal" data-target="#myModal" href="#myModal"><i class="fa fa-envelope-o"></i></a></li>
+            <li class="<%= page.url == "/index.html" ? "active" : ""  %>"><a href="index.html">HOME</a></li>
+            <li class="<%= page.url == "/about.html" ? "active" : ""  %>"><a href="about.html">ABOUT</a></li>
+            <li class="<%= page.url == "/services.html" ? "active" : ""  %>"><a href="services.html">SERVICES</a></li>
+            <li class="<%= page.url == "/works.html" ? "active" : ""  %>"><a href="works.html">WORKS</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -57,11 +57,10 @@
       <div class="container">
 	<div class="row centered">
 	  <a href="#"><i class="fa fa-twitter"></i></a><a href="#"><i class="fa fa-facebook"></i></a><a href="#"><i class="fa fa-dribbble"></i></a>
-	  
+	  <div><a href="http://localhost:9292/cmsnew?editme=true">edit</a></div>
 	</div><!-- row -->
       </div><!-- container -->
     </div><!-- Footer -->
-
 
     <!-- Bootstrap core JavaScript
          ================================================== -->

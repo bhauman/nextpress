@@ -5,11 +5,20 @@
    [cmsnew.util.core :refer [self-assoc map-to-key find-first]]
    [cmsnew.datastore.s3 :as store]
    [cmsnew.transformer.markdown :refer [markdown-to-html]]
-   [cmsnew.publisher.item-templates :as templ]
    [cmsnew.util.async-utils :as async-util]
    [cmsnew.publisher.site :as st]   
    [cmsnew.publisher.paths :as paths]
-   [cmsnew.publisher.source-file :as sf]   
+   [cmsnew.publisher.source-file :as sf]
+
+   [cmsnew.publisher.item-templates :as templ]
+
+   ;; importing edn-items
+   [cmsnew.edn-page.item :refer [deleted? render-item]]
+   [cmsnew.edn-page.items.heading]
+   [cmsnew.edn-page.items.markdown]
+   [cmsnew.edn-page.items.section]
+   [cmsnew.edn-page.items.image]
+   
    [crate.core :as crate]
    [clojure.string :as string]
    [cljs.reader :refer [push-back-reader read-string]]   
@@ -116,14 +125,14 @@
   (.-outerHTML
    (crate/html
     (templ/item-list "list-1" "list-1"
-                     (map templ/render-item (get-in page-file-map
-                                                    [:front-matter :items]))))))
+                     (map render-item (get-in page-file-map
+                                              [:front-matter :items]))))))
 
 (defn render-edn-section [items]
   (.-outerHTML
    (crate/html
     [:div
-     (map templ/render-item items)])))
+     (map render-item items)])))
 
 (defn render-raw-page [page-file-map data-for-page]
   (condp = (-> page-file-map :path paths/extention-from-path)
@@ -145,6 +154,7 @@
         section-items (take-while #(not= (:type %) :section) (rest temp-items))]
     (if section-header
       (cons { :name    (:content section-header)
+              :items   section-items 
               :content (render-edn-section section-items) }
             (sections-from-items (rest temp-items)))
       nil)))
@@ -157,11 +167,13 @@
 (defn file-to-page-data [{:keys [body front-matter date] :as fm}]
   (let [{:keys [title]} front-matter
         sections (get-sections fm)
-        sections-map (into {} (map (juxt :name :content) sections))]
+        sections-map (into {} (map (juxt :name :content) sections))
+        sections-items-map (into {} (map (juxt :name :items) sections))]
     (merge { :content (render-raw-page-without-context fm)
              :sections sections
              :sectionsMap sections-map
              :getSection (fn [name] (get sections-map name))
+             :getSectionItems (fn [name] (clj->js (get sections-items-map name)))            
              :body (:body fm)
              :url (str "/" (sf/make-target-path fm))
              :path (:path fm)
@@ -203,6 +215,7 @@
            (render-template (:body template-file-map)
                             (assoc data-for-page :content content)))
           )))))
+
 
 ;; data for environment
 

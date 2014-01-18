@@ -36,7 +36,8 @@
       (let [pages (st/edn-pages site)]
         (log pages)
         (map render-page
-             pages
+             (sort-by #(string/lower-case (sf/display-name %))
+                      pages) 
              (repeat event-chan))
         )]]
     ]))

@@ -8,12 +8,21 @@
    [cmsnew.ui.templates :as templ]
    [cmsnew.util.log-utils :refer [ld lp log-chan]]
    [cmsnew.util.async-utils :as async-util]
+
+   ;; importing edn-items
+   [cmsnew.edn-page.item :refer [deleted?]]
+   [cmsnew.edn-page.items.heading]
+   [cmsnew.edn-page.items.markdown]
+   [cmsnew.edn-page.items.section]
+   [cmsnew.edn-page.items.image]   
+   
    [reactor.core :refer [react-render-loop]]
    [cljs-uuid-utils :refer [make-random-uuid uuid-string]]
    [clojure.string :as string]
    [jayq.core :refer [$] :as jq]
    [jayq.util :refer [log]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]))
+
 
 ;; page helpers
 
@@ -38,19 +47,6 @@
   (or (nil? st)
       (not (.test #"\S" st))))
 
-(defmulti deleted? #(:type %))
-
-(defmethod deleted? :default [{:keys [deleted]}]
-  deleted)
-
-(defmethod deleted? :heading [{:keys [content deleted]}]
-  (or deleted (blank? content)))
-
-(defmethod deleted? :markdown [{:keys [content deleted]}]
-  (or deleted (blank? content)))
-
-(defmethod deleted? :section [{:keys [content deleted]}]
-  (or deleted (blank? content)))
 
 (defn merge-data-item-into-page [page data-item]
   (let [items (get-page-items page)]
