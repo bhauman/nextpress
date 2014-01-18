@@ -23190,12 +23190,6 @@ cljs.core._add_method.call(null, cmsnew.edn_page.item.item_form, new cljs.core.K
     }], null), "Cancel")));
   });
 });
-cmsnew.transformer = {};
-cmsnew.transformer.markdown = {};
-var conv_class_18283 = Showdown.converter, converter_18284 = new conv_class_18283;
-cmsnew.transformer.markdown.markdown_to_html = function(a) {
-  return converter_18284.makeHtml(a);
-};
 cmsnew.util.core = {};
 cmsnew.util.core.self_assoc = function(a, b, c) {
   return cljs.core.assoc.call(null, a, b, c.call(null, a));
@@ -23205,6 +23199,15 @@ cmsnew.util.core.map_to_key = function(a, b) {
 };
 cmsnew.util.core.find_first = function(a, b) {
   return cljs.core.first.call(null, cljs.core.filter.call(null, a, b));
+};
+cmsnew.util.core.insert_at = function(a, b, c) {
+  return cljs.core.concat.call(null, cljs.core.take.call(null, b, a), new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [c], null), cljs.core.drop.call(null, b, a));
+};
+cmsnew.transformer = {};
+cmsnew.transformer.markdown = {};
+var conv_class_18283 = Showdown.converter, converter_18284 = new conv_class_18283;
+cmsnew.transformer.markdown.markdown_to_html = function(a) {
+  return converter_18284.makeHtml(a);
 };
 cmsnew.publisher = {};
 cmsnew.publisher.paths = {};
@@ -27205,13 +27208,10 @@ cmsnew.ui.templates.item_renderer = function(a, b) {
     return cmsnew.edn_page.item.render_editable_item.call(null, a, b);
   });
 };
-cmsnew.ui.templates.insert_at = function(a, b, c) {
-  return cljs.core.concat.call(null, cljs.core.take.call(null, b, a), new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [c], null), cljs.core.drop.call(null, b, a));
-};
 cmsnew.ui.templates.render_edn_page = function(a) {
   a = cljs.core.seq_QMARK_.call(null, a) ? cljs.core.apply.call(null, cljs.core.hash_map, a) : a;
   var b = cljs.core.get.call(null, a, new cljs.core.Keyword(null, "edn-page", "edn-page", 2694341983)), b = cljs.core.get_in.call(null, b, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "front-matter", "front-matter", 1516015191), new cljs.core.Keyword(null, "items", "items", 1114430258)], null));
-  var c = cljs.core.get_in.call(null, a, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "editing-item", "editing-item", 3635698074), new cljs.core.Keyword(null, "insert-position", "insert-position", 2389003567)], null)), b = cljs.core.truth_(c) ? cmsnew.ui.templates.insert_at.call(null, b, c, (new cljs.core.Keyword(null, "editing-item", "editing-item", 3635698074)).cljs$core$IFn$_invoke$arity$1(a)) : b;
+  var c = cljs.core.get_in.call(null, a, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "editing-item", "editing-item", 3635698074), new cljs.core.Keyword(null, "insert-position", "insert-position", 2389003567)], null)), b = cljs.core.truth_(c) ? cmsnew.util.core.insert_at.call(null, b, c, (new cljs.core.Keyword(null, "editing-item", "editing-item", 3635698074)).cljs$core$IFn$_invoke$arity$1(a)) : b;
   return sablono.render.render_html.call(null, cmsnew.publisher.item_templates.item_list.call(null, "list-1", "list-1", cljs.core.map.call(null, cmsnew.ui.templates.item_renderer, b, cljs.core.repeat.call(null, a))));
 };
 cmsnew.ui.templates.edit_front_matter_form = function(a) {

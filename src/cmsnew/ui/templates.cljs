@@ -14,13 +14,14 @@
    
    [cmsnew.publisher.site :as st]
 
-   ;; impobting edn-items
+   ;; importing edn-items
    [cmsnew.edn-page.item :refer [render-editable-item item-form]]
    [cmsnew.edn-page.items.heading]
    [cmsnew.edn-page.items.markdown]
    [cmsnew.edn-page.items.section]
    [cmsnew.edn-page.items.image]   
-   
+
+   [cmsnew.util.core :refer [insert-at]]
    [jayq.core :as jq :refer [$]]
    [jayq.util :refer [log]])
   (:require-macros [reactor.macros :as reactm] ))
@@ -60,9 +61,6 @@
                                                (sab/html (item-form (item-under-edit state) {}
                                                                     (:event-chan state) owner)))))
     (reactm/pure item (render-editable-item item state))))
-
-(defn insert-at [items index item]
-  (concat (take index items) [item] (drop index items)))
 
 (defn render-edn-page [{:keys [edn-page] :as state}]
   (let [page-data (get-in edn-page [:front-matter :items])
