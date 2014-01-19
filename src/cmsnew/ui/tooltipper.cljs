@@ -12,8 +12,6 @@
    [jayq.util :refer [log]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]))
 
-(def page-top 62)
-
 (defn top-bottom-boundary [item]
   (let [item   ($ item)
         height (.height item)
@@ -27,7 +25,7 @@
 
 (defn hover-boundaries [container-selector]
   (let [el-bounds (flatten (element-boundaries container-selector))
-        h-bounds  (concat [(- (first el-bounds) 16)] el-bounds [(+ 100 (last el-bounds))])]
+        h-bounds  (concat [(- (first el-bounds) 30)] el-bounds [(+ 100 (last el-bounds))])]
     (vec (map vector
               (keep-indexed #(if (even? %1) %2) h-bounds)
               (keep-indexed #(if (odd? %1) %2) h-bounds)))))
