@@ -3,7 +3,7 @@
 - [X] Add link from demo site to editor
 - [X] factor out items
 - [X] Fix first position for plus sign
-- [ ] have item partials
+- [X] have item partials
 - [ ] Finish demo site
 - [ ] Save demo site
 - [ ] Allow for the creation of pages

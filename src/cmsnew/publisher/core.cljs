@@ -125,23 +125,24 @@
 (defn template-for-item-type [system-data type]
   ((:partials system-data) (str "items/" (name type))))
 
-(defn render-item-with-local-template [system-data item]
-  (if-let [template (template-for-item-type system-data item)]
-    (render-template (:body template) item)
+(defn render-item-with-template-overide [system-data item]
+  (if-let [template (template-for-item-type system-data (:type item))]
+    (crate/raw (render-template (:body template) item))
     (render-item item)))
 
 (defn render-edn-page [system-data page-file-map]
   (.-outerHTML
    (crate/html
     (templ/item-list "list-1" "list-1"
-                     (map render-item (get-in page-file-map
+                     (map (partial render-item-with-template-overide system-data)
+                          (get-in page-file-map
                                               [:front-matter :items]))))))
 
 (defn render-edn-section [system-data items]
   (.-outerHTML
    (crate/html
     [:div
-     (map render-item items)])))
+     (map (partial render-item-with-template-overide system-data) items)])))
 
 (defn render-raw-page [system-data page-file-map data-for-page]
   (condp = (-> page-file-map :path paths/extention-from-path)
@@ -224,7 +225,6 @@
            (render-template (:body template-file-map)
                             (assoc data-for-page :content content)))
           )))))
-
 
 ;; processing system
 

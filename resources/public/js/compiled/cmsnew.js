@@ -27725,15 +27725,15 @@ cmsnew.publisher.core.get_config = function(a) {
 cmsnew.publisher.core.template_for_item_type = function(a, b) {
   return(new cljs.core.Keyword(null, "partials", "partials", 2202753668)).cljs$core$IFn$_invoke$arity$1(a).call(null, [cljs.core.str("items/"), cljs.core.str(cljs.core.name.call(null, b))].join(""));
 };
-cmsnew.publisher.core.render_item_with_local_template = function(a, b) {
-  var c = cmsnew.publisher.core.template_for_item_type.call(null, a, b);
-  return cljs.core.truth_(c) ? cmsnew.publisher.core.render_template.call(null, (new cljs.core.Keyword(null, "body", "body", 1016933652)).cljs$core$IFn$_invoke$arity$1(c), b) : cmsnew.edn_page.item.render_item.call(null, b);
+cmsnew.publisher.core.render_item_with_template_overide = function(a, b) {
+  var c = cmsnew.publisher.core.template_for_item_type.call(null, a, (new cljs.core.Keyword(null, "type", "type", 1017479852)).cljs$core$IFn$_invoke$arity$1(b));
+  return cljs.core.truth_(c) ? crate.core.raw.call(null, cmsnew.publisher.core.render_template.call(null, (new cljs.core.Keyword(null, "body", "body", 1016933652)).cljs$core$IFn$_invoke$arity$1(c), b)) : cmsnew.edn_page.item.render_item.call(null, b);
 };
 cmsnew.publisher.core.render_edn_page = function(a, b) {
-  return crate.core.html.call(null, cmsnew.publisher.item_templates.item_list.call(null, "list-1", "list-1", cljs.core.map.call(null, cmsnew.edn_page.item.render_item, cljs.core.get_in.call(null, b, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "front-matter", "front-matter", 1516015191), new cljs.core.Keyword(null, "items", "items", 1114430258)], null))))).outerHTML;
+  return crate.core.html.call(null, cmsnew.publisher.item_templates.item_list.call(null, "list-1", "list-1", cljs.core.map.call(null, cljs.core.partial.call(null, cmsnew.publisher.core.render_item_with_template_overide, a), cljs.core.get_in.call(null, b, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "front-matter", "front-matter", 1516015191), new cljs.core.Keyword(null, "items", "items", 1114430258)], null))))).outerHTML;
 };
 cmsnew.publisher.core.render_edn_section = function(a, b) {
-  return crate.core.html.call(null, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "div", "div", 1014003715), cljs.core.map.call(null, cmsnew.edn_page.item.render_item, b)], null)).outerHTML;
+  return crate.core.html.call(null, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "div", "div", 1014003715), cljs.core.map.call(null, cljs.core.partial.call(null, cmsnew.publisher.core.render_item_with_template_overide, a), b)], null)).outerHTML;
 };
 cmsnew.publisher.core.render_raw_page = function(a, b, c) {
   var d = cljs.core._EQ_, e = cmsnew.publisher.paths.extention_from_path.call(null, (new cljs.core.Keyword(null, "path", "path", 1017337751)).cljs$core$IFn$_invoke$arity$1(b));
@@ -27763,7 +27763,7 @@ cmsnew.publisher.core.file_to_page_data = function(a, b) {
   cljs.core.get.call(null, c, new cljs.core.Keyword(null, "body", "body", 1016933652));
   var f = cljs.core.seq_QMARK_.call(null, e) ? cljs.core.apply.call(null, cljs.core.hash_map, e) : e;
   cljs.core.get.call(null, f, new cljs.core.Keyword(null, "title", "title", 1124275658));
-  var f = cmsnew.publisher.core.get_sections.call(null, c), h = cljs.core.into.call(null, cljs.core.PersistentArrayMap.EMPTY, cljs.core.map.call(null, cljs.core.juxt.call(null, new cljs.core.Keyword(null, "name", "name", 1017277949), new cljs.core.Keyword(null, "content", "content", 1965434859)), f)), g = cljs.core.into.call(null, cljs.core.PersistentArrayMap.EMPTY, cljs.core.map.call(null, cljs.core.juxt.call(null, new cljs.core.Keyword(null, "name", "name", 1017277949), new cljs.core.Keyword(null, 
+  var f = cmsnew.publisher.core.get_sections.call(null, a, c), h = cljs.core.into.call(null, cljs.core.PersistentArrayMap.EMPTY, cljs.core.map.call(null, cljs.core.juxt.call(null, new cljs.core.Keyword(null, "name", "name", 1017277949), new cljs.core.Keyword(null, "content", "content", 1965434859)), f)), g = cljs.core.into.call(null, cljs.core.PersistentArrayMap.EMPTY, cljs.core.map.call(null, cljs.core.juxt.call(null, new cljs.core.Keyword(null, "name", "name", 1017277949), new cljs.core.Keyword(null, 
   "items", "items", 1114430258)), f));
   return cljs.core.merge.call(null, cljs.core.PersistentHashMap.fromArrays([new cljs.core.Keyword(null, "path", "path", 1017337751), new cljs.core.Keyword(null, "date", "date", 1016980256), new cljs.core.Keyword(null, "sections", "sections", 1961841056), new cljs.core.Keyword(null, "getSection", "getSection", 4021005857), new cljs.core.Keyword(null, "content", "content", 1965434859), new cljs.core.Keyword(null, "url", "url", 1014020321), new cljs.core.Keyword(null, "getSectionItems", "getSectionItems", 
   3270608323), new cljs.core.Keyword(null, "sectionsMap", "sectionsMap", 1589636032), new cljs.core.Keyword(null, "body", "body", 1016933652), new cljs.core.Keyword(null, "id", "id", 1013907597)], [(new cljs.core.Keyword(null, "path", "path", 1017337751)).cljs$core$IFn$_invoke$arity$1(c), d, f, function(a) {
@@ -27810,11 +27810,11 @@ cmsnew.publisher.core.process = function(a, b) {
     return cmsnew.util.core.self_assoc.call(null, a, new cljs.core.Keyword(null, "rendered-body", "rendered-body", 809187116), cljs.core.partial.call(null, cmsnew.publisher.core.render_page_with_templates, c, d));
   }, e)));
 };
-var dir_path_rx_412443 = /\/$/, hash_rx_412444 = /\#$/;
+var dir_path_rx_529571 = /\/$/, hash_rx_529572 = /\#$/;
 cmsnew.publisher.core.good_file_path_QMARK_ = function(a) {
   return cljs.core.not.call(null, function() {
-    var b = dir_path_rx_412443.test(a);
-    return cljs.core.truth_(b) ? b : hash_rx_412444.test(a);
+    var b = dir_path_rx_529571.test(a);
+    return cljs.core.truth_(b) ? b : hash_rx_529572.test(a);
   }());
 };
 cmsnew.publisher.core.fetch_file_list = function(a, b) {
@@ -28147,9 +28147,9 @@ cmsnew.publisher.core.create_site_for_url = function(a) {
               };
             }(r, d, d, g, k, l, m, n, p, q, s, r, t, u, v, w, c);
           }(), x = cljs.core.add_watch.call(null, w, new cljs.core.Keyword(null, "fields-changed", "fields-changed", 1579872018), x), z = cmsnew.publisher.core.system_flow.call(null, r);
-          b[7] = x;
+          b[7] = v;
           b[8] = z;
-          b[9] = v;
+          b[9] = x;
           return cljs.core.async.impl.ioc_helpers.return_chan.call(null, b, r);
         }
         return 1 === c ? (x = cmsnew.publisher.core.get_config.call(null, a), cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, b, 2, x)) : null;
