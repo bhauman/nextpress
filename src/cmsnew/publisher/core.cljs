@@ -122,7 +122,15 @@
 
 ;; rendering pages
 
-(defn render-edn-page [page-file-map]
+(defn template-for-item-type [system-data type]
+  ((:partials system-data) (str "items/" (name type))))
+
+(defn render-item-with-local-template [system-data item]
+  (if-let [template (template-for-item-type system-data item)]
+    (render-template (:body template) item)
+    (render-item item)))
+
+(defn render-edn-page [system-data page-file-map]
   (.-outerHTML
    (crate/html
     (templ/item-list "list-1" "list-1"
@@ -135,18 +143,18 @@
     [:div
      (map render-item items)])))
 
-(defn render-raw-page [page-file-map data-for-page]
+(defn render-raw-page [system-data page-file-map data-for-page]
   (condp = (-> page-file-map :path paths/extention-from-path)
     "md"    (markdown-to-html (:body page-file-map))
     "html"  (render-template (:body page-file-map)
                              data-for-page)
-    "edn"   (render-edn-page page-file-map)
+    "edn"   (render-edn-page system-data page-file-map)
     (:body page-file-map)))
 
-(defn render-raw-page-without-context [page-file-map]
+(defn render-raw-page-without-context [system-data page-file-map]
   (condp = (-> page-file-map :path paths/extention-from-path)
-    "md"    (render-raw-page page-file-map {})
-    "edn"   (render-raw-page page-file-map {})
+    "md"    (render-raw-page system-data page-file-map {})
+    "edn"   (render-raw-page system-data page-file-map {})
     (:body page-file-map)))
 
 (defn sections-from-items [items]
@@ -165,12 +173,12 @@
     (sections-from-items (sf/items source-file))
     (list)))
 
-(defn file-to-page-data [{:keys [body front-matter date] :as fm}]
+(defn file-to-page-data [system-data {:keys [body front-matter date] :as fm}]
   (let [{:keys [title]} front-matter
         sections (get-sections fm)
         sections-map (into {} (map (juxt :name :content) sections))
         sections-items-map (into {} (map (juxt :name :items) sections))]
-    (merge { :content (render-raw-page-without-context fm)
+    (merge { :content (render-raw-page-without-context system-data fm)
              :sections sections
              :sectionsMap sections-map
              :getSection (fn [name] (get sections-map name))
@@ -185,10 +193,10 @@
 (defn template-data [system-data]
   (let [data-files (system-data :data)
         posts (->> (:posts system-data)
-                   (map file-to-page-data)
+                   (map (partial file-to-page-data system-data))
                    (sort-by #(paths/date-to-int (:date %)))
                    reverse)
-        pages (map file-to-page-data (:pages system-data))
+        pages (map (partial file-to-page-data system-data) (:pages system-data))
         data-file-map (zipmap (keys data-files) (map :data (vals data-files)))]
     (merge
        data-file-map
@@ -204,10 +212,10 @@
 
 (defn render-page-with-templates [system-data data-for-templates page-file-map]
   (let [start-template (get-in page-file-map [:front-matter :layout])
-        data-for-page (merge {:page (file-to-page-data page-file-map)}
+        data-for-page (merge {:page (file-to-page-data system-data page-file-map)}
                              data-for-templates)]
     (loop [template start-template
-           content (render-raw-page page-file-map data-for-page)]
+           content (render-raw-page system-data page-file-map data-for-page)]
       (let [template-file-map (get (system-data :templates) template)]
         (if (nil? template-file-map)
           content
@@ -413,4 +421,3 @@
                   (log (:msg msg))
                   (recur)))
      site)))
-
