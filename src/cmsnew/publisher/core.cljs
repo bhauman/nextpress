@@ -198,18 +198,32 @@
                    (sort-by #(paths/date-to-int (:date %)))
                    reverse)
         pages (map (partial file-to-page-data system-data) (:pages system-data))
-        data-file-map (zipmap (keys data-files) (map :data (vals data-files)))]
-    (merge
-       data-file-map
-       { :site (assoc (get-in system-data [:site :config-file-data])
-                 :posts posts
-                 :pages pages)
-         :includePage (fn [page-path] (->> pages
-                                          (find-first #(= (:path %) page-path))
-                                          :content))
-         :getPage (fn [page-path] (clj->js (->> pages
-                                               (find-first #(= (:path %) page-path)))))
-        })))
+        data-file-map (zipmap (keys data-files) (map :data (vals data-files)))
+        site (assoc (get-in system-data [:site :config-file-data])
+               :posts posts
+               :pages pages)
+        include-page (fn [page-path] (->> pages
+                                         (find-first #(= (:path %) page-path))
+                                         :content))
+        get-page (fn [page-path] (clj->js (->> pages
+                                              (find-first #(= (:path %) page-path)))))
+        all-data (merge
+                  data-file-map
+                  { :site site
+                    :includePage include-page
+                    :getPage get-page})
+        render-partial (fn rendPartial [partial-path partial-data]
+                         (let [env (merge all-data
+                                          {:renderPartial rendPartial}
+                                          (or (js->clj partial-data) 
+                                              {}))]
+                           (if-let [template ((:partials system-data) partial-path)]
+                             (render-template (:body template) env)
+                             "null partial")
+                           ))]
+    (assoc all-data
+      :renderPartial render-partial)
+    ))
 
 (defn render-page-with-templates [system-data data-for-templates page-file-map]
   (let [start-template (get-in page-file-map [:front-matter :layout])

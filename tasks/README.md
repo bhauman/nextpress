@@ -7,7 +7,7 @@
 - [ ] Finish demo site
 - [ ] Save demo site
 - [ ] Allow for the creation of pages
-- [ ] Is :layout required for up published page?
+- [ ] Is :layout required for published page?
 - [ ] Test for null problems in templates helpers
 - [ ] Implement partials
 
