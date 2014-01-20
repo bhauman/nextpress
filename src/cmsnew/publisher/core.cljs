@@ -137,7 +137,7 @@
                      (map render-item (get-in page-file-map
                                               [:front-matter :items]))))))
 
-(defn render-edn-section [items]
+(defn render-edn-section [system-data items]
   (.-outerHTML
    (crate/html
     [:div
@@ -157,25 +157,25 @@
     "edn"   (render-raw-page system-data page-file-map {})
     (:body page-file-map)))
 
-(defn sections-from-items [items]
+(defn sections-from-items [system-data items]
   (let [temp-items (drop-while #(not= (:type %) :section) items)
         section-header (first temp-items)
         section-items (take-while #(not= (:type %) :section) (rest temp-items))]
     (if section-header
       (cons { :name    (:content section-header)
               :items   section-items 
-              :content (render-edn-section section-items) }
-            (sections-from-items (rest temp-items)))
+              :content (render-edn-section system-data section-items) }
+            (sections-from-items system-data (rest temp-items)))
       nil)))
 
-(defn get-sections [source-file]
+(defn get-sections [system-data source-file]
   (if (sf/edn-page? source-file)
-    (sections-from-items (sf/items source-file))
+    (sections-from-items system-data (sf/items source-file))
     (list)))
 
 (defn file-to-page-data [system-data {:keys [body front-matter date] :as fm}]
   (let [{:keys [title]} front-matter
-        sections (get-sections fm)
+        sections (get-sections system-data fm)
         sections-map (into {} (map (juxt :name :content) sections))
         sections-items-map (into {} (map (juxt :name :items) sections))]
     (merge { :content (render-raw-page-without-context system-data fm)
