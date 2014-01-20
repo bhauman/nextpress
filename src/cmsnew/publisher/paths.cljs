@@ -26,6 +26,12 @@
 
 (def filename-from-path (comp last path-parts))
 
+(def full-filename-from-path
+  (comp
+   (partial string/join "/")
+   rest
+   path-parts))
+
 (defn extention-from-path [path]
   (-> path
       (string/split #"\.")

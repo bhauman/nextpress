@@ -63,6 +63,11 @@
 
 ;; getting paths
 
+(defn full-filename-without-ext [{:keys [path]}]
+  (-> path
+      pth/full-filename-from-path
+      (pth/replace-extention "")))
+
 (defn filename-without-ext [{:keys [path]}]
   (-> path
       pth/filename-from-path

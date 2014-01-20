@@ -29,6 +29,7 @@
              :bucket "immubucket"
              :store-root "http://s3.amazonaws.com"
              :template-path "_layouts"
+             :partial-path "_partials"
              :post-path "_posts"
              :page-path "_site_src"             
              :data-path "_data" })
@@ -217,13 +218,12 @@
           )))))
 
 
-;; data for environment
-
 ;; processing system
 
 (defn process [site files]
   (let [system-data
         { :templates  (map-to-key :name (st/templates site))
+          :partials   (map-to-key :name (st/partials site))
           :data       (map-to-key :name (st/data-files site))
           :posts      (st/posts site)
           :pages      (st/pages site)
@@ -232,6 +232,8 @@
         files-to-publish (filter sf/publish?
                                  (concat (:posts system-data)
                                          (:pages system-data)))]
+    #_(log "SYSTEM DATA")
+    #_(log (clj->js system-data))
      (->> files-to-publish
           (map #(self-assoc % :rendered-body
                            (partial render-page-with-templates
@@ -411,16 +413,4 @@
                   (log (:msg msg))
                   (recur)))
      site)))
-
-#_(go
- (let [site (<! (create-site-for-url
-                 "http://immubucket.s3-website-us-east-1.amazonaws.com"))]
-   (log site)
-   (force-publish site)))
-
-
-#_(go-loop []
-         (publish)
-         (<! (timeout 5000))
-         (recur))
 

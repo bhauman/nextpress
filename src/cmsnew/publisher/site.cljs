@@ -7,19 +7,25 @@
 
 (def page-path :page-path)
 (def post-path :post-path)
-(def data-path :post-path)
+(def data-path :data-path)
+(def partial-path :partial-path)
 (def template-path :template-path)
 
 (defn source-files [site] @(:source-files site))
 
 (defn template-names [site]
   (->> (filter-for-prefix (source-files site) (template-path site))
-       (map sf/filename-without-ext)))
+       (map sf/full-filename-without-ext)))
 
 (defn templates [site]
   (->> (filter-for-prefix (source-files site) (template-path site))
        (map (partial sf/parse-front-matter site))
-       (map #(self-assoc % :name sf/filename-without-ext))))
+       (map #(self-assoc % :name sf/full-filename-without-ext))))
+
+(defn partials [site]
+  (->> (filter-for-prefix (source-files site) (partial-path site))
+       (map (partial sf/parse-front-matter site))
+       (map #(self-assoc % :name sf/full-filename-without-ext))))
 
 (defn pages [site]
   (->> (filter-for-prefix (source-files site) (page-path site))
