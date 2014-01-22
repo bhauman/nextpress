@@ -4,7 +4,7 @@
                                  render-item
                                  item-form
                                  render-editable-item] :as item]
-   [cmsnew.ui.form-templates :as form :refer [control-group delete-button]]
+   [cmsnew.ui.form-templates :as form :refer [control-group delete-button select-alternate-partial]]
    [reactor.core :as react]   
    [sablono.core :as sab :include-macros true]
    [cljs.core.async :as async :refer [put!]]   
@@ -26,7 +26,7 @@
   (reactm/owner-as
    owner
    (sab/html
-    (sab/form-to {:onSubmit (react/form-submit owner event-chan :form-submit [:description])}
+    (sab/form-to {:onSubmit (react/form-submit owner event-chan :form-submit [:description :partial])}
                  [:post (str "#image-item-" (:id item))]
                  [:p [:img.img-responsive {:src (:url item)}]]
                  (control-group :description errors
@@ -35,6 +35,7 @@
                                                  :defaultValue (item :description)
                                                  :placeholder "Description"}
                                                 :description))
+                 (select-alternate-partial item state :image)
                  (sab/submit-button {:className "btn btn-primary"} "Save")
                  (sab/reset-button {:className "btn btn-default"
                                     :onClick #(put! event-chan [:form-cancel])} "Cancel")

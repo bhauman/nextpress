@@ -18,14 +18,14 @@ goog.addDependency("../sablono/util.js", ['sablono.util'], ['cljs.core', 'clojur
 goog.addDependency("../sablono/render.js", ['sablono.render'], ['cljs.core', 'clojure.walk', 'clojure.string', 'sablono.util']);
 goog.addDependency("../sablono/core.js", ['sablono.core'], ['cljs.core', 'clojure.walk', 'clojure.string', 'sablono.util', 'sablono.render']);
 goog.addDependency("../cmsnew/util/log_utils.js", ['cmsnew.util.log_utils'], ['cljs.core', 'jayq.util', 'cljs.core.async']);
-goog.addDependency("../cmsnew/ui/form_templates.js", ['cmsnew.ui.form_templates'], ['cljs.core', 'cljs.core.async']);
-goog.addDependency("../cmsnew/edn_page/item.js", ['cmsnew.edn_page.item'], ['sablono.core', 'cljs.core', 'cljs.core.async']);
-goog.addDependency("../cmsnew/edn_page/items/heading.js", ['cmsnew.edn_page.items.heading'], ['sablono.core', 'cljs.core', 'cmsnew.edn_page.item', 'cmsnew.ui.form_templates', 'clojure.string', 'reactor.core', 'cljs.core.async']);
 goog.addDependency("../cmsnew/util/core.js", ['cmsnew.util.core'], ['cljs.core']);
-goog.addDependency("../cmsnew/transformer/markdown.js", ['cmsnew.transformer.markdown'], ['cljs.core']);
 goog.addDependency("../cmsnew/publisher/paths.js", ['cmsnew.publisher.paths'], ['cljs.core', 'clojure.string']);
 goog.addDependency("../cmsnew/publisher/source_file.js", ['cmsnew.publisher.source_file'], ['cljs.core', 'cmsnew.publisher.paths', 'clojure.string', 'cljs.reader', 'cljs.core.async']);
 goog.addDependency("../cmsnew/publisher/site.js", ['cmsnew.publisher.site'], ['cljs.core', 'cmsnew.util.core', 'cmsnew.publisher.paths', 'cmsnew.publisher.source_file']);
+goog.addDependency("../cmsnew/ui/form_templates.js", ['cmsnew.ui.form_templates'], ['sablono.core', 'cljs.core', 'cmsnew.publisher.site', 'clojure.string', 'cljs.core.async']);
+goog.addDependency("../cmsnew/edn_page/item.js", ['cmsnew.edn_page.item'], ['sablono.core', 'cljs.core', 'cljs.core.async']);
+goog.addDependency("../cmsnew/edn_page/items/heading.js", ['cmsnew.edn_page.items.heading'], ['sablono.core', 'cljs.core', 'cmsnew.edn_page.item', 'cmsnew.publisher.site', 'cmsnew.ui.form_templates', 'clojure.string', 'reactor.core', 'jayq.util', 'cljs.core.async']);
+goog.addDependency("../cmsnew/transformer/markdown.js", ['cmsnew.transformer.markdown'], ['cljs.core']);
 goog.addDependency("../crate/util.js", ['crate.util'], ['cljs.core', 'clojure.string']);
 goog.addDependency("../clojure/set.js", ['clojure.set'], ['cljs.core']);
 goog.addDependency("../crate/binding.js", ['crate.binding'], ['cljs.core', 'clojure.set']);

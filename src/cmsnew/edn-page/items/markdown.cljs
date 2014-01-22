@@ -4,7 +4,7 @@
                                  render-item
                                  item-form
                                  render-editable-item] :as item]
-   [cmsnew.ui.form-templates :as form :refer [control-group]]   
+   [cmsnew.ui.form-templates :as form :refer [control-group select-alternate-partial]]   
    [crate.core :as crate]
    [sablono.core :as sab :include-macros true]   
    [reactor.core :as react]   
@@ -30,13 +30,14 @@
    owner
    (sab/html
     (sab/form-to
-     {:onSubmit (react/form-submit owner event-chan :form-submit [:content])}
+     {:onSubmit (react/form-submit owner event-chan :form-submit [:content :partial])}
      [:post (str "#textblock-item-" (:id item))]
      (control-group :content errors
                     [:textarea {:className "big-text-area"
                                 :defaultValue (:content item)
                                 :name "content"
                                 :ref "content"}])
+     (select-alternate-partial item state :markdown)
      (sab/submit-button {:className "btn btn-primary"} "Save")
      (sab/reset-button {:className "btn btn-default"
                         :onClick #(put! event-chan [:form-cancel])} "Cancel"))

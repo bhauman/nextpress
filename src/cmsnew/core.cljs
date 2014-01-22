@@ -21,6 +21,8 @@
    [jayq.util :refer [log]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]))
 
+(enable-console-print!)
+
 (go
  (let [url-config (<! (select-site-loop))
        signing-service (get-in url-config [:config :signing-service])

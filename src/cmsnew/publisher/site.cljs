@@ -27,6 +27,12 @@
        (map (partial sf/parse-front-matter site))
        (map #(self-assoc % :name sf/full-filename-without-ext))))
 
+(defn partials-for-type [site item-type]
+  (->> (filter-for-prefix (source-files site)
+                          (str (partial-path site) "/items/" (name item-type)))
+       (map (partial sf/parse-front-matter site))
+       (map #(self-assoc % :name sf/full-filename-without-ext))))
+
 (defn pages [site]
   (->> (filter-for-prefix (source-files site) (page-path site))
        (map (partial sf/parse-front-matter site))

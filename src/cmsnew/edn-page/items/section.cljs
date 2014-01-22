@@ -4,10 +4,10 @@
                                  render-item
                                  item-form
                                  render-editable-item] :as item]
-   [cmsnew.ui.form-templates :as form :refer [control-group]]
+   [cmsnew.ui.form-templates :as form :refer [control-group select-alternate-partial]]
    [reactor.core :as react]   
    [sablono.core :as sab :include-macros true]
-   [cljs.core.async :as async :refer [put!]]   
+   [cljs.core.async :as async :refer [put!]]
    [clojure.string :as string])
   (:require-macros [reactor.macros :as reactm]))
 
@@ -27,7 +27,7 @@
   (reactm/owner-as
    owner
    (sab/html
-    (sab/form-to {:onSubmit (react/form-submit owner event-chan :form-submit [:content])}
+    (sab/form-to {:onSubmit (react/form-submit owner event-chan :form-submit [:content :partial])}
                  [:post (str "#section-item-" (:id item))]
                  (control-group :content errors
                                 (sab/text-field {:className "form-control"
@@ -35,6 +35,7 @@
                                                  :defaultValue (item :content)
                                                  :placeholder "Section name"}
                                                 :content))
+                 (select-alternate-partial item state :section)                 
                  (sab/submit-button {:className "btn btn-primary"} "Save")
                  (sab/reset-button {:className "btn btn-default"
                                     :onClick #(put! event-chan [:form-cancel])} "Cancel")))))

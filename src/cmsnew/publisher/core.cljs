@@ -117,12 +117,16 @@
 
 ;; rendering pages
 
-(defn template-for-item-type [system-data type]
-  ((:partials system-data) (str "items/" (name type))))
+(defn template-for-item-type [system-data item]
+  ;; this is getting pretty arbitrary we should probably have full
+  ;; paths to everything and use those as keys
+  ((:partials system-data)
+   (or (and (not (string/blank? (:partial item))) (:partial item))
+       (str "items/" (name (:type item))))))
 
 (defn render-item-with-template-overide [system-data item]
-  (if-let [template (template-for-item-type system-data (:type item))]
-    (crate/raw (render-template (:body template) item))
+  (if-let [template (template-for-item-type system-data item)]
+    (crate/raw (render-template (:body template) item))    
     (render-item item)))
 
 (defn render-edn-page [system-data page-file-map]
