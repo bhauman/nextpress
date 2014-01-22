@@ -48,7 +48,6 @@
                              :onClick #(put! event-chan [:move-item-down {:id id}])
                              } [:span.glyphicon.glyphicon-chevron-down]]])
 
-
 (defn item-under-edit [{:keys [editing-item]}] editing-item)
 
 (defn item-being-edited? [{:keys [editing-item]} item]
@@ -57,9 +56,7 @@
 (defn item-renderer [item state]
   (if (item-being-edited? state item)
     (sab/html (item-container (:id item) (:type item)
-                              (reactm/owner-as owner
-                                               (sab/html (item-form (item-under-edit state) {}
-                                                                    (:event-chan state) owner)))))
+                              (sab/html (item-form (item-under-edit state) {} state))))
     (reactm/pure item (render-editable-item item state))))
 
 (defn render-edn-page [{:keys [edn-page] :as state}]
@@ -157,6 +154,3 @@
                                          (put! (:event-chan state) [:image-selected event])))
                            :name "image-upload-file" }]]
     ]))
-
-
-

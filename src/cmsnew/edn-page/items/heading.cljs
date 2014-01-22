@@ -23,7 +23,7 @@
                             [(keyword (str "h" size)) content])
                            event-chan))
 
-(defmethod item-form :heading [item errors event-chan _]
+(defmethod item-form :heading [item errors {:keys [event-chan] :as state}]
   (reactm/owner-as
    owner
    (sab/html

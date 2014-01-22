@@ -25,7 +25,7 @@
                                 (react/raw (markdown-to-html content))
                                 event-chan))
 
-(defmethod item-form :markdown [item errors event-chan owner]
+(defmethod item-form :markdown [item errors {:keys [event-chan] :as state}]
   (reactm/owner-as
    owner
    (sab/html

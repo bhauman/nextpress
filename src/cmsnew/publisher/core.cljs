@@ -423,8 +423,8 @@
      (add-watch (:rendered-files site) :fields-changed
                 (fn [_ _ o n] (local-storage-set (localstorage-rendered-files-key site)  n)))
      (system-flow site)
-     #_(go-loop []
-                (let [msg (<! (:log-chan site))]
-                  (log (:msg msg))
-                  (recur)))
+     (go-loop []
+              (let [msg (<! (:log-chan site))]
+                (log (:msg msg))
+                (recur)))
      site)))

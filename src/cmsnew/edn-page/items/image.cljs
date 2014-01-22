@@ -22,7 +22,7 @@
                                 (sab/html [:p [:img.img-responsive {:src url}]])
                                 event-chan))
 
-(defmethod item-form :image [item errors event-chan owner]
+(defmethod item-form :image [item errors {:keys [event-chan] :as state}]
   (reactm/owner-as
    owner
    (sab/html

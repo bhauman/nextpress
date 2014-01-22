@@ -23,7 +23,7 @@
                                  [:div [:pre "Section: " "\"" content "\""]])
                                 event-chan))
 
-(defmethod item-form :section [item errors event-chan _]
+(defmethod item-form :section [item errors {:keys [event-chan] :as state}]
   (reactm/owner-as
    owner
    (sab/html
