@@ -6,20 +6,24 @@
 - [X] have item partials
 - [X] Implement partials
 - [X] get working in Safari
-- [ ] item templates in dir (partial/heading/blah.html) 
+- [X] item templates in dir (partial/heading/blah.html) 
       become partials available to in form
-- [ ] image templates that are a parameter in the image
+- [X] image templates that are a parameter in the image
 - [ ] a template item that defines it's own parameters
+- [ ] layouts for templates
 
-- [ ] safari freezing bug (clear cache and it freezes)
+- [ ] plugin architecture
+
+- [ ] safari freezing bug (clear cache and it freezes) intermittent
 - [ ] Finish demo site
 - [ ] Save demo site
 - [ ] Allow for the creation of pages
 - [ ] Is :layout required for published page?
 - [ ] Test for null problems in templates helpers
-
+- [ ] Create a test page that renders all possible features
 - [ ] Item chooser modal
 
+- [ ] Source editor
 
 - [ ] editable flag
 - [ ] pretty printing edn data
