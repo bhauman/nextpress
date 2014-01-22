@@ -6,6 +6,7 @@
 - [X] have item partials
 - [X] Implement partials
 - [ ] get working in Safari
+- [ ] safari freezing bug (clear cache and it freezes)
 - [ ] Finish demo site
 - [ ] Save demo site
 - [ ] Allow for the creation of pages

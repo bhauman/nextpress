@@ -23,7 +23,8 @@
    [clojure.string :as string]
    [cljs.reader :refer [push-back-reader read-string]]   
    [jayq.util :refer [log]])
-  (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]))
+  (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]
+                   [cmsnew.util.macros :refer [chan->>]]))
 
 (def system-defaults {
              :bucket "immubucket"
@@ -73,11 +74,8 @@
                                          :body (:body resp)}) (close! out)))
     out))
 
-(defn fetch-files [system paths-chan]
-  (let [out (chan)
-        file-chans (map< (partial fetch-file system) paths-chan)]
-    (go (async/pipe (async/merge (<! (async/into [] file-chans))) out))
-    out))
+(defn fetch-files [system paths]
+  (async/merge (map (partial fetch-file system) paths)))
 
 (defn store-rendered-file [system file-map]
   (let [out (chan)]
@@ -105,11 +103,8 @@
                                       )))  
     out))
 
-(defn store-files [system file-maps-chan]
-  (let [out (chan)
-        store-chans (map< (partial store-rendered-file system) file-maps-chan)]
-    (go (async/pipe (async/merge (<! (async/into [] store-chans))) out))
-    out))
+(defn store-files [system file-maps-list]
+  (async/merge (map (partial store-rendered-file system) file-maps-list)))
 
 (defn get-config [site-url]
   (let [out (chan)]
@@ -275,9 +270,8 @@
 (defn fetch-file-list [system input]
   (let [out (chan)]
     (go-loop [file-list (<! input)]
-             (put! out (<! (->> (to-chan file-list)
-                                (fetch-files system)
-                                (async/into []))))
+             (put! out (<! (chan->> (fetch-files system file-list)
+                                    (async/into []))))
              (recur (<! input)))
     out))
 
@@ -314,64 +308,9 @@
   (map< (fn [x] (put! (:log-chan system) (func x)) x)
         in-chan))
 
-(defn system-flow-new [system]
-  (let [p partial]
-    ((apply comp
-           (reverse
-            [(p log-it system (fn [x] {:msg (str "Publising site yeah to bucket: " (:bucket system))}))
-             (p map< (fn [x] (source-file-list system)))
-             (p async-util/flatten-chans)
-             (p log-it system (fn [x] {:msg (str "Finished fetching source file list")}))
-             (p map< (fn [new-file-list] [(path-etag-map (vals @(:source-files system)))
-                                         (path-etag-map new-file-list)]))
-             (p map< changed-map-keys)
-             (p map< (fn [file-list] (filter good-file-path? file-list)))
-             (p map< #(do
-                (when (zero? (count %))
-                  (swap! (:finished-publishing system) inc)) 
-                %))
-             (p filter< #(pos? (count %)))
-             (p log-it system (fn [x] {:msg (str "Source files have changed: ") :list-data x :type :source-files-changed}))
-             (p log-it system (fn [x] {:msg (str "Fetching changed files ...") :type :downloading}))
-             (p fetch-file-list system)
-             (p log-it system (fn [x] {:msg (str "Received changed files ...") :type :notice}))
-             (p map< #(map-to-key :path %))
-             (p map< (fn [file-map]
-                       (swap! (:source-files system) merge file-map)
-                       @(:source-files system)))
-             (p log-it system (fn [x] {:msg (str "Rendering site ...") :type :processing}))
-             (p map< (partial process system))
-             (p async-util/map-to-atom (:rendered-files system))
-             (p async-util/atom-chan)
-             (p map< (fn [[ov nv]] (let [res (->> (changed-map-keys [ov nv])
-                                                 (select-keys nv)
-                                                 vals)]
-                                    (or res []))))
-             (p log-it system (fn [x] (if (pos? (count x))
-                                       {:msg (str "Rendered pages have changed") :type :changes-detected}
-                                       {:msg "No rendered pages have changed" :type :published})))
-             (p map< #(do
-                        (when (zero? (count %))
-                          (swap! (:finished-publishing system) inc)) 
-                        %))
-             (p filter< #(pos? (count %)))
-             (p log-it system (fn [x] {:msg (str "Uploading rendered pages to site: ")
-                                      :list-data (map :target-path x)
-                                      :type :uploading }))
-             (p map< (fn [files-to-store]
-                       ((comp (p async/into [])
-                              (p store-files system))
-                        (to-chan files-to-store))))
-             (p log-it system (fn [x]
-                        {:msg (str "Site changes published") :type :published}))
-             (p map< #(do (swap! (:finished-publishing system) inc)  %))
-             (p async/into [])
-             ])
-           ) (:touch-chan system))))
-
 (defn system-flow [system]
-  (->> (:touch-chan system)
-       (log-it system (fn [x] {:msg (str "Publising site to bucket: " (:bucket system))}))
+  (chan->> (:touch-chan system)
+       (log-it system (fn [x] {:msg (str "Publising site yehaw to bucket: " (:bucket system))}))
        (map< (fn [x] (source-file-list system)))
        async-util/flatten-chans
        (log-it system (fn [x] {:msg (str "Finished fetching source file list")}))
@@ -421,9 +360,8 @@
                               :list-data (map :target-path x)
                               :type :uploading }))
        (map< (fn [files-to-store]
-               (->> (to-chan files-to-store)
-                    (store-files system)
-                    (async/into []))))
+               (chan->> (store-files system files-to-store)
+                        (async/into []))))
        (log-it system (fn [x]
                         {:msg (str "Site changes published") :type :published}))
        (map< #(do (swap! (:finished-publishing system) inc)  %))
@@ -484,8 +422,8 @@
                 (fn [_ _ o n] (local-storage-set (localstorage-source-files-key site) n)))
      (add-watch (:rendered-files site) :fields-changed
                 (fn [_ _ o n] (local-storage-set (localstorage-rendered-files-key site)  n)))
-     (system-flow-new site)
-     (go-loop []
+     (system-flow site)
+     #_(go-loop []
                 (let [msg (<! (:log-chan site))]
                   (log (:msg msg))
                   (recur)))

@@ -81,5 +81,3 @@
                                  (.log js/console "form submit")
                                  (.log js/console form-vals)
                                  [msg form-vals]))))
-
-
