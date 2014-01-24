@@ -31,7 +31,7 @@
 (defn select-alternate-partial [item state type]
   (let [options (partial-options (:site state) type)]
     (if (= 1 (count options))
-      [:div]
+      (sab/hidden-field {:ref "partial"} :partial)
       [:div.form-group
        [:label "Apply Partial"]
        (control-group

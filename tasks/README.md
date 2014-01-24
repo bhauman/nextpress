@@ -10,7 +10,9 @@
       become partials available to in form
 - [X] image templates that are a parameter in the image
 - [ ] a template item that defines it's own parameters
+
 - [ ] layouts for templates
+- [ ] add a compnent to toggle hiding and showing a content area
 
 - [ ] plugin architecture
 

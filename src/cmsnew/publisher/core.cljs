@@ -212,14 +212,13 @@
                     :includePage include-page
                     :getPage get-page})
         render-partial (fn rendPartial [partial-path partial-data]
-                         (let [env (merge all-data
-                                          {:renderPartial rendPartial}
-                                          (or (js->clj partial-data) 
-                                              {}))]
-                           (if-let [template ((:partials system-data) partial-path)]
-                             (render-template (:body template) env)
-                             "null partial")
-                           ))]
+                         (if-let [template ((:partials system-data) partial-path)]
+                           (let [env (merge all-data
+                                            {:renderPartial rendPartial}
+                                            (or (js->clj partial-data) 
+                                                {}))]
+                             (render-template (:body template) env))
+                           "null partial"))]
     (assoc all-data
       :renderPartial render-partial)
     ))
