@@ -2,8 +2,12 @@
   (:refer-clojure :exclude [take-while])
   (:require
    [cljs.core.async :as async
-    :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]])
+    :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
+   [cljs.core.async.impl.protocols :refer [Channel]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]))
+
+(defn chan? [c]
+  (satisfies? Channel c))
 
 (defn atom-chan [a]
   (let [out (chan)]
@@ -22,6 +26,22 @@
               (recur (<! input))) 
      atom)
   ([input] (map-to-atom (atom {}) input)))
+
+(defn flatten
+  ([in out]
+     (go-loop []
+              (let [v (<! ch)]
+                (when-not (nil? v)
+                  (if (satisfies? Channel v)
+                    (<! (flatten v out))
+                    (put! out v))
+                  (recur)))))
+  ([in]
+     (let [out (chan)]
+       (go
+        (<! (flatten in out))
+        (close! out))
+       out)))
 
 (defn flatten-chans [input]
   (let [out (chan)]
@@ -61,4 +81,3 @@
               (recur))
             (close! out))))
        out)))
-

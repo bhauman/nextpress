@@ -311,6 +311,32 @@
   (map< (fn [x] (put! (:log-chan system) (func x)) x)
         in-chan))
 
+;; beginings
+
+(defn get-source-file-list 
+  "We get the source files for the system. "
+  [[old-s site]]
+  (go
+   (assoc site :source-file-list (<! (source-file-list site)))))
+
+(defn piper< [f input]
+  (let [out (chan)]
+    (go-loop []
+             (let [[old new] (<! input)
+                   res (f [old new])]
+               (put! out [old
+                          (if (instance? async.impl.protocols.Channel res) (<! res) res)])
+               (recur)))))
+
+(defn render-pipeline [system-chan]
+  (chan->> system-chan
+           (map< (juxt identity identity))
+           (map< get-source-file-list)
+   )
+  )
+
+
+
 (defn system-flow [system]
   (chan->> (:touch-chan system)
        (log-it system (fn [x] {:msg (str "Publising site yehaw to bucket: " (:bucket system))}))
@@ -431,3 +457,7 @@
                 (log (:msg msg))
                 (recur)))
      site)))
+
+(let [in (async-util/flatten (to-chan [(to-chan (range 3)) (to-chan [(to-chan (range 4)) (to-chan (range 5))]) (to-chan (range 3))]))]
+  (go
+   (log (clj->js (<! (async/into [] in)))))) 

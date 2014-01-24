@@ -32,7 +32,7 @@ goog.addDependency("../crate/binding.js", ['crate.binding'], ['cljs.core', 'cloj
 goog.addDependency("../crate/compiler.js", ['crate.compiler'], ['cljs.core', 'goog.dom', 'clojure.string', 'crate.binding', 'goog.style']);
 goog.addDependency("../crate/core.js", ['crate.core'], ['crate.util', 'cljs.core', 'goog.dom', 'crate.compiler']);
 goog.addDependency("../cmsnew/edn_page/items/markdown.js", ['cmsnew.edn_page.items.markdown'], ['sablono.core', 'cljs.core', 'cmsnew.edn_page.item', 'cmsnew.transformer.markdown', 'cmsnew.ui.form_templates', 'clojure.string', 'reactor.core', 'crate.core', 'cljs.core.async']);
-goog.addDependency("../cmsnew/util/async_utils.js", ['cmsnew.util.async_utils'], ['cljs.core', 'cljs.core.async']);
+goog.addDependency("../cmsnew/util/async_utils.js", ['cmsnew.util.async_utils'], ['cljs.core', 'cljs.core.async.impl.protocols', 'cljs.core.async']);
 goog.addDependency("../cmsnew/ui/tooltipper.js", ['cmsnew.ui.tooltipper'], ['sablono.core', 'cljs.core', 'cmsnew.util.log_utils', 'cmsnew.util.async_utils', 'clojure.string', 'reactor.core', 'jayq.util', 'crate.core', 'cljs.core.async', 'jayq.core']);
 goog.addDependency("../cmsnew/edn_page/items/section.js", ['cmsnew.edn_page.items.section'], ['sablono.core', 'cljs.core', 'cmsnew.edn_page.item', 'cmsnew.ui.form_templates', 'clojure.string', 'reactor.core', 'cljs.core.async']);
 goog.addDependency("../crate/form.js", ['crate.form'], ['crate.util', 'cljs.core', 'crate.compiler']);
