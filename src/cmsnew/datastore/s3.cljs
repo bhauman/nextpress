@@ -152,7 +152,13 @@
                (fn [res]
                  (callback (extract-path-etag res)))))
 
+(defn list-files [store path callback]
+  (get-bucket-list (:bucket store) path callback))
+
+
+
 (defn create-s3-store [signing-service-host bucket]
-  {:signing-service signing-service-host
+  {:type :s3
+   :signing-service signing-service-host
    :bucket bucket})
 

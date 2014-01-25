@@ -22,55 +22,172 @@
    [crate.core :as crate]
    [clojure.string :as string]
    [cljs.reader :refer [push-back-reader read-string]]   
-   [jayq.util :refer [log]])
+   [jayq.util :refer [log]]
+   [goog.crypt.Md5])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]
                    [cmsnew.util.macros :refer [chan->>]]))
 
 (def system-defaults {
-             :bucket "immubucket"
-             :store-root "http://s3.amazonaws.com"
-             :template-path "_layouts"
-             :partial-path "_partials"
-             :post-path "_posts"
-             :page-path "_site_src"             
-             :data-path "_data" })
+                      :store { :type :s3
+                               :bucket "immubucket"
+                               :signing-service "http://localhost:4567"}         
+                      
+                      :layout-path "_layouts"
+                      :partial-path "_partials"
+                      :post-path "_posts"
+                      :page-path "_site_src"             
+                      :data-path "_data" })
 
-(defn bucket-path [{:keys [store-root bucket]}]
-  (str store-root "/" bucket))
+;; storage-system
 
-(defn item-path [system path]
-  (str (bucket-path system) "/" path))
+(defn starts-with? [s prefix]
+  (zero? (.indexOf s prefix)))
 
-(defn template-path [system path]
-  (item-path system (str (:template-path system) "/" path)))
+(let [md (goog.crypt.Md5.)]
+  (defn md5 [s]
+    (.update md s)
+    (apply
+     str
+     (map (fn [x]
+            (str
+             (if (> 16 x) "0" "")
+             (.toString x 16))) (.digest md)))))
 
-(defn post-path [system path]
-  (item-path system (str (system :post-path) "/" path)))
+(defprotocol FileLister
+  (list-files [this callback])  
+  (list-files-with-prefix [this prefix callback]))
 
-(defn page-path [system path]
-  (item-path system (str (system :page-path) "/" path)))
+(defprotocol PutFile
+  (-store! [this path data options callback])
+  (-store-response-success? [this response])
+  (-store-response-version [this response])) 
+
+(defprotocol GetFile
+  (-get-file [this path callback]))
+
+(defprotocol ToSourceFile
+  (->source-file [this path file-response]))
+
+(defprotocol ResourcePath
+  (resource-path [this path]))
+
+(defrecord LocalStore [path-prefix]
+  FileLister
+  (list-files [this callback]
+    (callback
+     (map (fn [x] {:path x
+                  :etag (md5
+                         (.getItem js/localStorage
+                                   (str (:path-prefix this) "::" x)))})
+          (map (fn [x] (string/replace-first x (str path-prefix "::") ""))
+               (filter (fn [x] (starts-with? x (str path-prefix "::")))
+                       (map #(.key js/localStorage %)
+                            (range (.-length js/localStorage))))))))
+  (list-files-with-prefix [this prefix callback]
+    (list-files this
+     (fn [files]
+       (callback
+        (filter (fn [x] (starts-with? (:path x) prefix))
+              files)))))
+  PutFile
+  (-store! [this path data options callback]
+    (.setItem js/localStorage
+              (resource-path this path)
+              data)
+    (callback data))
+  (-store-response-version [this resp] nil)
+  (-store-response-success? [this resp] true)
+  GetFile
+  (-get-file [this path callback]
+    (callback
+     (.getItem js/localStorage
+               (resource-path this path))))
+  ToSourceFile
+  (->source-file [this path file-response]
+    {:path path
+     :etag (md5 file-response)
+     :body file-response})
+  ResourcePath
+  (resource-path [this path]
+    (str (:path-prefix this) "::" path)))
+
+(defrecord S3Store [bucket signing-service]
+  FileLister
+  (list-files [this callback]
+    (cmsnew.datastore.s3/list-files this "" callback))
+  (list-files-with-prefix [this prefix callback]
+    (cmsnew.datastore.s3/list-files this prefix callback))
+  PutFile
+  (-store! [this path data options callback]
+    (store/save-data-to-file this
+                             path
+                             data
+                             (or (:mime-type options) "text/plain")
+                             callback))
+  (-store-response-version [this resp]
+    (.getResponseHeader resp "x-amz-version-id"))
+  (-store-response-success? [this resp]
+    (log resp)
+    true)
+  GetFile
+  (-get-file [this path callback]
+    (store/get-text (resource-path this path) callback))
+  ToSourceFile
+  (->source-file [this path file-response]
+    {:path path
+     :etag (get-in file-response [:headers :etag])
+     :version (get-in file-response [:headers :version])
+     :body (:body file-response)})
+  ResourcePath
+  (resource-path [this path]
+    (str "http://s3.amazonaws.com/" bucket "/" path)))
+
+(defn get-source-file [st path callback]
+  (-get-file st path (fn [f] (callback (->source-file st path f)))))
+
+(defn store-source-file! [st source-file callback]
+  (-store! st
+           (:path source-file)
+           (str (prn-str (:front-matter source-file)) (:body source-file))
+           {:mime-type "text/plain"}
+           (fn [store-resp]
+             (if (-store-response-success? st store-resp)
+               (callback (assoc source-file :version
+                                (-store-response-version st store-resp))) 
+               (callback :failed)))))
+
+(defn store-rendered-file! [st source-file callback]
+  (-store! st
+           (:target-path source-file)
+           (:rendered-body file-map)           
+           {:mime-type "text/html"}
+           (fn [store-resp]
+             (if (-store-response-success? st store-resp)
+               (callback (assoc source-file :target-version
+                                (-store-response-version st store-resp))) 
+               (callback :failed)))))
+
+
+(defmulti create-store #(:type %))
+
+(defmethod create-store :local [{:keys [path-prefix]}]
+  (LocalStore. path-prefix))
+
+(defmethod create-store :s3 [{:keys [bucket signing-service]}]
+  (S3Store. bucket signing-service))
+
 
 (defn render-template [template-string data]
   (.template js/_ template-string (clj->js data)))
 
 ;; fetching pipeline helpers
 
-(defn file-list [bucket path-prefix]
-  (let [out (chan)
-        not-prefix? (fn [x] (not (or (= (str path-prefix "/") x)
-                                    (= path-prefix x))))]
-    (store/get-bucket-list bucket path-prefix
-                           (fn [path-etags]
-                             (async/onto-chan out (filter not-prefix?
-                                                          (map :path path-etags)))))
-    out))
-
 (defn fetch-file [system file]
   (let [out (chan)]
-    (store/get-text (item-path system file)
+    (store/get-text (item-path (:store system) file)
                     (fn [resp] (put! out {:path file
                                          :etag    (get-in resp [:headers :etag])
-                                         :version (get-in resp [:headers :version])                                         
+                                         :version (get-in resp [:headers :version])
                                          :body (:body resp)}) (close! out)))
     out))
 
@@ -90,7 +207,7 @@
                                       )))  
     out))
 
-(defn store-source-file [system file-map]
+#_(defn store-source-file [system file-map]
   (let [out (chan)]
     (store/save-data-to-file (:s3-store system)
                              (:path file-map)
@@ -292,11 +409,6 @@
 
 ;; setting up reactive system
 
-(defn source-file-list [system]
-  (let [out (chan)]
-    (store/get-bucket-list (system :bucket) "_" #(do (put! out %) (close! out)))
-    out))
-
 (defn log-chan [input]
   (map< #(do (log (prn-str %)) %) input))
 
@@ -313,29 +425,131 @@
 
 ;; beginings
 
+(defrecord LogMsg [msg type data])
+
+(defn logger
+  ([system msg typ data]
+     (when-let [log-chan (:log-chan system)]
+       (put! log-chan (LogMsg. msg typ data))))
+  ([system msg typ]
+     (logger system msg typ nil))
+  ([system msg]
+     (logger system msg nil nil)))
+
+
+
+;; source-file-list plugin
+
+(defn source-file-list [system]
+  (let [out (chan)]
+    (store/list-files (system :store) "_" #(do (put! out %) (close! out)))
+    out))
+
 (defn get-source-file-list 
-  "We get the source files for the system. "
+  "We get the source files for the system. Creates a :source-file-list entry
+   with the shape [{:path \"\" :etag \"\" } ...] in the site"
   [[old-s site]]
   (go
-   (assoc site :source-file-list (<! (source-file-list site)))))
+   (logger site "Fetching site source file listing." :fetching)
+   (assoc site :source-file-list
+          (filter (comp good-file-path? :path)
+                  (<! (source-file-list site))))))
+
+;; changed-source-files
+
+(defn changed-source-files
+  "We fetch changed files. Depends on the :source-file-list and a :source-files key.
+   Creates or updates a :changed-files entry in the site that is a list of the paths
+   of the files that have changed"
+  [[old-s site]]
+  (let [changed (changed-map-keys
+                 [(path-etag-map (:source-file-list site))
+                  (path-etag-map (:source-files old-s))])]
+    (assoc site :changed-source-files changed)))
+
+;; fetch-changed-source-files
+
+(defn fetch-changed-source-files
+  "We fetch changed files. Depends on the :changed-source-files and a :source-files key.
+   Fteches files in the :changed-source-files and merges them into the :source-files map."
+  [[old-s site]]
+  (if (zero? (count (:changed-source-files site)))
+    site
+    (go
+     (logger site "Source files have changed: " :source-files-changed (:changed-source-files site))
+     (logger site "Fetching changed files ..." :downloading)     
+     (let [files (<! (chan->> (fetch-files site (:changed-source-files site))
+                              (async/into [])))]
+       (logger site "Recieved changed files ..." :notice)
+       (update-in site [:source-files] merge (map-to-key :path files))))))
+
+#_{ :templates  (map-to-key :name (st/templates site))
+    :partials   (map-to-key :name (st/partials site))
+    :data       (map-to-key :name (st/data-files site))
+    :posts      (st/posts site)
+    :pages      (st/pages site)
+    :site     site }
+
+;; parse-pages
+
+(defn- pages* [site]
+  (->> (paths/filter-for-prefix (:source-files site) (:page-path site))
+       (map (partial sf/parse-front-matter site))
+       (map #(assoc % :page-type :page))
+       (map #(self-assoc % :target-path sf/make-page-target-path))
+       (map #(self-assoc % :name (fn [page] (paths/remove-prefix (:page-path site) (:path page)))))))
+
+(defn parse-pages
+  "Parses the front matter out of the pages and installs a list of
+   pages into the :pages.
+
+   Expects: { :page-path String
+              :source-files [{ :body String
+                               :path String } ...]
+   Adds: {:pages { String {:front-matter Map
+                           :page-type :page
+                           :target-path String
+                           :name String
+                           :body etc... } ...}}"
+  [[old-s site]]
+  (assoc site :pages (map-to-key :name (pages* site))))
+
+;; parse-layouts
+
+(defn- layouts* [site]
+  (->> (paths/filter-for-prefix (:source-files site) (:layout-path site))
+       (map (partial sf/parse-front-matter site))
+       (map #(self-assoc % :name sf/full-filename-without-ext))))
+
+(defn parse-layouts
+  "Parses the front matter out of the layouts and installs them into the :layouts key.
+   The layouts are stored in a map keyd to their name.  The name for _layouts/fun/index.html
+   would be fun/index.html.  
+   Depends on the :source-files key and the :layout-path key."
+  [[old-s site]]
+  (assoc site :layouts (map-to-key :name (layouts* site))))
 
 (defn piper< [f input]
   (let [out (chan)]
     (go-loop []
-             (let [[old new] (<! input)
-                   res (f [old new])]
-               (put! out [old
-                          (if (instance? async.impl.protocols.Channel res) (<! res) res)])
-               (recur)))))
+             (let [v (<! input)]
+               (if v
+                 (let [[o n] v
+                       res (f [o n])]
+                   (put! out [o (if (.-takes res) (<! res) res)])
+                   (recur))
+                 (close! out))))
+    out))
 
 (defn render-pipeline [system-chan]
   (chan->> system-chan
            (map< (juxt identity identity))
-           (map< get-source-file-list)
-   )
-  )
-
-
+           (piper< get-source-file-list)
+           (piper< changed-source-files)
+           (piper< fetch-changed-source-files)
+           #_(piper< parse-pages)           
+           
+           ))
 
 (defn system-flow [system]
   (chan->> (:touch-chan system)
@@ -458,6 +672,40 @@
                 (recur)))
      site)))
 
-(let [in (async-util/flatten (to-chan [(to-chan (range 3)) (to-chan [(to-chan (range 4)) (to-chan (range 5))]) (to-chan (range 3))]))]
-  (go
-   (log (clj->js (<! (async/into [] in)))))) 
+#_(let [lc (chan)
+      in (to-chan [{ :log-chan lc
+                     :page-path "_site_src"
+                     :layout-path "_layouts"
+                     :store { :type :s3
+                              :bucket "nextpress-demo"
+                              :signing-service "http://localhost:4567"
+                              :store-root "http://s3.amazonaws.com"}
+                    }])
+      p (render-pipeline in)]
+  (go-loop []
+        (let [msg (<! lc)]
+          (when msg
+            (log (:msg msg))
+            (recur))))
+    
+  (go (log (clj->js (:source-files (last (<! p)))))))
+
+
+
+
+(let [st (S3Store. "nextpress-demo"
+                   "http://localhost:4567")]
+  #_(store! st "_data1.txt" "1" identity)
+  #_(store! st "data2" 2 identity)
+  #_(store! st "data3" 3 identity)
+
+  #_(store! st "rata1" 1 identity)
+  #_(store! st "rata2" 2 identity)
+  #_(store! st "rata3" 3 identity)
+  
+  (get-source-file st "_config.edn" (fn [x] (log x)
+                                      (store-source-file! st x (fn [result] (log result) ))
+                                      ))
+  (list-files st (fn [list] (log (clj->js list))))
+  (list-files-with-prefix st "_" (fn [list] (log (clj->js list))))) 
+

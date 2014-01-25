@@ -22,6 +22,11 @@
 (defn parse-file-date [{:keys [path]}]
   (parse-date (last (path-parts path))))
 
+(defn remove-prefix [prefix path]
+  (->> (path-parts path)
+       (drop (count (path-parts prefix)))
+       (string/join "/")))
+
 ;; handle path rewriting
 
 (def filename-from-path (comp last path-parts))

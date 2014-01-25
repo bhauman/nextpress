@@ -1,5 +1,5 @@
 (ns cmsnew.util.async-utils
-  (:refer-clojure :exclude [take-while])
+  (:refer-clojure :exclude [take-while flatten])
   (:require
    [cljs.core.async :as async
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
@@ -29,13 +29,14 @@
 
 (defn flatten
   ([in out]
-     (go-loop []
-              (let [v (<! ch)]
-                (when-not (nil? v)
-                  (if (satisfies? Channel v)
-                    (<! (flatten v out))
-                    (put! out v))
-                  (recur)))))
+     (go
+      (loop []
+        (let [v (<! in)]
+          (when-not (nil? v)
+            (if (satisfies? Channel v)
+              (<! (flatten v out))
+              (put! out v))
+            (recur))))))
   ([in]
      (let [out (chan)]
        (go
