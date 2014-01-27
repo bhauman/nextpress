@@ -29,7 +29,7 @@
 
 (def system-defaults {
                       :store { :type :s3
-                               :bucket "immubucket"
+                               :bucket "nextpress-demo"
                                :signing-service "http://localhost:4567"}         
                       
                       :layout-path "_layouts"
@@ -148,7 +148,9 @@
 (defn store-source-file! [st source-file callback]
   (-store! st
            (:path source-file)
-           (str (prn-str (:front-matter source-file)) (:body source-file))
+           (str (if-let [fm (:front-matter source-file)]
+                  (prn-str fm) "")
+                (:body source-file))
            {:mime-type "text/plain"}
            (fn [store-resp]
              (if (-store-response-success? st store-resp)
@@ -159,13 +161,40 @@
 (defn store-rendered-file! [st source-file callback]
   (-store! st
            (:target-path source-file)
-           (:rendered-body file-map)           
+           (:rendered-body source-file)           
            {:mime-type "text/html"}
            (fn [store-resp]
              (if (-store-response-success? st store-resp)
                (callback (assoc source-file :target-version
                                 (-store-response-version st store-resp))) 
                (callback :failed)))))
+
+(defn fetch-file [system path]
+  (let [out (chan)]
+    (get-source-file (:store system)
+                     path
+                     (fn [sf] (put! out sf) (close! out)))
+    out))
+
+(defn fetch-files [system paths]
+  (async/merge (map (partial fetch-file system) paths)))
+
+(defn store-rendered [system source-file]
+  (let [out (chan)]
+    (store-rendered-file! (:store system)
+                          source-file
+                          (fn [resp] (put! out resp) (close! out)))
+    out))
+
+(defn store-source [system source-file]
+  (let [out (chan)]
+    (store-source-file! (:store system)
+                        source-file
+                        (fn [resp] (put! out resp) (close! out)))
+    out))
+
+(defn store-files [system file-maps-list]
+  (async/merge (map (partial store-rendered system) file-maps-list)))
 
 
 (defmulti create-store #(:type %))
@@ -182,46 +211,9 @@
 
 ;; fetching pipeline helpers
 
-(defn fetch-file [system file]
-  (let [out (chan)]
-    (store/get-text (item-path (:store system) file)
-                    (fn [resp] (put! out {:path file
-                                         :etag    (get-in resp [:headers :etag])
-                                         :version (get-in resp [:headers :version])
-                                         :body (:body resp)}) (close! out)))
-    out))
 
-(defn fetch-files [system paths]
-  (async/merge (map (partial fetch-file system) paths)))
 
-(defn store-rendered-file [system file-map]
-  (let [out (chan)]
-    (store/save-data-to-file (:s3-store system)
-                             (:target-path file-map)
-                             (:rendered-body file-map)
-                             "text/html"
-                             (fn [e] (let [version
-                                          (.getResponseHeader e "x-amz-version-id")]
-                                      (put! out (assoc file-map :rendered { :version version }))
-                                      (close! out)
-                                      )))  
-    out))
 
-#_(defn store-source-file [system file-map]
-  (let [out (chan)]
-    (store/save-data-to-file (:s3-store system)
-                             (:path file-map)
-                             (str (prn-str (:front-matter file-map)) (:body file-map))
-                             "text/plain"
-                             (fn [e] (let [version
-                                          (.getResponseHeader e "x-amz-version-id")]
-                                      (put! out (assoc file-map :current-version { :version version }))
-                                      (close! out)
-                                      )))  
-    out))
-
-(defn store-files [system file-maps-list]
-  (async/merge (map (partial store-rendered-file system) file-maps-list)))
 
 (defn get-config [site-url]
   (let [out (chan)]
@@ -283,12 +275,12 @@
               :items   section-items 
               :content (render-edn-section system-data section-items) }
             (sections-from-items system-data (rest temp-items)))
-      nil)))
+      [])))
 
 (defn get-sections [system-data source-file]
   (if (sf/edn-page? source-file)
     (sections-from-items system-data (sf/items source-file))
-    (list)))
+    []))
 
 (defn file-to-page-data [system-data {:keys [body front-matter date] :as fm}]
   (let [{:keys [title]} front-matter
@@ -320,7 +312,7 @@
                :pages pages)
         include-page (fn [page-path] (->> pages
                                          (find-first #(= (:path %) page-path))
-                                         :content))
+                                         :content)) 
         get-page (fn [page-path] (clj->js (->> pages
                                               (find-first #(= (:path %) page-path)))))
         all-data (merge
@@ -440,9 +432,9 @@
 
 ;; source-file-list plugin
 
-(defn source-file-list [system]
+(defn source-file-list [st]
   (let [out (chan)]
-    (store/list-files (system :store) "_" #(do (put! out %) (close! out)))
+    (list-files-with-prefix st "_" #(do (put! out %) (close! out)))
     out))
 
 (defn get-source-file-list 
@@ -453,7 +445,7 @@
    (logger site "Fetching site source file listing." :fetching)
    (assoc site :source-file-list
           (filter (comp good-file-path? :path)
-                  (<! (source-file-list site))))))
+                  (<! (source-file-list (:store site)))))))
 
 ;; changed-source-files
 
@@ -480,15 +472,9 @@
      (logger site "Fetching changed files ..." :downloading)     
      (let [files (<! (chan->> (fetch-files site (:changed-source-files site))
                               (async/into [])))]
-       (logger site "Recieved changed files ..." :notice)
+       (logger site "Received changed files ..." :notice)
        (update-in site [:source-files] merge (map-to-key :path files))))))
 
-#_{ :templates  (map-to-key :name (st/templates site))
-    :partials   (map-to-key :name (st/partials site))
-    :data       (map-to-key :name (st/data-files site))
-    :posts      (st/posts site)
-    :pages      (st/pages site)
-    :site     site }
 
 ;; parse-pages
 
@@ -514,12 +500,26 @@
   [[old-s site]]
   (assoc site :pages (map-to-key :name (pages* site))))
 
+;; parse-posts
+
+(defn- posts* [site]
+  (->> (paths/filter-for-prefix (:source-files site) (:post-path site))
+       (map (partial sf/parse-front-matter site))
+       (map #(assoc % :page-type :post))
+       (map #(self-assoc % :date paths/parse-file-date))
+       (map #(self-assoc % :target-path sf/make-post-target-path))
+       (map #(self-assoc % :name (fn [page] (paths/remove-prefix (:post-path site) (:path page)))))))
+
+(defn parse-posts
+  [[old-s site]]
+  (assoc site :posts (map-to-key :name (posts* site))))
+
 ;; parse-layouts
 
 (defn- layouts* [site]
   (->> (paths/filter-for-prefix (:source-files site) (:layout-path site))
        (map (partial sf/parse-front-matter site))
-       (map #(self-assoc % :name sf/full-filename-without-ext))))
+       (map #(self-assoc % :name (fn [page] (paths/remove-prefix (:layout-path site) (:path page)))))))
 
 (defn parse-layouts
   "Parses the front matter out of the layouts and installs them into the :layouts key.
@@ -529,7 +529,132 @@
   [[old-s site]]
   (assoc site :layouts (map-to-key :name (layouts* site))))
 
-(defn piper< [f input]
+;; parse partials
+
+(defn- partials* [site]
+  (->> (paths/filter-for-prefix (:source-files site) (:partial-path site))
+       (map (partial sf/parse-front-matter site))
+       (map #(self-assoc % :name (fn [page] (paths/remove-prefix (:partial-path site) (:path page)))))))
+
+(defn parse-partials
+  [[old-s site]]
+  (assoc site :partials (map-to-key :name (partials* site))))
+
+;; parse data-files
+
+(defn- data-files* [site]
+  (->> (paths/filter-for-prefix (:source-files site) (:data-path site))
+       (map (partial sf/parse-front-matter site))
+       (map #(self-assoc % :name (fn [page]
+                                   (paths/remove-extention
+                                    (paths/remove-prefix (:data-path site) (:path page))))))))
+
+(defn parse-data-files
+  [[_ site]]
+  (assoc site :data (map-to-key :name (data-files* site))))
+
+;; template environment processing
+
+(defn data-into-templ-env
+  "Templates have the data from the files in the data directory directly available by
+   using the name of the file to access them"
+  [[_ site]]
+  (assoc site :template-env
+         (zipmap (keys (:data site))
+                 (map :front-matter (vals (:data site))))))
+
+;; bringing in base page data
+
+(defn pages-into-templ-env
+  [[_ site]]
+  (assoc-in site [:template-env :pages]
+            (map
+             (fn [f]
+               (merge
+                (select-keys f [:name :path :body])
+                { :url (str "/" (sf/make-target-path f))
+                 :id (str "/" (-> f sf/make-target-path (paths/replace-extention "")))}))
+             (vals (:pages site)))))
+
+;; bringing in base post data
+
+(defn posts-into-templ-env
+  [[_ site]]
+  (assoc-in site [:template-env :posts]
+            (->> (vals (:posts site))
+                 (map 
+                  (fn [f]
+                    (assoc
+                        (select-keys f [:name :path :body :date])
+                      :url (str "/" (sf/make-target-path f))
+                      :id (str "/" (-> f sf/make-target-path (paths/replace-extention ""))))))
+                 (sort-by #(paths/date-to-int (:date %)))
+                 reverse)))
+
+(defn map-in [col key f]
+  (update-in col key (fn [c] (map f c))))
+
+
+(defn- merge-front-matter-to-temple-env* [file-list-key site]
+  (map-in site [:template-env file-list-key]
+          (fn [{:keys [name] :as file}]
+            (merge file
+              (:front-matter (get-in site [file-list-key name]))))))
+
+(defn merge-front-matter-into-page-templ-env [[_ site]]
+  (merge-front-matter-to-temple-env* :pages site))
+
+(defn merge-front-matter-into-post-templ-env [[_ site]]
+  (merge-front-matter-to-temple-env* :posts site))
+
+;; add rendered content to templ post and page data
+
+(defn- add-rendered-content-into-templ-env* [file-list-key site]
+  (map-in site [:template-env file-list-key]
+          (fn [{:keys [name] :as file}]
+            (assoc file
+              :content
+              (render-raw-page-without-context site (get-in site [file-list-key name]))))))
+
+(defn add-rendered-content-to-pages-templ-env [[_ site]]
+  (add-rendered-content-into-templ-env* :pages site))
+
+(defn add-rendered-content-to-posts-templ-env [[_ site]]
+  (add-rendered-content-into-templ-env* :posts site))
+
+;; add sections to page templ data
+
+(defn page-sections [[_ site]]
+  (map-in site [:template-env :pages]
+          (fn [file]
+            (let [sections (get-sections site (get-in site [:pages (:name file)]))
+                  sections-map (into {} (map (juxt :name :content) sections))]
+              (assoc file
+                :sections sections
+                :sectionsMap sections-map
+                :getSection (fn [k] (get sections-map k)))))))
+
+;; get page 
+
+(defn- get-page-by-path* [site page-path]
+  (->> (get-in site [:template-env :pages])
+       (find-first #(= (:path %) page-path))))
+
+(defn get-page-in-templ-env [[_ site]]
+  (assoc site :getPage
+         (fn [page-path] (get-page-by-path* site page-path))))
+
+;; page includes
+
+(defn page-includes-in-templ-env [[_ site]]
+  (assoc site :includePage
+         (fn [page-path] (:content (get-page-by-path* site page-path)))))
+
+
+
+
+
+(defn plugin< [f input]
   (let [out (chan)]
     (go-loop []
              (let [v (<! input)]
@@ -544,10 +669,24 @@
 (defn render-pipeline [system-chan]
   (chan->> system-chan
            (map< (juxt identity identity))
-           (piper< get-source-file-list)
-           (piper< changed-source-files)
-           (piper< fetch-changed-source-files)
-           #_(piper< parse-pages)           
+           (plugin< get-source-file-list)
+           (plugin< changed-source-files)
+           (plugin< fetch-changed-source-files)
+           (plugin< parse-pages)
+           (plugin< parse-posts)           
+           (plugin< parse-layouts)
+           (plugin< parse-partials)
+           (plugin< parse-data-files)
+           (plugin< data-into-templ-env)
+           (plugin< pages-into-templ-env)
+           (plugin< posts-into-templ-env)
+           (plugin< merge-front-matter-into-page-templ-env)
+           (plugin< merge-front-matter-into-post-templ-env)           
+           (plugin< add-rendered-content-to-pages-templ-env)
+           (plugin< add-rendered-content-to-posts-templ-env)
+           (plugin< page-includes-in-templ-env)
+           (plugin< get-page-in-templ-env)           
+           (plugin< page-sections)
            
            ))
 
@@ -672,14 +811,19 @@
                 (recur)))
      site)))
 
-#_(let [lc (chan)
+(let [lc (chan)
       in (to-chan [{ :log-chan lc
                      :page-path "_site_src"
                      :layout-path "_layouts"
-                     :store { :type :s3
-                              :bucket "nextpress-demo"
-                              :signing-service "http://localhost:4567"
-                              :store-root "http://s3.amazonaws.com"}
+                     :partial-path "_partials"                    
+                     :post-path "_posts"
+                     :data-path "_data"
+                    :store
+                    #_(create-store { :type :s3
+                                     :bucket "nextpress-demo"
+                                     :signing-service "http://localhost:4567"})
+                    (create-store { :type :local
+                                   :path-prefix "development"})
                     }])
       p (render-pipeline in)]
   (go-loop []
@@ -688,24 +832,40 @@
             (log (:msg msg))
             (recur))))
     
-  (go (log (clj->js (:source-files (last (<! p)))))))
+  (go (log (clj->js (last (<! p))))))
 
+(defn load-localstore []
+  (let [s3 (create-store { :type :s3
+                          :bucket "nextpress-demo"
+                          :signing-service "http://localhost:4567"})
+        loc (create-store { :type :local
+                           :path-prefix "development"})]
+    (go
+     (let [start-paths (mapv :path (<! (source-file-list s3)))]
+       (loop [paths start-paths]
+         (let [p (first paths)]
+           (if p
+             (let [file (<! (fetch-file {:store s3} p))
+                   res  (<! (store-source {:store loc} file))]
+               (log (clj->js file))
+               (recur (rest paths)))
+             (log (clj->js (<! (source-file-list loc)))))))))))
 
+#_(load-localstore)
 
-
-(let [st (S3Store. "nextpress-demo"
+#_(let [st (S3Store. "nextpress-demo"
                    "http://localhost:4567")]
-  #_(store! st "_data1.txt" "1" identity)
-  #_(store! st "data2" 2 identity)
-  #_(store! st "data3" 3 identity)
-
-  #_(store! st "rata1" 1 identity)
-  #_(store! st "rata2" 2 identity)
-  #_(store! st "rata3" 3 identity)
-  
-  (get-source-file st "_config.edn" (fn [x] (log x)
-                                      (store-source-file! st x (fn [result] (log result) ))
-                                      ))
-  (list-files st (fn [list] (log (clj->js list))))
-  (list-files-with-prefix st "_" (fn [list] (log (clj->js list))))) 
+    #_(store! st "_data1.txt" "1" identity)
+    #_(store! st "data2" 2 identity)
+    #_(store! st "data3" 3 identity)
+    
+    #_(store! st "rata1" 1 identity)
+    #_(store! st "rata2" 2 identity)
+    #_(store! st "rata3" 3 identity)
+    
+    (get-source-file st "_config.edn" (fn [x] (log x)
+                                        (store-source-file! st x (fn [result] (log result) ))
+                                        ))
+    (list-files st (fn [list] (log (clj->js list))))
+    (list-files-with-prefix st "_" (fn [list] (log (clj->js list))))) 
 

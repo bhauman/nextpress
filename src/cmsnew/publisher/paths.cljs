@@ -3,8 +3,10 @@
    [clojure.string :as string]))
 
 (defn filter-for-prefix [files prefix]
-  (let [rx (js/RegExp. (str "^" prefix))] 
-    (filter #(.test rx (:path %)) (vals files))))
+  (if prefix
+    (let [rx (js/RegExp. (str "^" prefix))] 
+      (filter #(.test rx (:path %)) (vals files)))
+    []))
 
 (def filename-parts #(string/split % #"-"))
 
@@ -58,3 +60,5 @@
       (str-join ".") 
       (str new-ext)))
 
+(defn remove-extention [path]
+  (replace-extention path ""))
