@@ -3,6 +3,17 @@
    [cljs.core.async :as async
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
    [cmsnew.util.core :refer [self-assoc map-to-key find-first]]
+   [cmsnew.datastore.core :refer [
+                                  fetch-files
+                                  source-file-list
+                                  store-source
+                                  store-files
+                                  fetch-file
+                                  create-store]]
+   
+   [cmsnew.datastore.localstore :refer [LocalStore]]
+   [cmsnew.datastore.s3-store :refer [S3tore]]  
+   
    [cmsnew.datastore.s3 :as store]
    [cmsnew.transformer.markdown :refer [markdown-to-html]]
    [cmsnew.util.async-utils :as async-util]
@@ -22,8 +33,7 @@
    [crate.core :as crate]
    [clojure.string :as string]
    [cljs.reader :refer [push-back-reader read-string]]   
-   [jayq.util :refer [log]]
-   [goog.crypt.Md5])
+   [jayq.util :refer [log]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]
                    [cmsnew.util.macros :refer [chan->>]]))
 
@@ -38,181 +48,12 @@
                       :page-path "_site_src"             
                       :data-path "_data" })
 
-;; storage-system
-
-(defn starts-with? [s prefix]
-  (zero? (.indexOf s prefix)))
-
-(let [md (goog.crypt.Md5.)]
-  (defn md5 [s]
-    (.update md s)
-    (apply
-     str
-     (map (fn [x]
-            (str
-             (if (> 16 x) "0" "")
-             (.toString x 16))) (.digest md)))))
-
-(defprotocol FileLister
-  (list-files [this callback])  
-  (list-files-with-prefix [this prefix callback]))
-
-(defprotocol PutFile
-  (-store! [this path data options callback])
-  (-store-response-success? [this response])
-  (-store-response-version [this response])) 
-
-(defprotocol GetFile
-  (-get-file [this path callback]))
-
-(defprotocol ToSourceFile
-  (->source-file [this path file-response]))
-
-(defprotocol ResourcePath
-  (resource-path [this path]))
-
-(defrecord LocalStore [path-prefix]
-  FileLister
-  (list-files [this callback]
-    (callback
-     (map (fn [x] {:path x
-                  :etag (md5
-                         (.getItem js/localStorage
-                                   (str (:path-prefix this) "::" x)))})
-          (map (fn [x] (string/replace-first x (str path-prefix "::") ""))
-               (filter (fn [x] (starts-with? x (str path-prefix "::")))
-                       (map #(.key js/localStorage %)
-                            (range (.-length js/localStorage))))))))
-  (list-files-with-prefix [this prefix callback]
-    (list-files this
-     (fn [files]
-       (callback
-        (filter (fn [x] (starts-with? (:path x) prefix))
-              files)))))
-  PutFile
-  (-store! [this path data options callback]
-    (.setItem js/localStorage
-              (resource-path this path)
-              data)
-    (callback data))
-  (-store-response-version [this resp] nil)
-  (-store-response-success? [this resp] true)
-  GetFile
-  (-get-file [this path callback]
-    (callback
-     (.getItem js/localStorage
-               (resource-path this path))))
-  ToSourceFile
-  (->source-file [this path file-response]
-    {:path path
-     :etag (md5 file-response)
-     :body file-response})
-  ResourcePath
-  (resource-path [this path]
-    (str (:path-prefix this) "::" path)))
-
-(defrecord S3Store [bucket signing-service]
-  FileLister
-  (list-files [this callback]
-    (cmsnew.datastore.s3/list-files this "" callback))
-  (list-files-with-prefix [this prefix callback]
-    (cmsnew.datastore.s3/list-files this prefix callback))
-  PutFile
-  (-store! [this path data options callback]
-    (store/save-data-to-file this
-                             path
-                             data
-                             (or (:mime-type options) "text/plain")
-                             callback))
-  (-store-response-version [this resp]
-    (.getResponseHeader resp "x-amz-version-id"))
-  (-store-response-success? [this resp]
-    (log resp)
-    true)
-  GetFile
-  (-get-file [this path callback]
-    (store/get-text (resource-path this path) callback))
-  ToSourceFile
-  (->source-file [this path file-response]
-    {:path path
-     :etag (get-in file-response [:headers :etag])
-     :version (get-in file-response [:headers :version])
-     :body (:body file-response)})
-  ResourcePath
-  (resource-path [this path]
-    (str "http://s3.amazonaws.com/" bucket "/" path)))
-
-(defn get-source-file [st path callback]
-  (-get-file st path (fn [f] (callback (->source-file st path f)))))
-
-(defn store-source-file! [st source-file callback]
-  (-store! st
-           (:path source-file)
-           (str (if-let [fm (:front-matter source-file)]
-                  (prn-str fm) "")
-                (:body source-file))
-           {:mime-type "text/plain"}
-           (fn [store-resp]
-             (if (-store-response-success? st store-resp)
-               (callback (assoc source-file :version
-                                (-store-response-version st store-resp))) 
-               (callback :failed)))))
-
-(defn store-rendered-file! [st source-file callback]
-  (-store! st
-           (:target-path source-file)
-           (:rendered-body source-file)           
-           {:mime-type "text/html"}
-           (fn [store-resp]
-             (if (-store-response-success? st store-resp)
-               (callback (assoc source-file :target-version
-                                (-store-response-version st store-resp))) 
-               (callback :failed)))))
-
-(defn fetch-file [system path]
-  (let [out (chan)]
-    (get-source-file (:store system)
-                     path
-                     (fn [sf] (put! out sf) (close! out)))
-    out))
-
-(defn fetch-files [system paths]
-  (async/merge (map (partial fetch-file system) paths)))
-
-(defn store-rendered [system source-file]
-  (let [out (chan)]
-    (store-rendered-file! (:store system)
-                          source-file
-                          (fn [resp] (put! out resp) (close! out)))
-    out))
-
-(defn store-source [system source-file]
-  (let [out (chan)]
-    (store-source-file! (:store system)
-                        source-file
-                        (fn [resp] (put! out resp) (close! out)))
-    out))
-
-(defn store-files [system file-maps-list]
-  (async/merge (map (partial store-rendered system) file-maps-list)))
-
-
-(defmulti create-store #(:type %))
-
-(defmethod create-store :local [{:keys [path-prefix]}]
-  (LocalStore. path-prefix))
-
-(defmethod create-store :s3 [{:keys [bucket signing-service]}]
-  (S3Store. bucket signing-service))
-
-
 (defn render-template [template-string data]
+  (log "data")
+  (log (clj->js data))
   (.template js/_ template-string (clj->js data)))
 
 ;; fetching pipeline helpers
-
-
-
 
 
 (defn get-config [site-url]
@@ -365,9 +206,9 @@
     #_(log (clj->js system-data))
      (->> files-to-publish
           (map #(self-assoc % :rendered-body
-                           (partial render-page-with-templates
-                                    system-data
-                                    data-for-templates)))
+                            (partial render-page-with-templates
+                                     system-data
+                                     data-for-templates)))
           (map (juxt :path identity))
           (into {}))))
 
@@ -428,14 +269,7 @@
   ([system msg]
      (logger system msg nil nil)))
 
-
-
 ;; source-file-list plugin
-
-(defn source-file-list [st]
-  (let [out (chan)]
-    (list-files-with-prefix st "_" #(do (put! out %) (close! out)))
-    out))
 
 (defn get-source-file-list 
   "We get the source files for the system. Creates a :source-file-list entry
@@ -563,11 +397,12 @@
          (zipmap (keys (:data site))
                  (map :front-matter (vals (:data site))))))
 
+
 ;; bringing in base page data
 
 (defn pages-into-templ-env
   [[_ site]]
-  (assoc-in site [:template-env :pages]
+  (assoc-in site [:template-env :site :pages]
             (map
              (fn [f]
                (merge
@@ -580,7 +415,7 @@
 
 (defn posts-into-templ-env
   [[_ site]]
-  (assoc-in site [:template-env :posts]
+  (assoc-in site [:template-env :site :posts]
             (->> (vals (:posts site))
                  (map 
                   (fn [f]
@@ -596,7 +431,7 @@
 
 
 (defn- merge-front-matter-to-temple-env* [file-list-key site]
-  (map-in site [:template-env file-list-key]
+  (map-in site [:template-env :site file-list-key]
           (fn [{:keys [name] :as file}]
             (merge file
               (:front-matter (get-in site [file-list-key name]))))))
@@ -610,7 +445,7 @@
 ;; add rendered content to templ post and page data
 
 (defn- add-rendered-content-into-templ-env* [file-list-key site]
-  (map-in site [:template-env file-list-key]
+  (map-in site [:template-env :site file-list-key]
           (fn [{:keys [name] :as file}]
             (assoc file
               :content
@@ -625,7 +460,7 @@
 ;; add sections to page templ data
 
 (defn page-sections [[_ site]]
-  (map-in site [:template-env :pages]
+  (map-in site [:template-env :site :pages]
           (fn [file]
             (let [sections (get-sections site (get-in site [:pages (:name file)]))
                   sections-map (into {} (map (juxt :name :content) sections))]
@@ -636,19 +471,141 @@
 
 ;; get page 
 
-(defn- get-page-by-path* [site page-path]
-  (->> (get-in site [:template-env :pages])
-       (find-first #(= (:path %) page-path))))
 
-(defn get-page-in-templ-env [[_ site]]
-  (assoc site :getPage
-         (fn [page-path] (get-page-by-path* site page-path))))
+#_(defn get-page-in-templ-env [[_ site]]
+  (assoc-in site [:template-env :getPage]
+            (fn [page-path]
+
+              (get-page-by-path* site page-path))))
 
 ;; page includes
 
-(defn page-includes-in-templ-env [[_ site]]
-  (assoc site :includePage
+#_(defn page-includes-in-templ-env [[_ site]]
+  (assoc-in site [:template-env :includePage]
          (fn [page-path] (:content (get-page-by-path* site page-path)))))
+
+;; render partials
+
+;; this is not a good idea as the env is not handled well
+(defn render-partials [[_ site]]
+  (assoc-in site [:template-env :renderPartial]
+         (fn rendPartial [partial-path partial-data]
+           (if-let [template ((:partials site) partial-path)]
+             (let [env (merge (:template-env site)
+                              {:renderPartial rendPartial}
+                              (or (js->clj partial-data) 
+                                  {}))]
+               (render-template (:body template) env))
+             "null partial"))))
+
+;; register extention source type
+
+(defn source-extention->source-type
+  "Map an extention to a source type"
+  [source-ext source-type]
+  (fn [[_ site]]
+    (when-not (get-in site [:source-ext-types (keyword source-ext)])
+      (assoc-in site [:source-ext-types (keyword source-ext)] source-type))))
+
+;; register page renderer
+
+(defn markdown-renderer [site source-file env-data]
+  (markdown-to-html (:body source-file)))
+
+(defn edn-page-renderer [site source-file env-data]
+  (render-edn-page site source-file))
+
+(defn underscore-template-renderer [site source-file env-data]
+  (render-template (:body source-file) env-data))
+
+(defn register-page-renderer 
+  "Map source type to renderer"
+  [source-type render-function]
+  (fn [[_ site]]
+    (assoc-in site [:source-type-renderer source-type] render-function)))
+
+;; register template helper
+
+(defn- get-page-by-path* [site page-path]
+  (let [pages (get-in site [:template-env :site :pages])]
+    (find-first #(= (:path %) page-path) pages)))
+
+(defn get-page-helper [site]
+  (fn [page-path]
+    (clj->js (get-page-by-path* site page-path))))
+
+(defn include-page-helper [site]
+  (fn [page-path] (:content (get-page-by-path* site page-path))))
+
+(defn add-template-helpers [site env]
+  (merge
+   (into {} (map (fn [[k v]] [k (v site)])
+                 (:template-helpers site)))
+   env))
+
+(defn render-partial-helper [site]
+  (fn [partial-path partial-data]
+    (if-let [partial ((:partials site) partial-path)]
+      (let [env (merge (add-template-helpers site
+                                             (:template-env site)) 
+                       (js->clj partial-data))]
+        (render-template (:body partial) env))
+      "null partial")))
+
+(defn register-template-helper [helper-name helper-function]
+  (fn [[_ site]]
+    (assoc-in site [:template-helpers (keyword helper-name)] helper-function)))
+
+;; page-and-post renderer
+
+(defn renderer-for-source-file [site source-file]
+  (let [ext (keyword (paths/extention-from-path (:path source-file)))
+        source-type   (get-in site [:source-ext-types ext])]
+    (get-in site [:source-type-renderer source-type])))
+
+(defn render-page-with-templates-new [site source-file]
+  (log (clj->js site) )
+  (let [start-layout (get-in source-file [:front-matter :layout])
+        data-for-page
+        (add-template-helpers site
+                              ;; refering to :pages here is a problem
+                              (merge {:page (find-first #(= (:name source-file) (:name %))
+                                                        (get-in site [:template-env :site :pages]))}
+                                     (:template-env site)))
+        renderer (renderer-for-source-file site source-file)]
+    (loop [layout start-layout
+           content (renderer site source-file data-for-page)]
+      ; should not be adding .html here
+      (if-let [layout-source-file (get (site :layouts) (str layout ".html"))]
+        (recur
+         (get-in layout-source-file [:front-matter :layout])
+         (render-template (:body layout-source-file)
+                          (assoc data-for-page :content content)))
+        content))))
+
+(defn source-file-renderer [key-to-render]
+  (fn [[_ site]]
+    (let [to-rend  (site key-to-render)
+          rendered (->> (vals to-rend)
+                        (map #(self-assoc % :rendered-body
+                                          (partial render-page-with-templates-new
+                                                   site)))
+                        (map (juxt :path identity))
+                        (into {}))]
+      (update-in site
+                 [:rendered-files]
+                 (fn [files] (merge files rendered))))))
+
+;; XXX register an extention to source_type ".md" -> "text/markdown"
+;; XXX register a handler for page type
+;; "text/markdown" ->  markdown_renderer
+;; "text/edn-page" -> edn-page-renderer
+
+;; XXX you should come up is a register renderer strategy
+;; XXX also register handlers for rendering a page
+;; XXX you can also register handlers for last minute binding into the
+;; env for the template renderer that way they can have all the
+;; information available to the template to them
 
 
 
@@ -669,6 +626,15 @@
 (defn render-pipeline [system-chan]
   (chan->> system-chan
            (map< (juxt identity identity))
+           (plugin< (source-extention->source-type "md" "text/markdown"))
+           (plugin< (source-extention->source-type "edn" "text/edn"))
+           (plugin< (source-extention->source-type "html" "text/html"))
+           (plugin< (register-page-renderer "text/markdown" markdown-renderer))
+           (plugin< (register-page-renderer "text/edn" edn-page-renderer))
+           (plugin< (register-page-renderer "text/html" underscore-template-renderer))
+           (plugin< (register-template-helper :getPage get-page-helper))
+           (plugin< (register-template-helper :includePage include-page-helper))
+           (plugin< (register-template-helper :renderPartial render-partial-helper))           
            (plugin< get-source-file-list)
            (plugin< changed-source-files)
            (plugin< fetch-changed-source-files)
@@ -681,12 +647,17 @@
            (plugin< pages-into-templ-env)
            (plugin< posts-into-templ-env)
            (plugin< merge-front-matter-into-page-templ-env)
-           (plugin< merge-front-matter-into-post-templ-env)           
+           (plugin< merge-front-matter-into-post-templ-env)
+           ;; should break different rendering types into different
+           ;; plugins (.ie md, edn, html) that way we can add
+           ;; as many renderers as we want and can replace them as well
            (plugin< add-rendered-content-to-pages-templ-env)
            (plugin< add-rendered-content-to-posts-templ-env)
-           (plugin< page-includes-in-templ-env)
-           (plugin< get-page-in-templ-env)           
+           ;; (plugin< page-includes-in-templ-env)
+           ;; (plugin< get-page-in-templ-env)           
            (plugin< page-sections)
+           ;; (plugin< render-partials)
+           (plugin< (source-file-renderer :pages))
            
            ))
 
