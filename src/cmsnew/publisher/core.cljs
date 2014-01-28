@@ -2,25 +2,24 @@
   (:require
    [cljs.core.async :as async
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
-   [cmsnew.util.core :refer [self-assoc map-to-key find-first]]
-   [cmsnew.datastore.core :refer [
-                                  fetch-files
-                                  source-file-list
-                                  store-source
-                                  store-files
-                                  fetch-file
-                                  create-store]]
    
-   [cmsnew.datastore.localstore :refer [LocalStore]]
-   [cmsnew.datastore.s3-store :refer [S3tore]]  
+   [cmsnew.publisher.util.core :refer [self-assoc map-to-key find-first]]
+   [cmsnew.publisher.util.async-utils :as async-util]
+
+   [cmsnew.publisher.datastore.core :refer [
+                                            fetch-files
+                                            source-file-list
+                                            store-source
+                                            store-files
+                                            fetch-file
+                                            create-store]]
    
-   [cmsnew.datastore.s3 :as store]
+   [cmsnew.publisher.datastore.localstore :refer [LocalStore]]
+   [cmsnew.publisher.datastore.s3-store :refer [S3tore]]  
+   
+   [cmsnew.publisher.datastore.s3 :as store]
 
-   [cmsnew.util.async-utils :as async-util]
-
-
-
-   [cmsnew.publisher.rendering.edn-page :refer [render-edn-page]]
+   [cmsnew.edn-page.rendering :refer [render-edn-page]]
    
    
    [cmsnew.publisher.site :as st]   
@@ -29,14 +28,15 @@
 
    [cmsnew.publisher.item-templates :as templ]
 
-   [cmsnew.publisher.default-pipeline]
    
    [crate.core :as crate]
    [clojure.string :as string]
    [cljs.reader :refer [push-back-reader read-string]]   
    [jayq.util :refer [log]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]
-                   [cmsnew.util.macros :refer [chan->>]]))
+                   [cmsnew.publisher.util.macros :refer [chan->>]]))
+
+;;; This file is deprecated keeping it around for the transition
 
 (def system-defaults {
                       :store { :type :s3

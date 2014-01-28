@@ -1,7 +1,7 @@
 (ns cmsnew.publisher.item-templates
   (:require
    [crate.core :as crate]
-   [cmsnew.transformer.markdown :refer [markdown-to-html]]))
+   [cmsnew.publisher.transformer.markdown :refer [markdown-to-html]]))
 
 (defn item-list [id name items]
   [:div.edit-items-list {:id id :data-pagename name } items])

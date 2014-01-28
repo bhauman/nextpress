@@ -6,7 +6,7 @@
    [cmsnew.ui.templates :as templ]
    [cmsnew.ui.form-templates :as form :refer [control-group]]   
    [reactor.core :refer [input-value react-render] :as rct]
-   [cmsnew.util.log-utils :refer [ld lp log-chan]]
+   [cmsnew.publisher.util.log-utils :refer [ld lp log-chan]]
    [clojure.string :as string]
    [cmsnew.publisher.core :as pub]
    [jayq.core :refer [$] :as jq]

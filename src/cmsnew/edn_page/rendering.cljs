@@ -1,14 +1,13 @@
-(ns cmsnew.publisher.rendering.edn-page
+(ns cmsnew.edn-page.rendering
   (:require
-   [cmsnew.transformer.underscore-template :refer [render-template]]
+   [cmsnew.publisher.transformer.underscore-template :refer [render-template]]
    [cmsnew.edn-page.item :refer [render-item]]
    [cmsnew.edn-page.items.heading]
    [cmsnew.edn-page.items.markdown]
    [cmsnew.edn-page.items.section]
    [cmsnew.edn-page.items.image]
    [crate.core :as crate]
-   [clojure.string :as string]
-   ))
+   [clojure.string :as string]))
 
 (defn item-list [id name items]
   [:div.edit-items-list {:id id :data-pagename name } items])
@@ -43,5 +42,3 @@
    (crate/html
     [:div
      (map (partial render-item-with-template-overide system-data) items)])))
-
-

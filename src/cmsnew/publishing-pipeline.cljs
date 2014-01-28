@@ -1,10 +1,9 @@
-(ns cmsnew.publisher.default-pipeline
+(ns cmsnew.publishing-pipeline
   (:require
-   [cmsnew.util.core :refer [find-first]]
+   [cmsnew.publisher.util.core :refer [find-first]]
    
-   [cmsnew.transformer.markdown :refer [markdown-to-html]]
-   [cmsnew.transformer.underscore-template :refer [render-template]]
-   [cmsnew.publisher.rendering.edn-page :refer [render-edn-page]]
+   [cmsnew.publisher.transformer.markdown :refer [markdown-to-html]]
+   [cmsnew.publisher.transformer.underscore-template :refer [render-template]]
 
    [cmsnew.publisher.plugins.base :refer [add-template-helpers
                                           register-template-helper
@@ -13,7 +12,9 @@
                                           
                                           get-source-file-list
                                           changed-source-files
+                                          changed-rendered-files
                                           fetch-changed-source-files
+                                          store-changed-rendered-files
                                           
                                           parse-data-files
                                           parse-partials
@@ -21,7 +22,6 @@
                                           parse-posts
                                           parse-pages
                                           get-sections
-                                          page-sections
                                          
                                           posts-into-templ-env
                                           pages-into-templ-env
@@ -30,25 +30,27 @@
                                           merge-front-matter-into-post-templ-env
                                           add-rendered-content-to-pages-templ-env
                                           add-rendered-content-to-posts-templ-env
-                                          ] :as plg]
-
+                                          ]]
+   
    [cmsnew.publisher.plugins.source-file-renderer :refer [source-file-renderer]]
    
-   [cmsnew.datastore.core :refer [
+   [cmsnew.publisher.datastore.core :refer [
                                   source-file-list
                                   fetch-file
                                   store-source
                                   create-store]]
-   [cmsnew.datastore.localstore :refer [LocalStore]]
-   [cmsnew.datastore.s3-store :refer [S3tore]]  
+   [cmsnew.publisher.datastore.localstore :refer [LocalStore]]
+   [cmsnew.publisher.datastore.s3-store :refer [S3tore]]  
+
+   [cmsnew.edn-page.rendering :refer [render-edn-page]]
+   [cmsnew.edn-page.plugins :refer [page-sections]]
    
    [cljs.core.async :as async
     :refer [chan close! put! to-chan map<]]
    [jayq.util :refer [log]])
   (:require-macros
    [cljs.core.async.macros :as m :refer [go alt! go-loop]]
-   [cmsnew.util.macros :refer [chan->>]])
-  )
+   [cmsnew.publisher.util.macros :refer [chan->>]]))
 
 ;; register page renderer
 
@@ -120,16 +122,14 @@
            (plugin< posts-into-templ-env)
            (plugin< merge-front-matter-into-page-templ-env)
            (plugin< merge-front-matter-into-post-templ-env)
-           ;; should break different rendering types into different
-           ;; plugins (.ie md, edn, html) that way we can add
-           ;; as many renderers as we want and can replace them as well
            (plugin< add-rendered-content-to-pages-templ-env)
            (plugin< add-rendered-content-to-posts-templ-env)
-           ;; (plugin< page-includes-in-templ-env)
-           ;; (plugin< get-page-in-templ-env)           
            (plugin< page-sections)
-           ;; (plugin< render-partials)
            (plugin< (source-file-renderer :pages))
+           (plugin< (source-file-renderer :posts))
+           (plugin< changed-rendered-files)
+           (plugin< store-changed-rendered-files)
+           
            
            ))
 

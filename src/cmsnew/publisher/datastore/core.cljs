@@ -1,4 +1,4 @@
-(ns cmsnew.datastore.core
+(ns cmsnew.publisher.datastore.core
   (:require
     [cljs.core.async :as async :refer [chan put! close!]]))
 
@@ -47,32 +47,32 @@
                                 (-store-response-version st store-resp))) 
                (callback :failed)))))
 
-(defn fetch-file [system path]
+(defn fetch-file [st path]
   (let [out (chan)]
-    (get-source-file (:store system)
+    (get-source-file st
                      path
                      (fn [sf] (put! out sf) (close! out)))
     out))
 
-(defn fetch-files [system paths]
-  (async/merge (map (partial fetch-file system) paths)))
+(defn fetch-files [st paths]
+  (async/merge (map (partial fetch-file st) paths)))
 
-(defn store-rendered [system source-file]
+(defn store-rendered [st source-file]
   (let [out (chan)]
-    (store-rendered-file! (:store system)
+    (store-rendered-file! st
                           source-file
                           (fn [resp] (put! out resp) (close! out)))
     out))
 
-(defn store-source [system source-file]
+(defn store-source [st source-file]
   (let [out (chan)]
-    (store-source-file! (:store system)
+    (store-source-file! st
                         source-file
                         (fn [resp] (put! out resp) (close! out)))
     out))
 
-(defn store-files [system file-maps-list]
-  (async/merge (map (partial store-rendered system) file-maps-list)))
+(defn store-files [st file-maps-list]
+  (async/merge (map (partial store-rendered st) file-maps-list)))
 
 (defn source-file-list [st]
   (let [out (chan)]

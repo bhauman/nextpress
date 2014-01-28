@@ -1,4 +1,4 @@
-(ns cmsnew.util.core)
+(ns cmsnew.publisher.util.core)
 
 (defn self-assoc [x key f]
   (assoc x key (f x)))
@@ -11,3 +11,6 @@
 
 (defn insert-at [items index item]
   (concat (take index items) [item] (drop index items)))
+
+(defn map-in [col key f]
+  (update-in col key (fn [c] (map f c))))

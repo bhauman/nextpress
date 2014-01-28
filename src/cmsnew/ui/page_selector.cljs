@@ -4,7 +4,7 @@
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
    [sablono.core :as sab :include-macros true]   
    [reactor.core :refer [input-value react-render] :as rct]
-   [cmsnew.util.log-utils :refer [ld lp log-chan]]
+   [cmsnew.publisher.util.log-utils :refer [ld lp log-chan]]
    [clojure.string :as string]
    [cmsnew.publisher.core :as pub]
    [cmsnew.publisher.site :as st]

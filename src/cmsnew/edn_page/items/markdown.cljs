@@ -8,7 +8,7 @@
    [crate.core :as crate]
    [sablono.core :as sab :include-macros true]   
    [reactor.core :as react]   
-   [cmsnew.transformer.markdown :refer [markdown-to-html]]
+   [cmsnew.publisher.transformer.markdown :refer [markdown-to-html]]
    [cljs.core.async :as async :refer [put!]]   
    [clojure.string :as string])
   (:require-macros [reactor.macros :as reactm]))

@@ -1,4 +1,4 @@
-(ns cmsnew.util.macros)
+(ns cmsnew.publisher.util.macros)
 
 (defmacro chan->>
   "I'm using this macro while there is a memory leak in safari"

@@ -3,11 +3,11 @@
    [cljs.core.async :as async
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
    [sablono.core :as sab :include-macros true]   
-   [cmsnew.datastore.s3 :as store]
+   [cmsnew.publisher.datastore.s3 :as store]
    [cmsnew.publisher.core :as pub]
    [cmsnew.ui.templates :as templ]
-   [cmsnew.util.log-utils :refer [ld lp log-chan]]
-   [cmsnew.util.async-utils :as async-util]
+   [cmsnew.publisher.util.log-utils :refer [ld lp log-chan]]
+   [cmsnew.publisher.util.async-utils :as async-util]
 
    ;; importing edn-items
    [cmsnew.edn-page.item :refer [deleted?]]

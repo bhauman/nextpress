@@ -4,8 +4,8 @@
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
    [sablono.core :as sab :include-macros true]
    [cmsnew.publisher.core :as pub]
-   [cmsnew.util.log-utils :refer [ld lp log-chan]]
-   [cmsnew.util.async-utils :as async-util]
+   [cmsnew.publisher.util.log-utils :refer [ld lp log-chan]]
+   [cmsnew.publisher.util.async-utils :as async-util]
    [jayq.core :refer [$] :as jq]
    [jayq.util :refer [log]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]))

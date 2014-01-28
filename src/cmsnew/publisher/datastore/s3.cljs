@@ -1,4 +1,4 @@
-(ns cmsnew.datastore.s3
+(ns cmsnew.publisher.datastore.s3
   (:require
    [cljs-uuid-utils :refer [make-random-uuid uuid-string]]   
    [clojure.string :as string]

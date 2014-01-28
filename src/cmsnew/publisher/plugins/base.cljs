@@ -1,18 +1,20 @@
 (ns cmsnew.publisher.plugins.base
   (:require
-   [cmsnew.datastore.core :refer [fetch-files
-                                  source-file-list]]
-   [cmsnew.transformer.underscore-template :refer [render-template]]
+   [cmsnew.publisher.datastore.core :refer [fetch-files
+                                            source-file-list
+                                            store-files]]
+   [cmsnew.publisher.transformer.underscore-template :refer [render-template]]
    [cmsnew.publisher.source-file :as sf]
    [cmsnew.publisher.paths :as paths]
    [cmsnew.publisher.logger :refer [logger]]
    [cmsnew.publisher.rendering.base :refer [render-raw-page-without-context]]
-   [cmsnew.publisher.rendering.edn-page :refer [render-edn-section]]   
-   [cmsnew.util.core :refer [self-assoc map-to-key]]
-   [cljs.core.async :as async])
+   [cmsnew.edn-page.rendering :refer [render-edn-section]]   
+   [cmsnew.publisher.util.core :refer [self-assoc map-to-key map-in]]
+   [cljs.core.async :as async :refer [chan put! close!]]
+   [jayq.util :refer [log]])
   (:require-macros
    [cljs.core.async.macros :as m :refer [go]]
-   [cmsnew.util.macros :refer [chan->>]]))
+   [cmsnew.publisher.util.macros :refer [chan->>]]))
 
 (defn source-extention->source-type
   "Map an extention to a source type"
@@ -53,14 +55,21 @@
     (keep (fn [k] (if (not (= (old-map k) (new-map k))) k)) key-list)))
 
 (defn changed-source-files
-  "We fetch changed files. Depends on the :source-file-list and a :source-files key.
-   Creates or updates a :changed-files entry in the site that is a list of the paths
-   of the files that have changed"
   [[old-s site]]
   (let [changed (changed-map-keys
                  [(path-etag-map (:source-file-list site))
                   (path-etag-map (:source-files old-s))])]
     (assoc site :changed-source-files changed)))
+
+(defn changed-rendered-files
+  [[old-s site]]
+  (let [changed (changed-map-keys
+                 [(or (:rendered-files site) {})
+                  (or (:rendered-files old-s) {})])
+        changed-rendered (->> changed
+                              (select-keys (:rendered-files site))
+                              vals)]
+    (assoc site :changed-rendered-files changed-rendered)))
 
 ;; fetch-changed-source-files
 
@@ -73,16 +82,34 @@
     (go
      (logger site "Source files have changed: " :source-files-changed (:changed-source-files site))
      (logger site "Fetching changed files ..." :downloading)     
-     (let [files (<! (chan->> (fetch-files site (:changed-source-files site))
+     (let [files (<! (chan->> (fetch-files (:store site) (:changed-source-files site))
                               (async/into [])))]
        (logger site "Received changed files ..." :notice)
        (update-in site [:source-files] merge (map-to-key :path files))))))
 
 
+;; store-changed-rendered-files pluging
+
+(defn store-changed-rendered-files [[_ site]]
+  (let [changed-files (:changed-rendered-files site)]
+    (if (zero? (count changed-files))
+      site
+      (let [out (chan)]
+        (go
+         (let [res (<! (chan->>
+                        (store-files (:store site) changed-files)
+                        (async/into [])))]
+           (log (clj->js res)))
+         (put! out site)
+         (close! out))
+        out))))
+
 ;; parse-pages
 
 (defn- pages* [site]
   (->> (paths/filter-for-prefix (:source-files site) (:page-path site))
+       ;; published should be separate layer of functionality
+       (map #(assoc % :published true)) 
        (map (partial sf/parse-front-matter site))
        (map #(assoc % :page-type :page))
        (map #(self-assoc % :target-path sf/make-page-target-path))
@@ -195,10 +222,6 @@
                  (sort-by #(paths/date-to-int (:date %)))
                  reverse)))
 
-(defn map-in [col key f]
-  (update-in col key (fn [c] (map f c))))
-
-
 (defn- merge-front-matter-to-temple-env* [file-list-key site]
   (map-in site [:template-env :site file-list-key]
           (fn [{:keys [name] :as file}]
@@ -225,35 +248,6 @@
 
 (defn add-rendered-content-to-posts-templ-env [[_ site]]
   (add-rendered-content-into-templ-env* :posts site))
-
-;; add sections to page templ data
-
-
-(defn sections-from-items [system-data items]
-  (let [temp-items (drop-while #(not= (:type %) :section) items)
-        section-header (first temp-items)
-        section-items (take-while #(not= (:type %) :section) (rest temp-items))]
-    (if section-header
-      (cons { :name    (:content section-header)
-              :items   section-items 
-              :content (render-edn-section system-data section-items) }
-            (sections-from-items system-data (rest temp-items)))
-      [])))
-
-(defn get-sections [system-data source-file]
-  (if (sf/edn-page? source-file)
-    (sections-from-items system-data (sf/items source-file))
-    []))
-
-(defn page-sections [[_ site]]
-  (map-in site [:template-env :site :pages]
-          (fn [file]
-            (let [sections (get-sections site (get-in site [:pages (:name file)]))
-                  sections-map (into {} (map (juxt :name :content) sections))]
-              (assoc file
-                :sections sections
-                :sectionsMap sections-map
-                :getSection (fn [k] (get sections-map k)))))))
 
 ;; render partials
 

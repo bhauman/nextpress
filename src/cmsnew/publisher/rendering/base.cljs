@@ -1,8 +1,7 @@
 (ns cmsnew.publisher.rendering.base
   (:require
    [cmsnew.publisher.paths :as paths]   
-   [cmsnew.util.core :refer [find-first]]   
-   [cmsnew.transformer.underscore-template :refer [render-template]]))
+   [cmsnew.publisher.transformer.underscore-template :refer [render-template]]))
 
 (defn add-template-helpers [site env]
   (merge
@@ -24,13 +23,13 @@
 
 ;; and we are hard wired to underscore templates
 
-(defn render-page-with-templates [site source-file]
+(defn render-page-with-templates [site page-data-lookup source-file]
   (let [start-layout (get-in source-file [:front-matter :layout])
+        page-key-data (page-data-lookup site (:name source-file))
         data-for-page
         (add-template-helpers site
                               ;; refering to :pages here is a problem
-                              (merge {:page (find-first #(= (:name source-file) (:name %))
-                                                        (get-in site [:template-env :site :pages]))}
+                              (merge {:page page-key-data}
                                      (:template-env site)))
         renderer (renderer-for-source-file site source-file)]
     (loop [layout start-layout

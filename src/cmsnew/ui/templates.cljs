@@ -8,7 +8,7 @@
    [crate.core :as crate]
    [reactor.core :as react]
    [sablono.core :as sab :include-macros true]
-   [cmsnew.transformer.markdown :refer [markdown-to-html]]
+   [cmsnew.publisher.transformer.markdown :refer [markdown-to-html]]
    [cmsnew.publisher.item-templates :refer [item-list item-container]]
    [cmsnew.ui.form-templates :as form :refer [control-group]]
    
@@ -21,7 +21,7 @@
    [cmsnew.edn-page.items.section]
    [cmsnew.edn-page.items.image]   
 
-   [cmsnew.util.core :refer [insert-at]]
+   [cmsnew.publisher.util.core :refer [insert-at]]
    [jayq.core :as jq :refer [$]]
    [jayq.util :refer [log]])
   (:require-macros [reactor.macros :as reactm] ))

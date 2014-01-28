@@ -1,6 +1,6 @@
 (ns cmsnew.publisher.site
   (:require
-   [cmsnew.util.core :refer [self-assoc]]
+   [cmsnew.publisher.util.core :refer [self-assoc]]
    [cmsnew.publisher.paths :as p :refer [filter-for-prefix]]
    [cmsnew.publisher.source-file :as sf]   
    ))

@@ -1,13 +1,13 @@
-(ns cmsnew.datastore.localstore
+(ns cmsnew.publisher.datastore.localstore
   (:require
-   [cmsnew.datastore.core :refer [FileLister
-                                  PutFile
-                                  GetFile
-                                  ToSourceFile
-                                  ResourcePath
-                                  list-files
-                                  resource-path
-                                  create-store]]
+   [cmsnew.publisher.datastore.core :refer [FileLister
+                                            PutFile
+                                            GetFile
+                                            ToSourceFile
+                                            ResourcePath
+                                            list-files
+                                            resource-path
+                                            create-store]]
    [clojure.string :as string]
    [goog.crypt.Md5]))
 

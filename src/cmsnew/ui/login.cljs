@@ -6,7 +6,7 @@
    [cmsnew.ui.templates :as templ]
    [cmsnew.authorization.persona :as session]
    [reactor.core :refer [input-value react-render] :as rct]
-   [cmsnew.util.log-utils :refer [ld lp log-chan]]
+   [cmsnew.publisher.util.log-utils :refer [ld lp log-chan]]
    [jayq.core :refer [$] :as jq]
    [jayq.util :refer [log]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]
