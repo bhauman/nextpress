@@ -25,6 +25,7 @@
              (.toString x 16))) (.digest md)))))
 
 (defrecord LocalStore [path-prefix]
+
   FileLister
   (list-files [this callback]
     (callback
@@ -41,7 +42,8 @@
      (fn [files]
        (callback
         (filter (fn [x] (starts-with? (:path x) prefix))
-              files)))))
+                files)))))
+  
   PutFile
   (-store! [this path data options callback]
     (.setItem js/localStorage
@@ -50,21 +52,22 @@
     (callback data))
   (-store-response-version [this resp] nil)
   (-store-response-success? [this resp] true)
+  
   GetFile
   (-get-file [this path callback]
     (callback
      (.getItem js/localStorage
                (resource-path this path))))
+  
   ToSourceFile
   (->source-file [this path file-response]
     {:path path
      :etag (md5 file-response)
      :body file-response})
+  
   ResourcePath
   (resource-path [this path]
     (str (:path-prefix this) "::" path)))
 
 (defmethod create-store :local [{:keys [path-prefix]}]
   (LocalStore. path-prefix))
-
-

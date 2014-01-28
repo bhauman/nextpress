@@ -29,6 +29,12 @@
        (drop (count (path-parts prefix)))
        (string/join "/")))
 
+(let [dir-path-rx #"/$"
+      hash-rx #"\#$"]
+  (defn good-file-path? [path]
+    (not (or (.test dir-path-rx path)
+             (.test hash-rx path)))))
+
 ;; handle path rewriting
 
 (def filename-from-path (comp last path-parts))

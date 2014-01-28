@@ -13,7 +13,7 @@
 
 (defn source-files [site] (:source-files site))
 
-(defn template-names [site]
+#_(defn template-names [site]
   (->> (filter-for-prefix (source-files site) (template-path site))
        (map sf/full-filename-without-ext)))
 
@@ -50,6 +50,6 @@
   (->> (filter-for-prefix (source-files site) (data-path site))
        (map (partial sf/parse-data-file site))))
 
-(defn edn-pages [site]
+#_(defn edn-pages [site]
   (->> (pages site)
        (filter sf/edn-page?)))
