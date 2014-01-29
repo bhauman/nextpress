@@ -128,10 +128,7 @@
            (plugin< (source-file-renderer :pages))
            (plugin< (source-file-renderer :posts))
            (plugin< changed-rendered-files)
-           (plugin< store-changed-rendered-files)
-           
-           
-           ))
+           (plugin< store-changed-rendered-files)))
 
 (let [lc (chan)
       in (to-chan [{ :log-chan lc
@@ -141,10 +138,10 @@
                      :post-path "_posts"
                      :data-path "_data"
                     :store
-                    #_(create-store { :type :s3
+                    (create-store { :type :s3
                                      :bucket "nextpress-demo"
                                      :signing-service "http://localhost:4567"})
-                    (create-store { :type :local
+                    #_(create-store { :type :local
                                    :path-prefix "development"})
                     }])
       p (render-pipeline in)]

@@ -64,8 +64,10 @@
 (defn changed-rendered-files
   [[old-s site]]
   (let [changed (changed-map-keys
-                 [(or (:rendered-files site) {})
-                  (or (:rendered-files old-s) {})])
+                 [(or (into {} (map (juxt :path :rendered-body)
+                                    (vals (:rendered-files site))))
+                      {})
+                  (or (:stored-files old-s) {})])
         changed-rendered (->> changed
                               (select-keys (:rendered-files site))
                               vals)]
@@ -87,7 +89,6 @@
        (logger site "Received changed files ..." :notice)
        (update-in site [:source-files] merge (map-to-key :path files))))))
 
-
 ;; store-changed-rendered-files pluging
 
 (defn store-changed-rendered-files [[_ site]]
@@ -96,12 +97,16 @@
       site
       (let [out (chan)]
         (go
-         (let [res (<! (chan->>
-                        (store-files (:store site) changed-files)
-                        (async/into [])))]
-           (log (clj->js res)))
-         (put! out site)
-         (close! out))
+         (let [stored-files (<! (chan->>
+                                 (store-files (:store site) changed-files)
+                                 (async/into [])))
+               new-site (assoc site
+                          :stored-files
+                          (into {} (map (juxt :path :rendered-body)
+                                        (filter (fn [x] (not= :failed x))
+                                                stored-files))))]
+           (put! out new-site)
+           (close! out)))
         out))))
 
 ;; parse-pages
@@ -134,6 +139,7 @@
 
 (defn- posts* [site]
   (->> (paths/filter-for-prefix (:source-files site) (:post-path site))
+       (map #(assoc % :published true))       
        (map (partial sf/parse-front-matter site))
        (map #(assoc % :page-type :post))
        (map #(self-assoc % :date paths/parse-file-date))
