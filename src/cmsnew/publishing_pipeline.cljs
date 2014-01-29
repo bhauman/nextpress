@@ -190,7 +190,7 @@
      :pipeline-output pipeline-output)))
 
 
-(let [system (create-site-for-url "http://nextpress-demo.s3-website-us-east-1.amazonaws.com")]
+#_(let [system (create-site-for-url "http://nextpress-demo.s3-website-us-east-1.amazonaws.com")]
   (go
    (log (clj->js (<! (publish-site system))))))
 

@@ -6,7 +6,7 @@
    [cmsnew.publisher.datastore.s3 :as store]
    #_[cmsnew.publisher.core :as pub]
 
-   [cmsnew.publishing-pipeline]
+   [cmsnew.publishing-pipeline :as pub]
    
    [cmsnew.publisher.util.log-utils :refer [ld lp log-chan]]
 
@@ -22,21 +22,20 @@
 
 (enable-console-print!)
 
-#_(go
- (let [url-config (<! (select-site-loop))
-       signing-service (get-in url-config [:config :signing-service])
-       site-url (:site-url url-config)
-       user-email (<! (session/init signing-service))
-       user-email (or user-email (<! (login-loop)))]
-   (when user-email
-     (let [site (<! (pub/create-site-for-url site-url))]
-       #_(pub/clear-cache site)
-       #_(publisher-page/init site)
-       (<! (pub/blocking-publish site))
-       (loop []
-         (let [edn-page (<! (select-page-loop site))]
-           (log edn-page)
-           (<! (page-edit/edit-page site edn-page)))
-         (recur))))))
-
-
+(go
+ (let [] #_[url-config (<! (select-site-loop))
+            signing-service (get-in url-config [:config :signing-service])
+            site-url (:site-url url-config)
+            user-email (<! (session/init signing-service))
+            user-email (or user-email (<! (login-loop)))]
+   (when true #_user-email
+         (let [site (pub/create-site-for-url "http://nextpress-demo.s3-website-us-east-1.amazonaws.com")]
+           ;; this loads everything
+           (let [site (<! (pub/publish-site site))]
+             (log (clj->js site))
+             (loop []
+               (let [edn-page (<! (select-page-loop site))]
+                 (log edn-page)
+                 (<! (page-edit/edit-page site edn-page)))
+               (recur))         
+         )))))

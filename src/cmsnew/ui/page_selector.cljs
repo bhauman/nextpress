@@ -7,7 +7,7 @@
    [cmsnew.publisher.util.log-utils :refer [ld lp log-chan]]
    [clojure.string :as string]
    [cmsnew.publisher.core :as pub]
-   [cmsnew.publisher.site :as st]
+   [cmsnew.site :as st]
    [cmsnew.publisher.paths :as pth]
    [cmsnew.publisher.source-file :as sf]   
    [jayq.core :refer [$] :as jq]
