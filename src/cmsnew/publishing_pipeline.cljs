@@ -1,11 +1,15 @@
 (ns cmsnew.publishing-pipeline
   (:require
+   [cmsnew.publisher.logger :refer [logger]]
+
    [cmsnew.publisher.util.core :refer [find-first]]
+
    
    [cmsnew.publisher.transformer.markdown :refer [markdown-to-html]]
    [cmsnew.publisher.transformer.underscore-template :refer [render-template]]
 
-   [cmsnew.publisher.plugins.base :refer [add-template-helpers
+   [cmsnew.publisher.plugins.base :refer [add-default
+                                          add-template-helpers
                                           register-template-helper
                                           register-page-renderer
                                           source-extention->source-type
@@ -31,22 +35,27 @@
                                           add-rendered-content-to-pages-templ-env
                                           add-rendered-content-to-posts-templ-env
                                           ]]
+
+   [cmsnew.publisher.plugins.core :refer [plugin<]]
    
    [cmsnew.publisher.plugins.source-file-renderer :refer [source-file-renderer]]
-   
-   [cmsnew.publisher.datastore.core :refer [
-                                  source-file-list
-                                  fetch-file
-                                  store-source
-                                  create-store]]
-   [cmsnew.publisher.datastore.localstore :refer [LocalStore]]
-   [cmsnew.publisher.datastore.s3-store :refer [S3tore]]  
 
+   [cmsnew.publisher.datastore.core :refer [
+                                            source-file-list
+                                            fetch-file
+                                            store-source
+                                            create-store]]
+
+   [cmsnew.publisher.datastore.localstore :refer [LocalStore]]
+   [cmsnew.publisher.datastore.s3-store :refer [S3tore]]
+   
    [cmsnew.edn-page.rendering :refer [render-edn-page]]
    [cmsnew.edn-page.plugins :refer [page-sections]]
+   [cljs.reader :refer [read-string]]
    
    [cljs.core.async :as async
-    :refer [chan close! put! to-chan map<]]
+    :refer [chan close! put! to-chan map< <!]]
+   [jayq.core :as jq]
    [jayq.util :refer [log]])
   (:require-macros
    [cljs.core.async.macros :as m :refer [go alt! go-loop]]
@@ -85,21 +94,52 @@
         (render-template (:body partial) env))
       "null partial")))
 
-(defn plugin< [f input]
+;; local plugins
+
+(defn get-config [site-url]
   (let [out (chan)]
-    (go-loop []
-             (let [v (<! input)]
-               (if v
-                 (let [[o n] v
-                       res (f [o n])]
-                   (put! out [o (if (.-takes res) (<! res) res)])
-                   (recur))
-                 (close! out))))
+    (.get js/$ (str site-url "/_config.edn" )
+          (fn [e]
+            (put! out (-> e read-string))
+            (close! out)))
     out))
+
+(defn load-config
+  "conditionally loads the config if it hasn't been loaded"
+  [[o-site site]]
+  (let [out (chan)]
+    (go
+     (let [config-data (<! (get-config (:site-url site)))]
+       (if-not (:config-file-data site)
+         (do
+           (logger site "Loading config file ...")
+           (put! out (assoc site
+                       :config-file-data
+                       config-data)))
+         (put! out site))
+       (close! out)))
+    out))
+
+(defn merge-config [[_ site]]
+  "Puts config data into the base level of the state."
+  (merge site (:config-file-data site)))
+
+(defn create-storage [[_ site]]
+  (if-not (:store site)
+    (assoc site :store (create-store (:datastore site)))
+    site))
 
 (defn render-pipeline [system-chan]
   (chan->> system-chan
            (map< (juxt identity identity))
+           (plugin< load-config)
+           (plugin< merge-config)
+           (plugin< create-storage)
+           (plugin< (add-default :page-path "_site_src"))
+           (plugin< (add-default :layout-path "_layouts"))
+           (plugin< (add-default :partial-path "_partials"))
+           (plugin< (add-default :post-path "_posts"))
+           (plugin< (add-default :data-path "_data"))           
            (plugin< (source-extention->source-type "md" "text/markdown"))
            (plugin< (source-extention->source-type "edn" "text/edn"))
            (plugin< (source-extention->source-type "html" "text/html"))
@@ -130,61 +170,48 @@
            (plugin< changed-rendered-files)
            (plugin< store-changed-rendered-files)))
 
-(let [lc (chan)
-      in (to-chan [{ :log-chan lc
-                     :page-path "_site_src"
-                     :layout-path "_layouts"
-                     :partial-path "_partials"                    
-                     :post-path "_posts"
-                     :data-path "_data"
-                    :store
-                    (create-store { :type :s3
-                                     :bucket "nextpress-demo"
-                                     :signing-service "http://localhost:4567"})
-                    #_(create-store { :type :local
-                                   :path-prefix "development"})
-                    }])
-      p (render-pipeline in)]
-  (go-loop []
-        (let [msg (<! lc)]
-          (when msg
-            (log (:msg msg))
-            (recur))))
-    
-  (go (log (clj->js (last (<! p))))))
+(defn create-site-for-url [url]
+  (let [in-chan (chan)]
+    { :site-url url
+      :log-chan (chan)
+      :config-file-data { :datastore { :type :local
+                                      :path-prefix "development" }}
+      :pipeline-input in-chan 
+      :pipeline-output (render-pipeline in-chan)}))
 
+;; not digging this, seems fragile
+(defn publish-site [{:keys [pipeline-input pipeline-output] :as site}]
+  (go
+   (>! pipeline-input (dissoc site
+                              :pipeline-output
+                              :pipeline-input))
+   (assoc (last (<! pipeline-output))
+     :pipeline-input pipeline-input
+     :pipeline-output pipeline-output)))
+
+
+(let [system (create-site-for-url "http://nextpress-demo.s3-website-us-east-1.amazonaws.com")]
+  (go
+   (log (clj->js (<! (publish-site system))))))
+
+;; this is just a development helper
 (defn load-localstore []
   (let [s3 (create-store { :type :s3
-                          :bucket "nextpress-demo"
-                          :signing-service "http://localhost:4567"})
+                           :bucket "nextpress-demo"
+                           :signing-service "http://localhost:4567"})
         loc (create-store { :type :local
-                           :path-prefix "development"})]
+                            :path-prefix "development"})]
     (go
      (let [start-paths (mapv :path (<! (source-file-list s3)))]
        (loop [paths start-paths]
          (let [p (first paths)]
            (if p
-             (let [file (<! (fetch-file {:store s3} p))
-                   res  (<! (store-source {:store loc} file))]
+             (let [file (<! (fetch-file s3 p))
+                   res  (<! (store-source loc file))]
                (log (clj->js file))
                (recur (rest paths)))
              (log (clj->js (<! (source-file-list loc)))))))))))
 
-#_(load-localstore)
 
-#_(let [st (S3Store. "nextpress-demo"
-                   "http://localhost:4567")]
-    #_(store! st "_data1.txt" "1" identity)
-    #_(store! st "data2" 2 identity)
-    #_(store! st "data3" 3 identity)
-    
-    #_(store! st "rata1" 1 identity)
-    #_(store! st "rata2" 2 identity)
-    #_(store! st "rata3" 3 identity)
-    
-    (get-source-file st "_config.edn" (fn [x] (log x)
-                                        (store-source-file! st x (fn [result] (log result) ))
-                                        ))
-    (list-files st (fn [list] (log (clj->js list))))
-    (list-files-with-prefix st "_" (fn [list] (log (clj->js list)))))
+#_(load-localstore)
 

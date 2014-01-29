@@ -16,6 +16,11 @@
    [cljs.core.async.macros :as m :refer [go]]
    [cmsnew.publisher.util.macros :refer [chan->>]]))
 
+(defn add-default [key value]
+  (fn [[_ site]]
+    (when-not (site key)
+      (assoc site key value))))
+
 (defn source-extention->source-type
   "Map an extention to a source type"
   [source-ext source-type]
