@@ -7,7 +7,9 @@
   (list-files-with-prefix [this prefix callback]))
 
 (defprotocol PutFile
-  (-store! [this path data options callback])
+  (-store!
+    [this path data options callback]
+    [this path data callback])
   (-store-response-success? [this response])
   (-store-response-version [this response])) 
 

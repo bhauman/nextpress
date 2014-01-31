@@ -200,7 +200,7 @@
                            :bucket "nextpress-demo"
                            :signing-service "http://localhost:4567"})
         loc (create-store { :type :local
-                            :path-prefix "development"})]
+                            :path-prefix "dev"})]
     (go
      (let [start-paths (mapv :path (<! (source-file-list s3)))]
        (loop [paths start-paths]
@@ -211,7 +211,6 @@
                (log (clj->js file))
                (recur (rest paths)))
              (log (clj->js (<! (source-file-list loc)))))))))))
-
 
 #_(load-localstore)
 

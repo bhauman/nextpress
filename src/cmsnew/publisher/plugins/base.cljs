@@ -9,7 +9,7 @@
    [cmsnew.publisher.logger :refer [logger]]
    [cmsnew.publisher.rendering.base :refer [render-raw-page-without-context]]
    [cmsnew.edn-page.rendering :refer [render-edn-section]]   
-   [cmsnew.publisher.util.core :refer [self-assoc map-to-key map-in]]
+   [cmsnew.publisher.util.core :refer [self-assoc map-to-key map-in changed-map-keys]]
    [cljs.core.async :as async :refer [chan put! close!]]
    [jayq.util :refer [log]])
   (:require-macros
@@ -54,10 +54,6 @@
 
 (defn path-etag-map [maps]
   (into {} (map (juxt :path :etag) maps)))
-
-(defn changed-map-keys [[old-map new-map :as maps]]
-  (let [key-list (set (apply concat (map keys maps)))]
-    (keep (fn [k] (if (not (= (old-map k) (new-map k))) k)) key-list)))
 
 (defn changed-source-files
   [[old-s site]]

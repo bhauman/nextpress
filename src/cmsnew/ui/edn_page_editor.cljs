@@ -3,8 +3,16 @@
    [cljs.core.async :as async
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
    [sablono.core :as sab :include-macros true]   
+
    [cmsnew.publisher.datastore.s3 :as store]
-   [cmsnew.publisher.core :as pub]
+
+   [cmsnew.publisher.datastore.core :refer [store-source]]
+   
+   [cmsnew.publisher.datastore.localstore :refer [LocalStore]]
+   [cmsnew.publisher.datastore.s3-store :refer [S3tore]]
+   
+   
+   [cmsnew.publishing-pipeline :as pub]
    [cmsnew.ui.templates :as templ]
    [cmsnew.publisher.util.log-utils :refer [ld lp log-chan]]
    [cmsnew.publisher.util.async-utils :as async-util]
@@ -75,6 +83,11 @@
               [(add-id? {:type :heading :size 2 :content "Edit this heading"})])
     page))
 
+(defn store-source-file-and-update [site source-file]
+  (store-source (:store site) source-file)
+  #_(go (<! (timeout 1000))
+        (pub/publish site)))
+
 ;; interaction controllers
 
 (defn upload-image-file [site uuid file]
@@ -114,9 +127,7 @@
                  :success
                  (let [new-page (insert-data-item-into-page edn-page position
                                                             (new-image-item file-upload-uuid (:url _data) file))]
-                   (pub/store-source-file site new-page)
-                   (go (<! (timeout 1000))
-                       (pub/publish site))                   
+                   (store-source-file-and-update site new-page)
                    new-page)
                  :progress (do (log _data) (recur))
                  (recur))))))
@@ -145,9 +156,7 @@
          new-data-item (<! (edit-item-new state item-data))]
      (if new-data-item
        (let [new-page (merge-data-item-into-page (:edn-page @state) new-data-item)]
-         (pub/store-source-file (:site @state) new-page)
-         (go (<! (timeout 1000))
-             (pub/publish (:site @state)))
+         (store-source-file-and-update (:site @state) new-page)
          new-page)
        (:edn-page @state)))))
 
@@ -158,9 +167,7 @@
      (if new-data-item
        (let [fixed-data-item (dissoc new-data-item :insert-position)
              new-page (insert-data-item-into-page (:edn-page @state) position fixed-data-item)]
-         (pub/store-source-file (:site @state) new-page)
-         (go (<! (timeout 1000))
-             (pub/publish (:site @state)))
+         (store-source-file-and-update (:site @state) new-page)
          new-page)
        (:edn-page @state)))))
 
@@ -208,9 +215,7 @@
                  (let [validated (validate-front-matter data)]
                    (if (valid? validated)
                      (let [new-page (merge-front-matter-into-page edn-page validated)]
-                       (pub/store-source-file (:site @page-state) new-page)
-                       (go (<! (timeout 1000))
-                           (pub/publish (:site @page-state)))
+                       (store-source-file-and-update (:site @page-state) new-page)
                        new-page)
                      (recur)))
                  :form-cancel edn-page
@@ -233,6 +238,8 @@
                  :edit-item
                  (let [res-page (<! (handle-edit-page-item-new page-state (:id data)))
                        new-page (initial-item-to-empty-page res-page)]
+                   (log "res PAGE")
+                   (ld res-page)
                    (swap! page-state assoc :edn-page new-page :editing-item false)
                    (recur new-page insert-position))
                  :add-item
@@ -265,4 +272,4 @@
            (close! event-chan)
            (close! state-change-chan)
            (close! close-chan)
-           true))))
+           (:edn-page @page-state)))))

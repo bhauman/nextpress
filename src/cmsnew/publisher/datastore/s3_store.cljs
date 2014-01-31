@@ -5,6 +5,7 @@
                                             GetFile
                                             ToSourceFile
                                             ResourcePath
+                                            -store!
                                             list-files
                                             resource-path
                                             create-store]]
@@ -25,6 +26,9 @@
                                                      data
                                                      (or (:mime-type options) "text/plain")
                                                      callback))
+  (-store! [this path data callback]
+    (-store! this path data {} callback))
+  
   (-store-response-version [this resp]
     (.getResponseHeader resp "x-amz-version-id"))
   (-store-response-success? [this resp]

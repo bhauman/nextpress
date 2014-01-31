@@ -4,6 +4,7 @@
     :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
    [cmsnew.authorization.persona :as session]
    [cmsnew.publisher.datastore.s3 :as store]
+   [cmsnew.publisher.datastore.cached-store]
    #_[cmsnew.publisher.core :as pub]
 
    [cmsnew.publishing-pipeline :as pub]
@@ -22,7 +23,7 @@
 
 (enable-console-print!)
 
-(go
+#_(go
  (let [] #_[url-config (<! (select-site-loop))
             signing-service (get-in url-config [:config :signing-service])
             site-url (:site-url url-config)
