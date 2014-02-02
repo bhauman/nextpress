@@ -26,6 +26,10 @@
               (make-cache-key ns k)
               (prn-str v))
     o)
+  IFn
+  (-invoke [ls k] (-lookup ls k))
+  (-invoke [ls k not-found]  
+    (-lookup ls k not-found))
   IMap
   (^clj -dissoc [o k]
     (.removeItem js/localStorage (make-cache-key ns k))
@@ -83,5 +87,5 @@
     (log "finished tests")
     ))
 
-(tests)
+#_(tests)
 

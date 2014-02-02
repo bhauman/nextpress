@@ -26,18 +26,18 @@
   ;; when you list files you invalidate the cache entries that have changed
   FileLister
   (list-files [this callback]
-    (list-files datastore
-                (fn [file-list]
-                  (let [last-file-list (get @cache-atom :__file-list__)
-                        old-path-etag-map (into {} (mapv (juxt :path :etag) last-file-list))
-                        new-path-etag-map (into {} (mapv (juxt :path :etag) file-list))
-                        changed-keys (changed-map-keys [old-path-etag-map new-path-etag-map])]
-                    ;; here we are invalidating the cache
-                    (doseq [p changed-keys]
-                      (when (contains? @cache-atom p)
-                        (swap! cache-atom dissoc p)))
-                    (swap! cache-atom assoc :__file-list__ file-list)
-                    (callback file-list)))))
+    (let [last-file-list (get @cache-atom :__file-list__)]
+      (list-files datastore
+                  (fn [file-list]
+                    (let [old-path-etag-map (into {} (mapv (juxt :path :etag) last-file-list))
+                          new-path-etag-map (into {} (mapv (juxt :path :etag) file-list))
+                          changed-keys (changed-map-keys [old-path-etag-map new-path-etag-map])]
+                      ;; here we are invalidating the cache
+                      (doseq [p changed-keys]
+                        (when (contains? @cache-atom p)
+                          (swap! cache-atom dissoc p)))
+                      (swap! cache-atom assoc :__file-list__ file-list)
+                      (callback file-list))))))
   (list-files-with-prefix [this prefix callback]
     (list-files this
      (fn [files]

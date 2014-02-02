@@ -27,6 +27,12 @@
      atom)
   ([input] (map-to-atom (atom {}) input)))
 
+(defn pipe-without-close [from to]
+  (go-loop []
+           (when-let [v (<! from)]
+             (>! to v)
+             (recur))))
+
 (defn flatten
   ([in out]
      (go
@@ -44,6 +50,7 @@
         (close! out))
        out)))
 
+; deprecated
 (defn flatten-chans [input]
   (let [out (chan)]
     (go-loop [chan-val (<! input)]

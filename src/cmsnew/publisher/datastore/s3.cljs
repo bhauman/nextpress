@@ -17,17 +17,16 @@
   (str signing-host "/signput"))
 
 (defn image-signing-service-url [signing-host]
-  (str signing-host "/sign-image-post"))
+  (str signing-host "/sign-file-post"))
  
 (defn url-for-name-type [{:keys [signing-service] :as s3-store}
                          name mime-type]
   (str (signing-service-url signing-service) 
        "?name=" name "&mime=" mime-type))
 
-(defn url-for-image-upload [{:keys [signing-service] :as s3-store}
-                            filename uuid mime-type]
-  (str (image-signing-service-url signing-service)
-       "?filename=" filename "&uuid=" uuid "&type=" mime-type))
+(defn url-for-image-upload [s3-store path-name mime-type]
+  (str (image-signing-service-url (:signing-service s3-store))
+       "?name=" path-name "&type=" mime-type))
 
 (defn xhr-request
   ([url callback method content headers timeoutInterval]
@@ -41,13 +40,21 @@
 (defn unquote-etag [etag]
   (get (string/split etag #"\"") 1))
 
+;; switched to jquery because it provides the caching behavior I want
+;; by default
 (defn get-text [url callback]
-  (xhr-request url (fn [resp]
-                     (callback
-                      {:headers { :etag (unquote-etag (.getResponseHeader resp "ETag"))
-                                  :content-type (.getResponseHeader resp "Content-Type")
-                                  :version (.getResponseHeader resp "x-amz-version-id") }
-                       :body (.getResponseText resp)}))))
+  (.ajax
+   js/jQuery 
+   (clj->js
+    {:type "GET"
+     :cache false ; this appends _=timestamp to url
+     :url url
+     :success (fn [_ _ resp]
+                (callback
+                 {:headers { :etag (unquote-etag (.getResponseHeader resp "ETag"))
+                            :content-type (.getResponseHeader resp "Content-Type")
+                            :version (.getResponseHeader resp "x-amz-version-id") }
+                  :body (.-responseText resp)}))})))
 
 (defn get-version [url callback]
   (xhr-request url (fn [resp] (callback (.getResponseHeader resp "x-amz-version-id"))) "HEAD"))
@@ -70,12 +77,12 @@
                   (fn [res]
                     (upload-data (.-puturl res) data mime-type callback))))
 
-(defn get-signed-image-post [s3-store uuid filename mime-type callback]
+(defn get-signed-image-post [s3-store path-name filename mime-type callback]
   (.ajax js/jQuery
          (clj->js {:type "GET"
                    :crossDomain true
                    :xhrFields { :withCredentials true }
-                   :url (url-for-image-upload s3-store filename uuid mime-type)
+                   :url (url-for-image-upload s3-store path-name mime-type)
                    :success (fn [e] (callback (js->clj e :keywordize-keys true)))})))
 
 (defn make-form-data [file fields]
@@ -100,8 +107,8 @@
     (.open xhr "POST" url true)
     (.send xhr form-data)))
 
-(defn upload-image-file [s3-store uuid file callback fail-callback progress-callback]
-  (get-signed-image-post s3-store uuid (.-name file) (.-type file)
+(defn upload-image-file [s3-store path-name file callback fail-callback progress-callback]
+  (get-signed-image-post s3-store path-name (.-name file) (.-type file)
                          (fn [{:keys [url fields] :as res}]
                            (log (prn-str res))
                            (let [form-data (make-form-data file fields)

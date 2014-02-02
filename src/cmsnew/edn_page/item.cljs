@@ -1,8 +1,19 @@
 (ns cmsnew.edn-page.item
   (:require
-   [cljs.core.async :as async
-    :refer [put!]]
+   [cljs-uuid-utils :refer [make-random-uuid uuid-string]]
+   [cljs.core.async :as async :refer [put!]]
    [sablono.core :as sab :include-macros true]))
+
+(defn random-uuid []
+  (uuid-string (make-random-uuid)))
+
+(defn add-id? [{:keys [id] :as item}]
+  (if id item (assoc item :id (uuid-string (make-random-uuid)))))
+
+(defmulti new-item identity)
+
+(defmethod new-item :default [t]
+  (add-id? {:type t}))
 
 (defmulti deleted? #(:type %))
 

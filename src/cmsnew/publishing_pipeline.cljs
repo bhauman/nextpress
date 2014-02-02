@@ -47,6 +47,9 @@
                                             create-store]]
 
    [cmsnew.publisher.datastore.localstore :refer [LocalStore]]
+   [cmsnew.publisher.datastore.cached-store :refer [CachedStore]]
+   [cmsnew.publisher.datastore.local-store-map :refer [LocalStoreMap]]   
+   
    [cmsnew.publisher.datastore.s3-store :refer [S3tore]]
    
    [cmsnew.edn-page.rendering :refer [render-edn-page]]
@@ -109,15 +112,14 @@
   [[o-site site]]
   (let [out (chan)]
     (go
-     (let [config-data (<! (get-config (:site-url site)))]
-       (if-not (:config-file-data site)
-         (do
-           (logger site "Loading config file ...")
-           (put! out (assoc site
-                       :config-file-data
-                       config-data)))
-         (put! out site))
-       (close! out)))
+     (if-not (:config-file-data site)
+       (let [config-data (<! (get-config (:site-url site)))]
+         (logger site "Loading config file ...")
+         (put! out (assoc site
+                     :config-file-data
+                     config-data)))
+       (put! out site))
+     (close! out))
     out))
 
 (defn merge-config [[_ site]]
@@ -126,7 +128,11 @@
 
 (defn create-storage [[_ site]]
   (if-not (:store site)
-    (assoc site :store (create-store (:datastore site)))
+    (assoc site :store (create-store (:datastore site))
+           #_(CachedStore.
+            (atom {})
+            
+            ))
     site))
 
 (defn render-pipeline [system-chan]
@@ -174,8 +180,13 @@
   (let [in-chan (chan)]
     { :site-url url
       :log-chan (chan)
-      :config-file-data { :datastore { :type :local
-                                      :path-prefix "development" }}
+       
+      :config-file-data { :datastore #_{ :type :s3
+                                      :bucket "nextpress-demo"
+                                      :signing-service "http://localhost:4567"}
+                                     { :type :local
+                                       :path-prefix "dev" }
+                         }
       :pipeline-input in-chan 
       :pipeline-output (render-pipeline in-chan)}))
 

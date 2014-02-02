@@ -5,9 +5,9 @@
    [clojure.string :as string]
    [cljs.core.async :as async :refer [put!]]))
 
-(defn delete-button [event-chan]
+(defn delete-button [event-chan msg]
   [:button {:type "button"
-            :onClick #(put! event-chan [:form-delete])
+            :onClick #(put! event-chan [msg])
             :className "btn btn-danger form-delete pull-right"} "Delete"])
 
 (defn control-group [field errors & content]

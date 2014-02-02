@@ -26,7 +26,7 @@
   (reactm/owner-as
    owner
    (sab/html
-    (sab/form-to {:onSubmit (react/form-submit owner event-chan :form-submit [:description :partial])}
+    (sab/form-to {:onSubmit (react/form-submit owner event-chan :edit-item.form-submit [:description :partial])}
                  [:post (str "#image-item-" (:id item))]
                  [:p [:img.img-responsive {:src (:url item)}]]
                  (control-group :description errors
@@ -38,5 +38,5 @@
                  (select-alternate-partial item state :image)
                  (sab/submit-button {:className "btn btn-primary"} "Save")
                  (sab/reset-button {:className "btn btn-default"
-                                    :onClick #(put! event-chan [:form-cancel])} "Cancel")
-                 (delete-button event-chan)))))
+                                    :onClick #(put! event-chan [:edit-item.form-cancel])} "Cancel")
+                 (delete-button event-chan :edit-item.form-delete)))))

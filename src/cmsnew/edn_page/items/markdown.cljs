@@ -30,7 +30,7 @@
    owner
    (sab/html
     (sab/form-to
-     {:onSubmit (react/form-submit owner event-chan :form-submit [:content :partial])}
+     {:onSubmit (react/form-submit owner event-chan :edit-item.form-submit [:content :partial])}
      [:post (str "#textblock-item-" (:id item))]
      (control-group :content errors
                     [:textarea {:className "big-text-area"
@@ -40,5 +40,5 @@
      (select-alternate-partial item state :markdown)
      (sab/submit-button {:className "btn btn-primary"} "Save")
      (sab/reset-button {:className "btn btn-default"
-                        :onClick #(put! event-chan [:form-cancel])} "Cancel"))
+                        :onClick #(put! event-chan [:edit-item.form-cancel])} "Cancel"))
     )))

@@ -23,7 +23,8 @@
   (resource-path [this path]))
 
 (defn get-source-file [st path callback]
-  (-get-file st path (fn [f] (callback (->source-file st path f)))))
+  (-get-file st path (fn [f]
+                       (callback (->source-file st path f)))))
 
 (defn store-source-file! [st source-file callback]
   (-store! st

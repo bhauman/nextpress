@@ -87,7 +87,6 @@
                                            true))))
                       (tooltip-positions (rct/get-prop-val this :watching))
                       (map< (fn [[msg data]]
-                              (log this)
                               (condp = msg
                                 :tooltip-hidden (.setState this #js{ :hidden true
                                                                      :display-popover false}) 
@@ -122,7 +121,6 @@
                                                   false
                                                   (rct/get-state-val this :top))}))} "+"
                           (let [children (rct/get-children this)]
-                            (log children)
                             (if (and children
                                      (rct/get-state-val this :display-popover))
                               [:div.popover.fade.right.in {:style { :top "-24px" :left "24px" :display "block"}}

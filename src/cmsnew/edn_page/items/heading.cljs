@@ -1,8 +1,10 @@
 (ns cmsnew.edn-page.items.heading
   (:require
    [cmsnew.edn-page.item :refer [deleted?
+                                 add-id?
                                  render-item
                                  item-form
+                                 new-item
                                  render-editable-item] :as item]
    [cmsnew.ui.form-templates :as form :refer [control-group select-alternate-partial]]
    [cmsnew.publisher.site :as st]
@@ -12,6 +14,9 @@
    [clojure.string :as string]
    [jayq.util :refer [log]])
   (:require-macros [reactor.macros :as reactm] ))
+
+(defmethod new-item :heading [_]
+  (add-id? {:type :heading :size 2}))
 
 (defmethod deleted? :heading [{:keys [content deleted]}]
   (or deleted (string/blank? content)))
@@ -29,7 +34,7 @@
   (reactm/owner-as
    owner
    (sab/html
-    (sab/form-to {:onSubmit (react/form-submit owner event-chan :form-submit [:content :size :partial])}
+    (sab/form-to {:onSubmit (react/form-submit owner event-chan :edit-item.form-submit [:content :size :partial])}
                  [:post (str "#heading-itemer-" (:id item))]
                  (control-group :content errors
                                 (sab/text-field {:className "heading-input" :data-size (item :size)
@@ -42,7 +47,7 @@
                                 [:div.btn-group.heading-size
                                  (map (fn [x]
                                         [:button {:type "button"
-                                                  :onClick #(put! event-chan [:change-edited-item {:size x}])
+                                                  :onClick #(put! event-chan [:edit-item.change-edited-item {:size x}])
                                                   :className (str "heading-size-btn btn btn-default h" x
                                                                   (if (= (str x) (str (item :size))) " active" ""))
                                                   :data-size x} (str "H" x)]
@@ -50,4 +55,4 @@
                  (select-alternate-partial item state :heading)
                  (sab/submit-button {:className "btn btn-primary"} "Save")
                  (sab/reset-button {:className "btn btn-default"
-                                    :onClick #(put! event-chan [:form-cancel])} "Cancel")))))
+                                    :onClick #(put! event-chan [:edit-item.form-cancel])} "Cancel")))))

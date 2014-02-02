@@ -27,7 +27,7 @@
   (reactm/owner-as
    owner
    (sab/html
-    (sab/form-to {:onSubmit (react/form-submit owner event-chan :form-submit [:content :partial])}
+    (sab/form-to {:onSubmit (react/form-submit owner event-chan :edit-item.form-submit [:content :partial])}
                  [:post (str "#section-item-" (:id item))]
                  (control-group :content errors
                                 (sab/text-field {:className "form-control"
@@ -38,4 +38,4 @@
                  (select-alternate-partial item state :section)                 
                  (sab/submit-button {:className "btn btn-primary"} "Save")
                  (sab/reset-button {:className "btn btn-default"
-                                    :onClick #(put! event-chan [:form-cancel])} "Cancel")))))
+                                    :onClick #(put! event-chan [:edit-item.form-cancel])} "Cancel")))))

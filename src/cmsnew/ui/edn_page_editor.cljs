@@ -6,31 +6,37 @@
 
    [cmsnew.publisher.datastore.s3 :as store]
 
-   [cmsnew.publisher.datastore.core :refer [store-source]]
+   [cmsnew.publisher.datastore.core :refer [store-source
+                                            fetch-file]]
    
    [cmsnew.publisher.datastore.localstore :refer [LocalStore]]
    [cmsnew.publisher.datastore.s3-store :refer [S3tore]]
+
+   [cmsnew.publisher.plugins.core :refer [plugin<]]
    
-   
+   [cmsnew.publisher.source-file :as sf]
+   [cmsnew.publisher.paths :as paths]   
    [cmsnew.publishing-pipeline :as pub]
    [cmsnew.ui.templates :as templ]
+   
+   [cmsnew.publisher.util.core :refer [find-first]]
    [cmsnew.publisher.util.log-utils :refer [ld lp log-chan]]
-   [cmsnew.publisher.util.async-utils :as async-util]
-
+   [cmsnew.publisher.util.async-utils :as async-util :refer [pipe-without-close]]
+   
    ;; importing edn-items
-   [cmsnew.edn-page.item :refer [deleted?]]
+   [cmsnew.edn-page.item :refer [deleted? add-id? new-item random-uuid]]
    [cmsnew.edn-page.items.heading]
    [cmsnew.edn-page.items.markdown]
    [cmsnew.edn-page.items.section]
    [cmsnew.edn-page.items.image]   
-   
+
    [reactor.core :refer [react-render-loop]]
-   [cljs-uuid-utils :refer [make-random-uuid uuid-string]]
    [clojure.string :as string]
    [jayq.core :refer [$] :as jq]
    [jayq.util :refer [log]])
-  (:require-macros [cljs.core.async.macros :as m :refer [go alt! go-loop]]))
-
+  (:require-macros
+   [cljs.core.async.macros :as m :refer [go alt! go-loop]]
+   [cmsnew.publisher.util.macros :refer [chan->>]]))
 
 ;; page helpers
 
@@ -42,19 +48,9 @@
 (defn empty-page? [page]
   (zero? (count (get-page-items page))))
 
-(defn random-uuid []
-  (uuid-string (make-random-uuid)))
-
-(defn add-id? [{:keys [id] :as item}]
-  (if id item (assoc item :id (uuid-string (make-random-uuid)))))
-
-(defn new-item [type]
-  (add-id? {:type type}))
-
 (defn blank? [st]
   (or (nil? st)
       (not (.test #"\S" st))))
-
 
 (defn merge-data-item-into-page [page data-item]
   (let [items (get-page-items page)]
@@ -90,18 +86,34 @@
 
 ;; interaction controllers
 
-(defn upload-image-file [site uuid file]
+(defmulti upload-file #(type %))
+
+(defmethod upload-file S3tore [dstore uuid file]
   (let [out (chan)]
-    (store/upload-image-file (:s3-store site)
-                             uuid file
+    (store/upload-image-file dstore
+                             (str "uploaded_images/" uuid "-" (.-name file)) 
+                             file
                              (fn [file url]
-                               (put! out [:success {:uuid uuid :url url :file file}])
+                               (put! out [:upload-success {:uuid uuid :url url :file file}])
                                (close! out))
                              (fn [file url]
-                               (put! out [:failed  {:uuid uuid :url url :file file}])
+                               (put! out [:upload-failed  {:uuid uuid :url url :file file}])
                                (close! out))
                              (fn [percent]
-                               (put! out [:progress percent])))
+                               (put! out [:upload-progress {:percent percent :uuid uuid :file file}])))
+    out))
+
+;; for offline development purposes
+(defmethod upload-file LocalStore [dstore uuid file]
+  (let [out (chan)]
+    (let [reader (js/FileReader.)]
+      (set! (.-onload reader)
+            (fn [e]
+              (put! out [:upload-success
+                         {:uuid uuid
+                          :url (.. e -target -result)
+                          :file file}])))
+      (.readAsDataURL reader file))
     out))
 
 (defn new-image-item [uuid url file]
@@ -110,80 +122,6 @@
    :url  url
    :name (.-name file)
    :mime-type (.-type file)})
-
-(defn handle-add-image [state data position]
-  (log data)
-  (let [site (:site @state)
-        edn-page (:edn-page @state)
-        file (aget (.-files (.-target data)) 0)
-        file-upload-uuid (random-uuid)
-        upload-chan (upload-image-file site file-upload-uuid file)]
-    (log data)
-    (log file)
-    (go-loop []
-             (let [[msg _data] (<! upload-chan)]
-               (condp = msg
-                 :failed edn-page
-                 :success
-                 (let [new-page (insert-data-item-into-page edn-page position
-                                                            (new-image-item file-upload-uuid (:url _data) file))]
-                   (store-source-file-and-update site new-page)
-                   new-page)
-                 :progress (do (log _data) (recur))
-                 (recur))))))
-
-;; right now this never exits as there is no exit event
-
-(defn edit-item-new [state start-item-data]
-  (go
-   (swap! state assoc :editing-item start-item-data)
-   (log (prn-str start-item-data))
-   (loop [[msg new-data] (<! (:event-chan @state))
-          item-data start-item-data]
-     (ld [:yep msg new-data])
-     (condp = msg
-       :form-cancel false
-       :change-edited-item (let [new-item (merge item-data new-data)]
-                             (swap! state assoc :editing-item new-item)
-                             (recur (<! (:event-chan @state)) new-item))
-       :form-submit (merge item-data new-data)
-       :form-delete (merge item-data {:deleted true}) 
-       (recur (<! (:event-chan @state)) item-data)))))
-
-(defn handle-edit-page-item-new [state id]
-  (go
-   (let [item-data (first (filter #(= (:id %) id) (get-page-items (:edn-page @state))))
-         new-data-item (<! (edit-item-new state item-data))]
-     (if new-data-item
-       (let [new-page (merge-data-item-into-page (:edn-page @state) new-data-item)]
-         (store-source-file-and-update (:site @state) new-page)
-         new-page)
-       (:edn-page @state)))))
-
-(defn handle-add-item-new [state start-item position]
-  (go
-   (let [item-data (assoc start-item :insert-position position)
-         new-data-item (<! (edit-item-new state item-data))]
-     (if new-data-item
-       (let [fixed-data-item (dissoc new-data-item :insert-position)
-             new-page (insert-data-item-into-page (:edn-page @state) position fixed-data-item)]
-         (store-source-file-and-update (:site @state) new-page)
-         new-page)
-       (:edn-page @state)))))
-
-(defn handle-adding-item [page-state item-type position]
-  (condp = item-type
-    :heading
-    (handle-add-item-new page-state
-                             (add-id? {:type :heading :size 2}) position)
-    :markdown
-    (handle-add-item-new page-state
-                         (new-item :markdown) position)
-    nil (go (:edn-page page-state))
-    (if (keyword? item-type) ; handle all types genericly
-      (handle-add-item-new page-state
-                           (new-item item-type) position)
-      (go (:edn-page page-state)))))
 
 (defn add-error [subject key msg]
   (update-in subject [:errors key]
@@ -204,55 +142,149 @@
 (defn valid? [data]
   (zero? (count (:errors data))))
 
-(defn handle-edit-settings [page-state]
-  (let [{:keys [edn-page event-chan]} @page-state]
-    (swap! page-state assoc :editing-front-matter (get-in @page-state [:edn-page :front-matter]))
-    (go-loop []
-             (let [[msg data] (<! event-chan)]
-               (log (prn-str [msg data]))
-               (condp = msg
-                 :form-submit
-                 (let [validated (validate-front-matter data)]
-                   (if (valid? validated)
-                     (let [new-page (merge-front-matter-into-page edn-page validated)]
-                       (store-source-file-and-update (:site @page-state) new-page)
-                       new-page)
-                     (recur)))
-                 :form-cancel edn-page
-                 nil edn-page
-                 (recur))))))
+;; helpers
 
-(defn edit-edn-page-loop-new [page-state]
-  (let [start-edn-page (initial-item-to-empty-page (:edn-page @page-state))]
-    (swap! page-state assoc :edn-page start-edn-page)
-    (go-loop [edn-page start-edn-page
-              insert-position 0]
-             (let [[msg data] (<! (:event-chan @page-state))]
-               (log (prn-str [msg data]))
-               (log insert-position)
-               (condp = msg
-                 :edit-settings
-                 (let [new-page (<! (handle-edit-settings page-state))]
-                   (swap! page-state assoc :edn-page new-page :editing-front-matter false)
-                   (recur new-page insert-position))
-                 :edit-item
-                 (let [res-page (<! (handle-edit-page-item-new page-state (:id data)))
-                       new-page (initial-item-to-empty-page res-page)]
-                   (log "res PAGE")
-                   (ld res-page)
-                   (swap! page-state assoc :edn-page new-page :editing-item false)
-                   (recur new-page insert-position))
-                 :add-item
-                 (let [new-page (<! (handle-adding-item page-state (:type data) insert-position))]
-                   (swap! page-state assoc :edn-page new-page :editing-item false)
-                   (recur new-page insert-position))
-                 :image-selected
-                 (let [new-page (<! (handle-add-image page-state data insert-position))]
-                   (swap! page-state assoc :edn-page new-page)
-                   (recur new-page insert-position))                 
-                 :insert-position (recur edn-page data)
-                 nil true
-                 (recur edn-page insert-position))))))
+;; transforms
+
+;; editing items
+(defn edit-item [ps {:keys [id]}]
+  (when-let [item (find-first #(= (:id %) id)
+                            (get-in ps [:edn-page :front-matter :items]))]
+    (assoc ps :editing-item item)))
+
+(defn edit-item-form-cancel [ps data]
+  (dissoc ps :editing-item))
+
+;; helper
+(defn- splice-item-into-page
+  "this will add a new item or merge and existing item into a page"
+  [page item]
+  ;; should probably check to see if item exists in page first
+  (if-let [position (:insert-position item)]
+    (insert-data-item-into-page page position (dissoc item :insert-position))
+    (merge-data-item-into-page page item)))
+
+(defn edit-item-form-submit [ps data]
+  (let [item (merge (:editing-item ps) data)
+        new-page (splice-item-into-page (:edn-page ps) item)]
+    (store-source-file-and-update (:site ps) new-page)
+    (-> ps
+        (assoc :edn-page new-page)
+        (dissoc :editing-item))))
+
+(defn edit-item-form-delete [ps data]
+  (edit-item-form-submit ps {:deleted true}))
+
+(defn change-edited-item [ps data]
+  (assoc ps :editing-item
+         (merge (:editing-item ps) data)))
+
+;; adding items
+
+(defn insert-position [ps position]
+  (when position
+    (assoc ps :insert-position position)))
+
+; this hijacks the editing item process
+(defn add-item [ps data]
+  (let [item (new-item (:type data))
+        item (assoc item :insert-position (:insert-position ps))]
+    (assoc ps :editing-item item)))
+
+;; editing settings
+
+(defn edit-settings [ps _]
+  (assoc ps :editing-front-matter
+    (get-in ps [:edn-page :front-matter])))
+
+(defn edit-settings-form-cancel [ps _]
+  (dissoc ps :editing-front-matter))
+
+(defn edit-settings-form-submit [ps data]
+  (let [validated (validate-front-matter data)]
+    (if (valid? validated)
+      (let [new-page (merge-front-matter-into-page (:edn-page ps) validated)]
+        ;; should be store front matter
+        (store-source-file-and-update (:site ps) new-page) 
+        (-> ps
+            (assoc :edn-page new-page)
+            (dissoc :editing-front-matter))))))
+
+;; adding an image item
+
+(defn image-selected [ps data]
+  (log data)
+  (let [position (:insert-position ps)
+        file (aget (.-files (.-target data)) 0)
+        file-upload-uuid (random-uuid)
+        upload-chan (upload-file (get-in ps [:site :store]) file-upload-uuid file)]
+    (pipe-without-close (map<
+                         (fn [[msg data]]
+                           [(keyword (str "image." (name msg))) data])
+                         upload-chan) 
+                        (:event-chan ps))
+    (log data)
+    (log file)
+    (-> ps
+        (assoc  :file-uploading {  :insert-position position
+                                   :filename (.-name file )
+                                   :uuid file-upload-uuid
+                                   :file file
+                                   :progress 0 } )
+        (dissoc :image-insert-position))))
+
+(defn image-upload-failed [ps data]
+  (dissoc ps :file-uploading))
+
+(defn image-upload-progress [ps data]
+  (when (:file-uploading ps)
+    (assoc-in ps [:file-uploading :progress] (:percent data))))
+
+(defn image-upload-success [ps data]
+  (let [image-item (new-image-item (:uuid data) (:url data) (:file data))
+        new-page (insert-data-item-into-page
+                  (:edn-page ps)
+                  (get-in ps [:file-uploading :insert-position])
+                  image-item)]
+    (store-source-file-and-update (:site ps) new-page)
+    (-> ps
+        (assoc :edn-page new-page)
+        (dissoc :file-uploading))))
+
+(defn prepare-for-image-choice [ps _]
+  (assoc ps :image-insert-position (:insert-position ps)))
+
+;;; core of system
+
+(defn create-event-table [& events]
+  (into {} events))
+
+(defn handle-events [page-state event-table]
+  (go-loop []
+           (let [[msg data] (<! (:event-chan @page-state))]
+             (log (prn-str [msg data]))
+             (when msg
+               (when-let [f (msg event-table)]
+                 (let [nilsafe-f (fn [s d] ((fnil f s) s d))]
+                   (swap! page-state nilsafe-f data)))
+               (recur)))))
+
+(defn get-edn-page-for-path [page-state path]
+  (go
+   (sf/parse-front-matter
+    (:site page-state)
+    (<! (fetch-file (get-in page-state [:site :store])
+                    path)))))
+
+;; display data altering
+
+(defn add-layout-list [[_ n]]
+  (if (:editing-front-matter n)
+    (let [llist (map (juxt identity identity)
+                     (map (comp paths/remove-extention :name)
+                          (vals (get-in n [:site :layouts]))))]
+      (assoc n :layout-list llist))
+    n))
 
 (defn edit-page [site start-edn-page]
   (let [event-chan (chan)
@@ -261,15 +293,40 @@
                            :event-chan event-chan
                            :close-chan close-chan})
         target-node (.getElementById js/document "cmsnew")
-        state-change-chan (async-util/atom-chan page-state)
-        ]
-    (->> state-change-chan
-         (map< #(templ/edit-page (last %)))
-         (react-render-loop target-node))
-    (swap! page-state assoc :edn-page start-edn-page ) ;; initial render
+        state-change-chan (async-util/atom-chan page-state)]
+    
+    (chan->> state-change-chan
+             (plugin< add-layout-list)             
+             (map< #(templ/edit-page (last %)))
+             (react-render-loop target-node))
+    
     (go
-     (let [[val ch] (alts! [close-chan (edit-edn-page-loop-new page-state)])]
+     (let [edn-page (<! (get-edn-page-for-path @page-state (:path start-edn-page)))]
+       (swap! page-state assoc :edn-page edn-page )
+       (<! (handle-events
+            page-state
+            (create-event-table
+             [:edit-settings              edit-settings]
+             [:edit-settings.form-cancel  edit-settings-form-cancel]
+             [:edit-settings.form-submit  edit-settings-form-submit]
+             [:edit-item                  edit-item]
+             [:edit-item.form-cancel      edit-item-form-cancel]
+             [:edit-item.change-edited-item     change-edited-item]
+             [:edit-item.form-submit      edit-item-form-submit]
+             [:edit-item.form-delete      edit-item-form-delete]             
+             [:insert-position            insert-position]
+             [:add-item                   add-item]
+             [:image-selected             image-selected]
+             [:image-chooser-opened       prepare-for-image-choice]
+             [:image.upload-success       image-upload-success]
+             [:image.upload-failed        image-upload-failed]
+             [:image.upload-progress      image-upload-progress]             
+             )
+            ))
+       ;; initial render
+       #_(let [[val ch] (alts! [close-chan (edit-edn-page-loop-new page-state)])]
            (close! event-chan)
            (close! state-change-chan)
            (close! close-chan)
-           (:edn-page @page-state)))))
+           (:edn-page @page-state))))))
+

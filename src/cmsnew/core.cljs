@@ -23,7 +23,7 @@
 
 (enable-console-print!)
 
-#_(go
+(go
  (let [] #_[url-config (<! (select-site-loop))
             signing-service (get-in url-config [:config :signing-service])
             site-url (:site-url url-config)

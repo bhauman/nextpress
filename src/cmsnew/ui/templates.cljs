@@ -11,8 +11,8 @@
    [cmsnew.publisher.transformer.markdown :refer [markdown-to-html]]
    [cmsnew.publisher.item-templates :refer [item-list item-container]]
    [cmsnew.ui.form-templates :as form :refer [control-group]]
-   
-   [cmsnew.publisher.site :as st]
+
+    [cmsnew.publisher.site :as st]
 
    ;; importing edn-items
    [cmsnew.edn-page.item :refer [render-editable-item item-form]]
@@ -24,7 +24,9 @@
    [cmsnew.publisher.util.core :refer [insert-at]]
    [jayq.core :as jq :refer [$]]
    [jayq.util :refer [log]])
-  (:require-macros [reactor.macros :as reactm] ))
+  (:require-macros
+   [reactor.macros :as reactm]
+   [cljs.core.async.macros :refer [go]]))
 
 ;; helpers
 
@@ -70,12 +72,11 @@
                                        page-data-inserted
                                        (repeat state))))))
 
-(defn edit-front-matter-form [{:keys [edn-page event-chan editing-front-matter site] :as state}]
-  (log editing-front-matter)
+(defn edit-front-matter-form [{:keys [event-chan editing-front-matter layout-list site] :as state}]
   (reactm/owner-as
    owner
    (sab/html
-    (form-to {:onSubmit (react/form-submit owner event-chan :form-submit [:title :layout :published])}
+    (form-to {:onSubmit (react/form-submit owner event-chan :edit-settings.form-submit [:title :layout :published])}
              [:post (str "#pasting-front-matter")]
              [:div.form-group
               [:label "Title"]
@@ -94,7 +95,7 @@
                                :className "form-control"                            
                                :defaultValue (editing-front-matter :layout)}
                               :layout
-                              (map (juxt identity identity) (st/template-names site))
+                              layout-list
                               ))]
              [:div.checkbox
               [:label
@@ -105,8 +106,31 @@
                "Published"]]
              (submit-button {:className "btn btn-primary"} "Save")
              (reset-button {:className "btn btn-default"
-                            :onClick #(put! event-chan [:form-cancel])} "Cancel")))))
+                            :onClick #(put! event-chan [:edit-settings.form-cancel])} "Cancel")))))
 
+(defn self-reseting-file-input
+  "This is a self toggling component. It rerenders a
+   fresh file input after a file has been chosen.
+   This is required to reset the filechooser so that it is ready
+   for another file choice.
+   Why? beacuse you are not allowed to set the input value of an
+   input[type=file]"
+  [state options]
+  (reactm/owner-as
+   owner
+   (sab/html
+    (if-not (react/get-state-val owner :removed)
+      (let [on-change (:onChange options)
+            new-on-change (fn [x]
+                            (on-change x)
+                            (go
+                             (<! (timeout 100))
+                             (react/set-state owner {:removed true})
+                             (<! (timeout 1000))
+                             (react/set-state owner {:removed false})))]
+        [:input
+         (assoc options :type "file" :onChange new-on-change)])
+      [:span.resetting]))))
 
 (defn edit-page [{:keys [edn-page] :as state}]
   (sab/html
@@ -143,14 +167,16 @@
                                        :onClick #(put! (:event-chan state) [:add-item {:type :section}])
                                        :className "btn btn-default add-section-item"} "Section"]
                              [:button {:type "button"
-                                       :onClick (fn [_] (.click ($ "input.image-upload")))
+                                       :onClick (fn [_]
+                                                  (put! (:event-chan state) [:image-chooser-opened])
+                                                  (.click ($ "input.image-upload")))
                                        :className "btn btn-default add-image-item"} "Image"]]))
       [:span])
-    [:div.hidden {:id "image-upload"}
-     [:input.image-upload {:type "file"
-                           ;; this isn't working, need to ask why
-                           :onChange (fn [x]
-                                       (let [event (.-nativeEvent x)]
-                                         (put! (:event-chan state) [:image-selected event])))
-                           :name "image-upload-file" }]]
+    [:div.hidden
+     (self-reseting-file-input state
+                               {:className "image-upload"
+                                :onChange (fn [x]
+                                            (let [event (.-nativeEvent x)]
+                                              (put! (:event-chan state) [:image-selected event])))
+                                :name "image-upload-file" })]
     ]))

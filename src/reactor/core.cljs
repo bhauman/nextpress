@@ -46,6 +46,9 @@
                    { :__html
                      raw-html-str }})))
 
+(defn set-state [owner new-state-map]
+  (.setState owner (clj->js new-state-map)))
+
 (defn get-state-val [owner state-key]
   (if-let [state (.-state owner)]
     (aget state (name state-key))))
