@@ -154,7 +154,7 @@
        (render-edn-page state))]
     (if (and (not (:editing-item state)) (not (:editing-front-matter state)))
       (tooltip/Tooltipper. #js{ :watching ".edit-items-list"
-                                :onPositionChange (fn [pos] (put! (:event-chan state) [:insert-position pos])) }
+                                :onPositionSelect (fn [pos] (put! (:event-chan state) [:insert-position pos])) }
                            (sab/html
                             [:div.btn-group {:style {:width "271px" }}
                              [:button {:type "button"
@@ -168,7 +168,6 @@
                                        :className "btn btn-default add-section-item"} "Section"]
                              [:button {:type "button"
                                        :onClick (fn [_]
-                                                  (put! (:event-chan state) [:image-chooser-opened])
                                                   (.click ($ "input.image-upload")))
                                        :className "btn btn-default add-image-item"} "Image"]]))
       [:span])

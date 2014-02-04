@@ -15,6 +15,8 @@
   
   :plugins [[lein-cljsbuild "1.0.1"]]
 
+  :source-paths ["src" "src/cmsnew" "src/reactor"]
+
   :profiles {:dev {:resource-paths ["dev"]
                    :plugins [[com.cemerick/austin "0.1.3"]]}}
   :cljsbuild {
@@ -30,3 +32,4 @@
                         :compiler {:output-to "resources/public/js/compiled/pigrep.js"
                                    :optimizations :simple
                                    :pretty-print true}}]})
+

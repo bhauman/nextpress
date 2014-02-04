@@ -28,7 +28,12 @@
    [cmsnew.edn-page.items.heading]
    [cmsnew.edn-page.items.markdown]
    [cmsnew.edn-page.items.section]
-   [cmsnew.edn-page.items.image]   
+   [cmsnew.edn-page.items.image]
+
+   ;; next release of Core.async
+   #_[cljs.core.async.impl.protocols :refer [Channel closed?]]
+   #_[cljs.core.async.impl.channels]
+   
 
    [reactor.core :refer [react-render-loop]]
    [clojure.string :as string]
@@ -37,6 +42,10 @@
   (:require-macros
    [cljs.core.async.macros :as m :refer [go alt! go-loop]]
    [cmsnew.publisher.util.macros :refer [chan->>]]))
+
+
+(defn effect [x]
+  (with-meta x {:effect true}))
 
 ;; page helpers
 
@@ -47,10 +56,6 @@
 
 (defn empty-page? [page]
   (zero? (count (get-page-items page))))
-
-(defn blank? [st]
-  (or (nil? st)
-      (not (.test #"\S" st))))
 
 (defn merge-data-item-into-page [page data-item]
   (let [items (get-page-items page)]
@@ -112,7 +117,8 @@
               (put! out [:upload-success
                          {:uuid uuid
                           :url (.. e -target -result)
-                          :file file}])))
+                          :file file}])
+              (close! out)))
       (.readAsDataURL reader file))
     out))
 
@@ -150,8 +156,9 @@
 (defn edit-item [ps {:keys [id]}]
   (when-let [item (find-first #(= (:id %) id)
                             (get-in ps [:edn-page :front-matter :items]))]
-    (assoc ps :editing-item item)))
-
+    (-> ps
+        (assoc :editing-item item))))
+ 
 (defn edit-item-form-cancel [ps data]
   (dissoc ps :editing-item))
 
@@ -167,12 +174,13 @@
 (defn edit-item-form-submit [ps data]
   (let [item (merge (:editing-item ps) data)
         new-page (splice-item-into-page (:edn-page ps) item)]
-    (store-source-file-and-update (:site ps) new-page)
     (-> ps
-        (assoc :edn-page new-page)
+        (assoc
+            :effects [[:store-page {:edn-page new-page}]]
+            :edn-page new-page)
         (dissoc :editing-item))))
 
-(defn edit-item-form-delete [ps data]
+(defn edit-item-form-delete [ps _]
   (edit-item-form-submit ps {:deleted true}))
 
 (defn change-edited-item [ps data]
@@ -204,34 +212,26 @@
   (let [validated (validate-front-matter data)]
     (if (valid? validated)
       (let [new-page (merge-front-matter-into-page (:edn-page ps) validated)]
-        ;; should be store front matter
-        (store-source-file-and-update (:site ps) new-page) 
         (-> ps
-            (assoc :edn-page new-page)
+            (assoc
+                :effects [[:store-page {:edn-page new-page}]]
+                :edn-page new-page)
             (dissoc :editing-front-matter))))))
 
 ;; adding an image item
 
 (defn image-selected [ps data]
-  (log data)
   (let [position (:insert-position ps)
         file (aget (.-files (.-target data)) 0)
-        file-upload-uuid (random-uuid)
-        upload-chan (upload-file (get-in ps [:site :store]) file-upload-uuid file)]
-    (pipe-without-close (map<
-                         (fn [[msg data]]
-                           [(keyword (str "image." (name msg))) data])
-                         upload-chan) 
-                        (:event-chan ps))
-    (log data)
-    (log file)
+        file-upload-uuid (random-uuid)]
     (-> ps
-        (assoc  :file-uploading {  :insert-position position
-                                   :filename (.-name file )
-                                   :uuid file-upload-uuid
-                                   :file file
-                                   :progress 0 } )
-        (dissoc :image-insert-position))))
+        (assoc :effects [[:upload-image-file! {:file-upload-uuid file-upload-uuid
+                                               :file file}]]
+               :file-uploading { :insert-position position
+                                 :filename (.-name file )
+                                 :uuid file-upload-uuid
+                                 :file file
+                                 :progress 0 }))))
 
 (defn image-upload-failed [ps data]
   (dissoc ps :file-uploading))
@@ -246,13 +246,32 @@
                   (:edn-page ps)
                   (get-in ps [:file-uploading :insert-position])
                   image-item)]
-    (store-source-file-and-update (:site ps) new-page)
     (-> ps
-        (assoc :edn-page new-page)
+        (assoc
+            :effects [[:store-page {:edn-page new-page}]]
+            :edn-page new-page)
         (dissoc :file-uploading))))
 
-(defn prepare-for-image-choice [ps _]
-  (assoc ps :image-insert-position (:insert-position ps)))
+;; effects
+
+(def store-page
+  (effect
+   (fn [ps-atom data]
+     (when-let [edn-page (:edn-page data)]
+       (store-source-file-and-update (:site @ps-atom) edn-page)))))
+
+(def upload-image-file!
+  (effect
+   (fn [ps-atom data]
+     (let [ps @ps-atom
+           upload-chan (upload-file (get-in ps [:site :store])
+                                    (:file-upload-uuid data)
+                                    (:file data))]
+       (pipe-without-close (map<
+                            (fn [[msg d]]
+                              [(keyword (str "image." (name msg))) d])
+                            upload-chan) 
+                           (:event-chan ps))))))
 
 ;;; core of system
 
@@ -260,14 +279,36 @@
   (into {} events))
 
 (defn handle-events [page-state event-table]
-  (go-loop []
-           (let [[msg data] (<! (:event-chan @page-state))]
-             (log (prn-str [msg data]))
-             (when msg
-               (when-let [f (msg event-table)]
-                 (let [nilsafe-f (fn [s d] ((fnil f s) s d))]
-                   (swap! page-state nilsafe-f data)))
-               (recur)))))
+  (let [nilsafe-f
+        (fn [f s d] ((fnil f s) s d))
+        pullout-ef
+        (fn [effects-chan f s d]
+          (let [res (nilsafe-f f s d)]
+            (if-let [effects (:effects res)]
+              (do
+                ; next release of core.async
+                #_(when-not (closed? effects-chan))
+                (put! effects-chan effects)
+                (close! effects-chan)
+                (dissoc res :effects))
+              (do
+                (close! effects-chan)
+                res))))]
+    (go-loop []
+             (let [[msg data] (<! (:event-chan @page-state))]
+               (log (prn-str [msg data]))
+               (when msg
+                 (when-let [f (msg event-table)]
+                   (if (:effect (meta f))
+                     (f page-state data)
+                     (let [effects-chan (chan)
+                           pullout-effects (partial pullout-ef effects-chan f)]
+                       (swap! page-state pullout-effects data)
+                       (when-let [first-effects (<! effects-chan)]
+                         (log (prn-str first-effects))
+                         (doseq [ef first-effects]
+                           (put! (:event-chan @page-state) ef))))))
+                 (recur))))))
 
 (defn get-edn-page-for-path [page-state path]
   (go
@@ -317,12 +358,16 @@
              [:insert-position            insert-position]
              [:add-item                   add-item]
              [:image-selected             image-selected]
-             [:image-chooser-opened       prepare-for-image-choice]
              [:image.upload-success       image-upload-success]
              [:image.upload-failed        image-upload-failed]
-             [:image.upload-progress      image-upload-progress]             
+             [:image.upload-progress      image-upload-progress]
+
+             ;; effects
+             [:store-page store-page]
+             [:upload-image-file! upload-image-file!]
              )
             ))
+       
        ;; initial render
        #_(let [[val ch] (alts! [close-chan (edit-edn-page-loop-new page-state)])]
            (close! event-chan)

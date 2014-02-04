@@ -16,7 +16,7 @@
   (update-in col key (fn [c] (map f c))))
 
 (defn starts-with? [s prefix]
-  (zero? (.indexOf s prefix)))
+  (when s (zero? (.indexOf s prefix))))
 
 (defn changed-map-keys [[old-map new-map :as maps]]
   (let [key-list (set (apply concat (map keys maps)))]

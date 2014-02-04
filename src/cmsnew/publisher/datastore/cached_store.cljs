@@ -13,8 +13,7 @@
                                             -store-response-success?
                                             ->source-file
                                             -get-file
-                                            ]
-    ]
+                                            ]]
    [cmsnew.publisher.datastore.localstore]
    [cmsnew.publisher.datastore.local-store-map :refer [LocalStoreMap]]
    [cmsnew.publisher.util.core :refer [starts-with? changed-map-keys]]

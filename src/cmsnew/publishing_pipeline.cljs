@@ -37,6 +37,8 @@
                                           ]]
 
    [cmsnew.publisher.plugins.core :refer [plugin<]]
+
+   [cmsnew.publisher.paths :as paths]   
    
    [cmsnew.publisher.plugins.source-file-renderer :refer [source-file-renderer]]
 
@@ -213,7 +215,9 @@
         loc (create-store { :type :local
                             :path-prefix "dev"})]
     (go
-     (let [start-paths (mapv :path (<! (source-file-list s3)))]
+     (let [start-paths
+           (filter paths/good-file-path?
+                   (mapv :path (<! (source-file-list s3))))]
        (loop [paths start-paths]
          (let [p (first paths)]
            (if p

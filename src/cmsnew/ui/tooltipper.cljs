@@ -70,6 +70,7 @@
     (fn [] #js{ :mousePositionChan (chan (sliding-buffer 1))
                :top 0
                :left 0
+               :pos 0
                :hidden true
                :display-popover false})
     "componentDidMount"
@@ -87,13 +88,12 @@
                                            true))))
                       (tooltip-positions (rct/get-prop-val this :watching))
                       (map< (fn [[msg data]]
-                              (condp = msg
+                              (condp = msg                                
                                 :tooltip-hidden (.setState this #js{ :hidden true
                                                                      :display-popover false}) 
-                                :tooltip-position (let [[x y pos] data
-                                                        callback (rct/get-prop-val this :onPositionChange)]
-                                                    (if callback (callback pos))
+                                :tooltip-position (let [[x y pos] data]
                                                     (.setState this #js {:hidden false
+                                                                         :pos pos
                                                                          :display-popover false
                                                                          :top y
                                                                          :left x})))
@@ -114,12 +114,16 @@
                                     :opacity (if (rct/get-state-val this :hidden) 0.0 1.0)
                                     :top (str (rct/get-state-val this :top) "px")
                                     :left (str (rct/get-state-val this :left) "px")}
-                           :onClick (fn [] (.setState
-                                           this
-                                           #js{ :display-popover
-                                                (if (rct/get-state-val this :display-popover)
-                                                  false
-                                                  (rct/get-state-val this :top))}))} "+"
+                           :onClick (fn []
+                                      (.setState
+                                       this
+                                       #js{ :display-popover
+                                           (if (rct/get-state-val this :display-popover)
+                                             false
+                                             (rct/get-state-val this :top))})
+                                      (when-let [callback (rct/get-prop-val this :onPositionSelect)]
+                                        (callback (rct/get-state-val this :pos)))
+                                      )} "+"
                           (let [children (rct/get-children this)]
                             (if (and children
                                      (rct/get-state-val this :display-popover))
