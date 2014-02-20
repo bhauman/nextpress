@@ -51,8 +51,10 @@
    [cmsnew.publisher.datastore.localstore :refer [LocalStore]]
    [cmsnew.publisher.datastore.cached-store :refer [CachedStore]]
    [cmsnew.publisher.datastore.local-store-map :refer [LocalStoreMap]]   
-   
-   [cmsnew.publisher.datastore.s3-store :refer [S3tore]]
+
+   [cmsnew.publisher.datastore.githubber :as github]
+   [cmsnew.publisher.datastore.s3-store]
+   [cmsnew.publisher.datastore.github-store]   
    
    [cmsnew.edn-page.rendering :refer [render-edn-page]]
    [cmsnew.edn-page.plugins :refer [page-sections]]
@@ -156,7 +158,7 @@
            (plugin< (register-page-renderer "text/html" underscore-template-renderer))
            (plugin< (register-template-helper :getPage get-page-helper))
            (plugin< (register-template-helper :includePage include-page-helper))
-           (plugin< (register-template-helper :renderPartial render-partial-helper))           
+           (plugin< (register-template-helper :renderPartial render-partial-helper))    
            (plugin< get-source-file-list)
            (plugin< changed-source-files)
            (plugin< fetch-changed-source-files)
@@ -184,10 +186,15 @@
       :log-chan (chan)
        
       :config-file-data { :datastore #_{ :type :s3
-                                      :bucket "nextpress-demo"
-                                      :signing-service "http://localhost:4567"}
+                                         :bucket "nextpress-demo"
+                                        :signing-service "http://localhost:4567"}
+                                     #_{ :type :github
+                                         :owner "bhauman"
+                                         :repo "test-website"
+                                         :access-token (github/get-access-token) }
                                      { :type :local
-                                       :path-prefix "dev" }
+                                        :path-prefix "dev" }
+               
                          }
       :pipeline-input in-chan 
       :pipeline-output (render-pipeline in-chan)}))
@@ -202,8 +209,7 @@
      :pipeline-input pipeline-input
      :pipeline-output pipeline-output)))
 
-
-#_(let [system (create-site-for-url "http://nextpress-demo.s3-website-us-east-1.amazonaws.com")]
+#_(let [system (create-site-for-url "http://rigsomelight.com/test-website")]
   (go
    (log (clj->js (<! (publish-site system))))))
 
@@ -212,8 +218,10 @@
   (let [s3 (create-store { :type :s3
                            :bucket "nextpress-demo"
                            :signing-service "http://localhost:4567"})
-        loc (create-store { :type :local
-                            :path-prefix "dev"})]
+        loc (create-store { :type :github
+                            :owner "bhauman"
+                            :repo "test-website"
+                            :access-token (github/get-access-token)})]
     (go
      (let [start-paths
            (filter paths/good-file-path?

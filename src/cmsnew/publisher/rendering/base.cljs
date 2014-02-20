@@ -16,6 +16,8 @@
 
 (defn render-raw-page-without-context [site source-file]
   (let [renderer (renderer-for-source-file site source-file)]
+    (.log js/console (clj->js source-file))
+    (.log js/console "finding renderer")
     (renderer site source-file (:template-env site))))
 
 ;; so far this is the worst refactored of the bunch
