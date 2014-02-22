@@ -1,67 +1,123 @@
 (ns frontier.core
   (:require
    [cljs.core.async :as async
-    :refer [<! >! chan close! sliding-buffer put! take! alts! timeout onto-chan map< to-chan filter<]]
-   [frontier.system.core :refer [system system-with-initial-inputs component-group]]
-   [frontier.system.example-components :refer [ExampleCounter
-                                               ExampleTodos]]
-   [frontier.system.meta-components :refer [managed-system
-                                            render-history-controls]]   
-   [reactor.core :refer [render-to raw]]
-   [sablono.core :as sab :include-macros true]  
-   [jayq.core :refer [$ html]]
-   [jayq.util :refer [log]])
+    :refer [chan put! map<]])
   (:require-macros
-   [cljs.core.async.macros :as m :refer [go alt! go-loop]]
-   [cmsnew.publisher.util.macros :refer [chan->>]])  
-  )
+   [cljs.core.async.macros :as m :refer [go-loop]]))
 
-(defn create-test-divs [parent-sel count]
-  (mapv
-   (fn [x]
-     (.append ($ parent-sel) (str "<div id='test" x "'></div>" )))
-   (range count)))
+(defn- dev-null [in]
+  (go-loop [v (<! in)]
+           (if (nil? v) :closed (recur (<! in)))))
 
+(defprotocol iPluginInit
+  (-initialize [_ system event-chan]))
 
-(defn render-input-message-links [msgs event-chan]
-  [:ul
-   (map (fn [x] [:li [:a
-                     { :onClick (fn [] (put! event-chan x)) }
-                     (prn-str x)]])
-        msgs)])
+(defprotocol iTransform
+  (-transform [_ msg system]))
 
-(defn json-renderer [target-id]
-  (let [target-node (.getElementById js/document target-id)]
-    (fn [cs event-chan hist-state hist-chan]
-      (let [state (or (:render-state hist-state) cs)]
-        (render-to (sab/html
-                    [:div
-                     (raw (.render_json js/JSONRenderer (clj->js (dissoc state :__msg))))
-                     (render-input-message-links
-                      [[:create-todo {:content "hello"}]
-                       [:create-todo {:content "goodbye"}]
-                       [:create-todo {:content "heller"}]]
-                      event-chan)
-                   (render-history-controls hist-state hist-chan)])
-                   target-node
-                   identity)))))
+(defprotocol iEffect
+  (-effect [_ msg system event-chan effect-chan]))
 
-(create-test-divs "#cmsnew" 5)
+(defprotocol iInputFilter
+  (-filter-input [_ msg system]))
 
-#_(system-with-initial-inputs {}
-        (component-group
-         (ExampleCounter.)
-         (ExampleTodos.))
-        (json-renderer "test0")
-        [[:create-todo {:content "hello"}]
-         [:create-todo {:content "goodbye"}]
-         [:create-todo {:content "heller"}]])
+(defprotocol iDerive
+  (-derive [_ system]))
 
-(managed-system {}
-        (component-group
-         (ExampleCounter.)
-         (ExampleTodos.))
-        (json-renderer "test0")
-        [[:create-todo {:content "hello"}]
-         [:create-todo {:content "goodbye"}]
-         [:create-todo {:content "heller"}]])
+(defn add-effects [system & args]
+  (update-in system [:__effects]
+             (fn [effects]
+               (concat effects args))))
+
+(defn component-group [& components]
+  (let [initializers    (filter #(satisfies? iPluginInit %) components)
+        transforms      (filter #(satisfies? iTransform %) components)
+        effects         (filter #(satisfies? iEffect %) components)
+        input-filters   (filter #(satisfies? iInputFilter %) components)
+        derivatives     (filter #(satisfies? iDerive %) components)
+        ifilter (apply comp (mapv
+                             (fn [pl]
+                               (let [func (partial -filter-input pl)]
+                                 (fn [[msg system]]
+                                   [(func msg system) system])))
+                             (reverse input-filters)))
+        itrans (apply comp (mapv
+                            (fn [pl]
+                              (let [func (partial -transform pl)]
+                                (fn [[msg system]]
+                                  [msg (func msg system)])))
+                            (reverse transforms)))
+        ideriv (apply comp (mapv
+                            (fn [pl]
+                              (partial -derive pl))
+                            (reverse derivatives)))        
+        ieffects (fn [msg system event-chan effect-chan]
+                   (doseq [pl (reverse effects)]
+                     (-effect pl msg system event-chan effect-chan)))]
+    (reify
+      iPluginInit
+      (-initialize [_ system event-chan]
+        (doseq [pl initializers]
+          (-initialize pl system event-chan)))
+      iTransform
+      (-transform [_ msg system]
+        (last (itrans [msg system])))
+      iEffect
+      (-effect [_ msg system event-chan effect-chan]
+        (ieffects msg system event-chan effect-chan))
+      iInputFilter
+      (-filter-input [_ msg system]
+        (first (ifilter [msg system])))
+      iDerive
+      (-derive [_ system]
+        (ideriv system)))))
+
+(defn trans-helper* [comp effect-handler sys msg]
+  (if-let [new-sys (-transform comp msg sys)]
+    (do
+      (effect-handler (:__effects new-sys))
+      (-> new-sys
+          (assoc :__msg msg)
+          (dissoc :__effects)))
+    sys))
+
+(defn system [initial-state
+              comp
+              state-callback]
+  (let [event-chan (chan)
+        effect-chan (chan)
+        state (atom initial-state)
+        trans-without-effect (partial trans-helper* comp identity)
+        transformer (partial trans-helper* comp #(doseq [ef %]
+                                                   (put! effect-chan ef)))]
+    
+    (add-watch state :renderer (fn [_ _ _ n]
+                                 (state-callback (-derive comp n) event-chan)))
+    
+    (-initialize comp initial-state event-chan)
+
+    (dev-null
+     (map< (fn [msg]
+             (-effect comp msg @state event-chan effect-chan) true)
+           effect-chan))
+    
+    (dev-null
+     (map< (fn [msg]
+             (let [new-msg (-filter-input comp msg @state)]
+               (swap! state transformer new-msg)))
+           event-chan))
+    
+    { :state state
+      :event-chan event-chan
+      :effect-chan effect-chan
+      :component comp }))
+
+(defn system-with-initial-inputs [initial-state
+                                  comp
+                                  state-callback
+                                  initial-inputs]
+  (let [system (system initial-state comp state-callback)
+        trans (partial trans-helper* comp identity)]
+    (doseq [msg initial-inputs]
+      (swap! (:state system) trans msg))
+    system))

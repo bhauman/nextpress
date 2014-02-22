@@ -5,6 +5,7 @@ goog.addDependency("../clojure/string.js", ['clojure.string'], ['cljs.core', 'go
 goog.addDependency("../sablono/util.js", ['sablono.util'], ['cljs.core', 'clojure.string', 'goog.Uri']);
 goog.addDependency("../sablono/render.js", ['sablono.render'], ['cljs.core', 'clojure.walk', 'clojure.string', 'sablono.util']);
 goog.addDependency("../sablono/core.js", ['sablono.core'], ['cljs.core', 'clojure.walk', 'clojure.string', 'sablono.util', 'sablono.render']);
+goog.addDependency("../frontier/util/edn_renderer.js", ['frontier.util.edn_renderer'], ['sablono.core', 'cljs.core']);
 goog.addDependency("../jayq/util.js", ['jayq.util'], ['cljs.core']);
 goog.addDependency("../cljs/core/async/impl/protocols.js", ['cljs.core.async.impl.protocols'], ['cljs.core']);
 goog.addDependency("../cljs/core/async/impl/ioc_helpers.js", ['cljs.core.async.impl.ioc_helpers'], ['cljs.core', 'cljs.core.async.impl.protocols']);
@@ -13,16 +14,14 @@ goog.addDependency("../cljs/core/async/impl/dispatch.js", ['cljs.core.async.impl
 goog.addDependency("../cljs/core/async/impl/channels.js", ['cljs.core.async.impl.channels'], ['cljs.core.async.impl.buffers', 'cljs.core', 'cljs.core.async.impl.dispatch', 'cljs.core.async.impl.protocols']);
 goog.addDependency("../cljs/core/async/impl/timers.js", ['cljs.core.async.impl.timers'], ['cljs.core', 'cljs.core.async.impl.channels', 'cljs.core.async.impl.dispatch', 'cljs.core.async.impl.protocols']);
 goog.addDependency("../cljs/core/async.js", ['cljs.core.async'], ['cljs.core.async.impl.ioc_helpers', 'cljs.core.async.impl.buffers', 'cljs.core', 'cljs.core.async.impl.channels', 'cljs.core.async.impl.dispatch', 'cljs.core.async.impl.protocols', 'cljs.core.async.impl.timers']);
-goog.addDependency("../frontier/system/core.js", ['frontier.system.core'], ['cljs.core', 'jayq.util', 'cljs.core.async']);
-goog.addDependency("../frontier/system/meta_components.js", ['frontier.system.meta_components'], ['sablono.core', 'cljs.core', 'jayq.util', 'cljs.core.async', 'frontier.system.core']);
 goog.addDependency("../cljs/reader.js", ['cljs.reader'], ['cljs.core', 'goog.string']);
 goog.addDependency("../jayq/core.js", ['jayq.core'], ['cljs.core', 'clojure.string', 'cljs.reader']);
 goog.addDependency("../cmsnew/authorization/persona.js", ['cmsnew.authorization.persona'], ['cljs.core', 'jayq.util', 'cljs.core.async', 'jayq.core']);
-goog.addDependency("../reactor/core.js", ['reactor.core'], ['cljs.core', 'cljs.core.async']);
-goog.addDependency("../frontier/system/example_components.js", ['frontier.system.example_components'], ['cljs.core', 'jayq.util', 'cljs.core.async', 'frontier.system.core']);
-goog.addDependency("../frontier/core.js", ['frontier.core'], ['frontier.system.meta_components', 'sablono.core', 'cljs.core', 'reactor.core', 'jayq.util', 'frontier.system.example_components', 'cljs.core.async', 'frontier.system.core', 'jayq.core']);
+goog.addDependency("../frontier/core.js", ['frontier.core'], ['cljs.core', 'cljs.core.async']);
 goog.addDependency("../cljs_uuid_utils.js", ['cljs_uuid_utils'], ['cljs.core', 'goog.string.StringBuffer']);
 goog.addDependency("../cmsnew/publisher/datastore/s3.js", ['cmsnew.publisher.datastore.s3'], ['cljs.core', 'clojure.string', 'goog.dom.xml', 'cljs_uuid_utils', 'jayq.util', 'goog.net.XhrIo', 'jayq.core']);
+goog.addDependency("../reactor/core.js", ['reactor.core'], ['cljs.core', 'cljs.core.async']);
+goog.addDependency("../frontier/dev_tools.js", ['frontier.dev_tools'], ['sablono.core', 'cljs.core', 'frontier.core', 'reactor.core', 'jayq.util', 'frontier.util.edn_renderer', 'cljs.core.async']);
 goog.addDependency("../cmsnew/publisher/paths.js", ['cmsnew.publisher.paths'], ['cljs.core', 'clojure.string']);
 goog.addDependency("../cmsnew/publisher/util/core.js", ['cmsnew.publisher.util.core'], ['cljs.core']);
 goog.addDependency("../cmsnew/publisher/source_file.js", ['cmsnew.publisher.source_file'], ['cljs.core', 'cmsnew.publisher.paths', 'clojure.string', 'cljs.reader', 'cljs.core.async']);
@@ -54,6 +53,8 @@ goog.addDependency("../cmsnew/edn_page/rendering.js", ['cmsnew.edn_page.renderin
 goog.addDependency("../cmsnew/publisher/core.js", ['cmsnew.publisher.core'], ['cmsnew.publisher.datastore.localstore', 'cljs.core', 'cmsnew.publisher.util.async_utils', 'cmsnew.publisher.datastore.s3', 'cmsnew.publisher.datastore.s3_store', 'cmsnew.publisher.site', 'cmsnew.publisher.paths', 'cmsnew.edn_page.rendering', 'cmsnew.publisher.util.core', 'cmsnew.publisher.item_templates', 'clojure.string', 'cljs.reader', 'cmsnew.publisher.datastore.core', 'jayq.util', 'crate.core', 'cljs.core.async', 'cmsnew.publisher.source_file']);
 goog.addDependency("../cmsnew/ui/site_selector.js", ['cmsnew.ui.site_selector'], ['sablono.core', 'cljs.core', 'cmsnew.ui.form_templates', 'cmsnew.ui.templates', 'clojure.string', 'reactor.core', 'jayq.util', 'cljs.core.async', 'cmsnew.publisher.core', 'jayq.core', 'cmsnew.publisher.util.log_utils']);
 goog.addDependency("../cmsnew/ui/publisher_page.js", ['cmsnew.ui.publisher_page'], ['sablono.core', 'cljs.core', 'cmsnew.publisher.util.async_utils', 'jayq.util', 'cljs.core.async', 'cmsnew.publisher.core', 'jayq.core', 'cmsnew.publisher.util.log_utils']);
+goog.addDependency("../frontier/example/components.js", ['frontier.example.components'], ['cljs.core', 'frontier.core', 'jayq.util', 'cljs.core.async']);
+goog.addDependency("../frontier/example/core.js", ['frontier.example.core'], ['frontier.example.components', 'cljs.core', 'frontier.core', 'jayq.util', 'frontier.dev_tools', 'jayq.core']);
 goog.addDependency("../cmsnew/publisher/plugins/core.js", ['cmsnew.publisher.plugins.core'], ['cljs.core', 'cmsnew.publisher.util.async_utils', 'cljs.core.async']);
 goog.addDependency("../cmsnew/edn_page/plugins.js", ['cmsnew.edn_page.plugins'], ['cljs.core', 'cmsnew.edn_page.rendering', 'cmsnew.publisher.util.core', 'cmsnew.publisher.source_file']);
 goog.addDependency("../cmsnew/publisher/logger.js", ['cmsnew.publisher.logger'], ['cljs.core', 'cljs.core.async']);
@@ -69,4 +70,4 @@ goog.addDependency("../cmsnew/ui/edn_page_editor.js", ['cmsnew.ui.edn_page_edito
 goog.addDependency("../cmsnew/edn_page/items/templated_item.js", ['cmsnew.edn_page.items.templated_item'], ['sablono.core', 'cljs.core', 'cmsnew.edn_page.item', 'cmsnew.publisher.site', 'cmsnew.ui.form_templates', 'clojure.string', 'reactor.core', 'jayq.util', 'cljs.core.async']);
 goog.addDependency("../cmsnew/site.js", ['cmsnew.site'], ['cljs.core', 'cmsnew.publisher.source_file']);
 goog.addDependency("../cmsnew/ui/page_selector.js", ['cmsnew.ui.page_selector'], ['sablono.core', 'cljs.core', 'cmsnew.publisher.paths', 'clojure.string', 'reactor.core', 'jayq.util', 'cljs.core.async', 'cmsnew.publisher.core', 'jayq.core', 'cmsnew.site', 'cmsnew.publisher.util.log_utils', 'cmsnew.publisher.source_file']);
-goog.addDependency("../cmsnew/core.js", ['cmsnew.core'], ['cmsnew.ui.site_selector', 'cljs.core', 'cmsnew.publisher.datastore.githubber', 'cmsnew.authorization.persona', 'cmsnew.publisher.datastore.github_store', 'frontier.core', 'cmsnew.ui.edn_page_editor', 'cmsnew.ui.publisher_page', 'cmsnew.ui.login', 'cmsnew.ui.page_selector', 'jayq.util', 'cljs.core.async', 'jayq.core', 'cmsnew.publishing_pipeline', 'cmsnew.publisher.util.log_utils']);
+goog.addDependency("../cmsnew/core.js", ['cmsnew.core'], ['cmsnew.ui.site_selector', 'cljs.core', 'cmsnew.publisher.datastore.githubber', 'cmsnew.authorization.persona', 'cmsnew.publisher.datastore.github_store', 'cmsnew.ui.edn_page_editor', 'cmsnew.ui.publisher_page', 'cmsnew.ui.login', 'cmsnew.ui.page_selector', 'frontier.example.core', 'jayq.util', 'cljs.core.async', 'jayq.core', 'cmsnew.publishing_pipeline', 'cmsnew.publisher.util.log_utils']);

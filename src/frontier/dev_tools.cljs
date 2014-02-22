@@ -1,18 +1,20 @@
-(ns frontier.system.meta-components
+(ns frontier.dev-tools
   (:require
    [cljs.core.async :as async
     :refer [put!]]
-   [sablono.core :as sab :include-macros true]   
-   [frontier.system.core :refer [iInputFilter
-                                 iPluginInit
-                                 iTransform
-                                 iEffect
-                                 iDerive
-                                 -derive
-                                 trans-helper*
-                                 system
-                                 add-effects
-                                 component-group]]
+   [reactor.core :refer [render-to raw]]
+   [sablono.core :as sab :include-macros true]
+   [frontier.util.edn-renderer :refer [html-edn]]
+   [frontier.core :refer [iInputFilter
+                          iPluginInit
+                          iTransform
+                          iEffect
+                          iDerive
+                          -derive
+                          trans-helper*
+                          system
+                          add-effects
+                          component-group]]
    [jayq.util :refer [log]]))
 
 (defn can-go-forward? [{:keys [history pointer]}]
@@ -26,6 +28,11 @@
 (defmulti hist-trans identity)
 
 (defmethod hist-trans :default [_ system data] system)
+
+(defmethod hist-trans :goto [_ {:keys [history pointer] :as sys} p]
+  (-> sys
+      (assoc :pointer p)
+      (assoc :render-state (get history p))))
 
 (defmethod hist-trans :collect [_ system data]
   (-> system
@@ -51,7 +58,7 @@
 (defmethod hist-trans :keep [_ {:keys [history pointer] :as sys} _]
   (-> sys
       (add-effects [:set-state (get history pointer)])
-      (update-in [:pointer] (dec (count history)))
+      (assoc :pointer (dec (count history)))
       (dissoc :render-state)))
 
 (defmethod hist-trans :cancel [_ {:keys [history pointer] :as sys} _]
@@ -77,6 +84,10 @@
 (defn add-msg [state]
   (assoc state :msg (:__msg (current-state state))))
 
+(defn messages [state]
+  (assoc state :messages
+         (take 20 (reverse (map-indexed (fn [i x] [i (:__msg x)]) (:history state))))))
+
 (defrecord HistoryManager [managed-system-event-chan]
   iTransform
   (-transform [o [msg data] system]
@@ -91,7 +102,8 @@
         under-control
         can-go-forward
         can-go-back
-        add-msg)))
+        add-msg
+        messages)))
 
 (defrecord SystemSetter []
   iTransform
@@ -113,8 +125,7 @@
                (swap! state
                       assoc
                       :sys-state s
-                      :sys-chan event-chan))
-             initial-inputs)
+                      :sys-chan event-chan)))
         history (system {}
                         (component-group
                          (HistoryManager. (:event-chan sys)))
@@ -131,50 +142,92 @@
         (swap! (:state sys) (partial trans-helper* sys-comp identity) msg)))
     sys))
 
-(defn render-history-controls [{:keys [under-control can-go-back can-go-forward msg] :as sys} hist-chan]
-  (log (clj->js sys))
+(defn render-history-controls [{:keys [under-control can-go-back can-go-forward msg messages] :as sys} hist-chan]
   (sab/html
    [:div.navbar.navbar-default
-    [:ul.nav.navbar-nav
+    [:div.nav.navbar-nav.btn-group
      (if can-go-back
-       [:li
-        [:a
-         {:className ""
-          :href "#"
-          :onClick (fn [x]
-                     (.preventDefault x)
-                     (put! hist-chan [:back]))}
-         [:span.glyphicon.glyphicon-step-backward]]]
-       [:li])
+       [:a.btn.btn-default.navbar-btn
+        {:className ""
+         :href "#"
+         :onClick (fn [x]
+                    (.preventDefault x)
+                    (put! hist-chan [:back]))}
+        [:span.glyphicon.glyphicon-step-backward]]
+       [:a.btn.btn-default.navbar-btn.disabled [:span.glyphicon.glyphicon-step-backward]])
      (if under-control
-       [:li
-        [:a
-         {:className ""
-          :onClick (fn [x]
-                     (.preventDefault x)
-                     (put! hist-chan [:cancel]))}
-         "continue"]]
-       [:li]) 
+       [:a.btn.btn-default.navbar-btn
+        {:className ""
+         :onClick (fn [x]
+                    (.preventDefault x)
+                    (put! hist-chan [:cancel]))}
+        [:span.glyphicon.glyphicon-stop]]
+       [:a.btn.btn-default.navbar-btn.disabled [:span.glyphicon.glyphicon-stop]]) 
      (if under-control
-       [:li
-        [:a
-         {:className ""
-          :onClick (fn [x]
+       [:a.btn.btn-default.navbar-btn
+        {:className ""
+         :onClick (fn [x]
                      (.preventDefault x)
                      (put! hist-chan [:keep]))}
-         "keep"]]
-       [:li])
+        [:span.glyphicon.glyphicon-download-alt]]
+       [:a.btn.btn-default.navbar-btn.disabled
+        [:span.glyphicon.glyphicon-download-alt]])
      (if (and under-control can-go-forward)
-       [:li
-        [:a
-         {:className "right"
-          :onClick (fn [x]
-                     (.preventDefault x)
-                     (put! hist-chan [:forward]))}
-         [:span.glyphicon.glyphicon-step-forward]]]
-       [:li]
+       [:a.btn.btn-default.navbar-btn
+        {:className "right"
+         :onClick (fn [x]
+                    (.preventDefault x)
+                    (put! hist-chan [:forward]))}
+        [:span.glyphicon.glyphicon-step-forward]]
+       [:a.btn.btn-default.navbar-btn.disabled
+        [:span.glyphicon.glyphicon-step-forward]]
        )
      ]
+    [:ul.nav.navbar-nav
+     [:li.dropdown
+      [:a.dropdown-toggle {:data-toggle "dropdown"} "Input history " [:b.caret]]
+      [:ul.dropdown-menu
+       (map
+        (fn [[i m]]
+          [:li
+           [:a
+            {:href "#"
+             :onClick
+             (fn [x]
+               (.preventDefault x)
+               (put! hist-chan [:goto i]))}
+            (str i " " (prn-str m))]])
+        messages)
+       ]]]
     [:p.navbar-text (prn-str msg)]
     ]
    ))
+
+(defn managed-renderer [target-id render-func]
+  (let [target-node (.getElementById js/document target-id)]
+    (fn [cs event-chan hist-state hist-chan]
+      (let [state (or (:render-state hist-state) cs)]
+        (render-to (sab/html
+                    [:div
+                     (render-history-controls hist-state hist-chan)
+                     (render-func state event-chan :disabled (:render-state hist-state))
+                     (html-edn (dissoc state :__msg))])
+                   target-node
+                   identity)))))
+
+(defn render-input-message-links [msgs event-chan & {:keys [disabled]}]
+  [:ul
+   (map (fn [x] [:li
+                (if disabled
+                  (prn-str x)
+                  [:a
+                   { :onClick (fn [] (put! event-chan x)) }
+                   (prn-str x)])])
+        msgs)])
+
+(defn input-controls-renderer [input-messages]
+  (fn [state event-chan {:keys [disabled]}]
+    (render-input-message-links
+     input-messages
+     event-chan
+     :disabled disabled)))

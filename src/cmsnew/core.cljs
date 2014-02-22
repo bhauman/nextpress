@@ -19,7 +19,7 @@
    [cmsnew.ui.page-selector :refer [select-page-loop]]
    [cmsnew.ui.login :refer [login-loop]]
 
-   [frontier.core]
+   [frontier.example.core]
    
    [jayq.core :refer [$] :as jq]
    [jayq.util :refer [log]])

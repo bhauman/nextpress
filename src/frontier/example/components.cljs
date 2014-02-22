@@ -1,6 +1,6 @@
-(ns frontier.system.example-components
+(ns frontier.example.components
   (:require
-   [frontier.system.core :refer [iInputFilter
+   [frontier.core :refer [iInputFilter
                                  iPluginInit
                                  iTransform
                                  iEffect
