@@ -15,13 +15,13 @@
   
   :plugins [[lein-cljsbuild "1.0.1"]]
 
-  :source-paths ["src" "src/cmsnew" "src/reactor"]
+  :source-paths ["src" "src/cmsnew" "src/reactor" "src/frontier"]
 
   :profiles {:dev {:resource-paths ["dev"]
                    :plugins [[com.cemerick/austin "0.1.3"]]}}
   :cljsbuild {
               :builds [{:id "cmsnew"
-                        :source-paths ["src/cmsnew" "src/reactor"]
+                        :source-paths ["src/cmsnew" "src/reactor" "src/frontier"]
                         :compiler {:output-to "resources/public/js/compiled/cmsnew.js"
                                    :output-dir "resources/public/js/compiled/out"
                                    :externs ["resources/public/js/externs/jquery-1.9.js"]

@@ -18,6 +18,8 @@
    [cmsnew.ui.site-selector :refer [select-site-loop]]
    [cmsnew.ui.page-selector :refer [select-page-loop]]
    [cmsnew.ui.login :refer [login-loop]]
+
+   [frontier.core]
    
    [jayq.core :refer [$] :as jq]
    [jayq.util :refer [log]])
@@ -26,7 +28,7 @@
 (enable-console-print!)
 
 
-(go
+#_(go
  (let [] #_[url-config (<! (select-site-loop))
             signing-service (get-in url-config [:config :signing-service])
             site-url (:site-url url-config)
