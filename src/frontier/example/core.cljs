@@ -48,5 +48,5 @@
 
 #_(log "here we are")
 
-#_(run-example "#cmsnew")
+(run-example "#cmsnew")
 

@@ -111,28 +111,28 @@
     (if (= msg :__system.set-state) data system)))
 
 (defn managed-system [initial-state comp state-callback initial-inputs]
-  (let [state (atom {})
-        watch (add-watch state :renderer
-                         (fn [_ _ _ {:keys [sys-state sys-chan hist-state hist-chan]}]
-                           (state-callback sys-state sys-chan hist-state hist-chan)))
+  (let [managed-state (atom {})
+        watch (add-watch managed-state :renderer
+                         (fn [_ _ _ cs]
+                           (state-callback cs)))
         sys-comp (component-group
                   (SystemSetter.)
                   comp)
         sys (system
              initial-state
              sys-comp
-             (fn [s event-chan]
-               (swap! state
+             (fn [{:keys [state event-chan]}]
+               (swap! managed-state
                       assoc
-                      :sys-state s
+                      :sys-state state
                       :sys-chan event-chan)))
         history (system {}
                         (component-group
                          (HistoryManager. (:event-chan sys)))
-                        (fn [s event-chan]
-                          (swap! state
+                        (fn [{:keys [state event-chan]}]
+                          (swap! managed-state
                                  assoc
-                                 :hist-state s
+                                 :hist-state state
                                  :hist-chan event-chan)))]
     (add-watch (:state sys) :history-collect
                (fn [_ _ _ n]
@@ -205,12 +205,14 @@
 
 (defn managed-renderer [target-id render-func]
   (let [target-node (.getElementById js/document target-id)]
-    (fn [cs event-chan hist-state hist-chan]
-      (let [state (or (:render-state hist-state) cs)]
+    (fn [{:keys [sys-state sys-chan hist-state hist-chan]}]
+      (let [state (or (:render-state hist-state) sys-state)]
         (render-to (sab/html
                     [:div
                      (render-history-controls hist-state hist-chan)
-                     (render-func state event-chan :disabled (:render-state hist-state))
+                     (render-func { :state state
+                                    :event-chan sys-chan }
+                                  :disabled (:render-state hist-state))
                      (html-edn (dissoc state :__msg))])
                    target-node
                    identity)))))
@@ -226,7 +228,7 @@
         msgs)])
 
 (defn input-controls-renderer [input-messages]
-  (fn [state event-chan {:keys [disabled]}]
+  (fn [{:keys [event-chan]} & {:keys [disabled]}]
     (render-input-message-links
      input-messages
      event-chan

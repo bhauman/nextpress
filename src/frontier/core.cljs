@@ -72,6 +72,8 @@
       (-derive [_ system]
         (ideriv system)))))
 
+(def compose component-group)
+
 (defn trans-helper* [comp effect-handler sys msg]
   (if-let [new-sys (-transform comp msg sys)]
     (do
@@ -81,18 +83,29 @@
           (dissoc :__effects)))
     sys))
 
+(defn trans-helper-new* [comp sys msg]
+  (if-let [new-sys (-transform comp msg sys)]
+    [(:__effects new-sys)
+     (-> new-sys
+         (assoc :__msg msg)
+         (dissoc :__effects))]
+    [nil sys]))
+
+
 (defn system [initial-state
               comp
               state-callback]
-  (let [event-chan (chan)
+  (let [state (atom initial-state)
+        event-chan (chan)
         effect-chan (chan)
-        state (atom initial-state)
+
         trans-without-effect (partial trans-helper* comp identity)
         transformer (partial trans-helper* comp #(doseq [ef %]
                                                    (put! effect-chan ef)))]
     
-    (add-watch state :renderer (fn [_ _ _ n]
-                                 (state-callback (-derive comp n) event-chan)))
+    (add-watch state :renderer (fn [_ _ o n]
+                                 (state-callback { :state (-derive comp n)
+                                                   :event-chan event-chan } )))
     
     (-initialize comp initial-state event-chan)
 
@@ -111,6 +124,8 @@
       :event-chan event-chan
       :effect-chan effect-chan
       :component comp }))
+
+
 
 (defn system-with-initial-inputs [initial-state
                                   comp
