@@ -125,6 +125,7 @@
       :effect-chan effect-chan
       :component comp }))
 
+(def run system)
 
 
 (defn system-with-initial-inputs [initial-state

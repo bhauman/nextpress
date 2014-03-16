@@ -9,14 +9,14 @@ goog.addDependency("../cljs/core/async/impl/timers.js", ['cljs.core.async.impl.t
 goog.addDependency("../cljs/core/async.js", ['cljs.core.async'], ['cljs.core.async.impl.ioc_helpers', 'cljs.core.async.impl.buffers', 'cljs.core', 'cljs.core.async.impl.channels', 'cljs.core.async.impl.dispatch', 'cljs.core.async.impl.protocols', 'cljs.core.async.impl.timers']);
 goog.addDependency("../frontier/core.js", ['frontier.core'], ['cljs.core', 'cljs.core.async']);
 goog.addDependency("../clojure/string.js", ['clojure.string'], ['cljs.core', 'goog.string', 'goog.string.StringBuffer']);
+goog.addDependency("../cljs/reader.js", ['cljs.reader'], ['cljs.core', 'goog.string']);
 goog.addDependency("../crate/util.js", ['crate.util'], ['cljs.core', 'clojure.string']);
 goog.addDependency("../clojure/set.js", ['clojure.set'], ['cljs.core']);
 goog.addDependency("../crate/binding.js", ['crate.binding'], ['cljs.core', 'clojure.set']);
 goog.addDependency("../crate/compiler.js", ['crate.compiler'], ['cljs.core', 'goog.dom', 'clojure.string', 'crate.binding', 'goog.style']);
 goog.addDependency("../crate/core.js", ['crate.core'], ['crate.util', 'cljs.core', 'goog.dom', 'crate.compiler']);
-goog.addDependency("../cljs/reader.js", ['cljs.reader'], ['cljs.core', 'goog.string']);
 goog.addDependency("../jayq/core.js", ['jayq.core'], ['cljs.core', 'clojure.string', 'cljs.reader']);
-goog.addDependency("../devcards/core.js", ['devcards.core'], ['cljs.core', 'frontier.core', 'clojure.string', 'crate.core', 'jayq.core']);
+goog.addDependency("../devcards/core.js", ['devcards.core'], ['cljs.core', 'frontier.core', 'clojure.string', 'cljs.reader', 'crate.core', 'cljs.core.async', 'jayq.core']);
 goog.addDependency("../jayq/util.js", ['jayq.util'], ['cljs.core']);
 goog.addDependency("../cmsnew/authorization/persona.js", ['cmsnew.authorization.persona'], ['cljs.core', 'jayq.util', 'cljs.core.async', 'jayq.core']);
 goog.addDependency("../cljs_uuid_utils.js", ['cljs_uuid_utils'], ['cljs.core', 'goog.string.StringBuffer']);
